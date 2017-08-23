@@ -35,6 +35,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -60,8 +61,10 @@ public class TimelineFragment extends Fragment {
     private DatabaseReference dbRef;
     private Bundle bundle;
     private Context context;
+    private StorageReference sRef;
 
-    public TimelineFragment(){}
+    public TimelineFragment() {
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -79,6 +82,7 @@ public class TimelineFragment extends Fragment {
 
         bundle = savedInstanceState;
         context = view.getContext();
+        sRef = FirebaseStorage.getInstance().getReference();
         SharedPreferences.Editor edChat = context.getSharedPreferences(CHAT, Context.MODE_PRIVATE).edit();
         edChat.putBoolean(ALERT, false);
         edChat.commit();
@@ -100,7 +104,7 @@ public class TimelineFragment extends Fragment {
             public void onClick(View v) {
                 Intent intent = new Intent(context, PostActivity.class);
                 intent.putExtra(KEY, "");
-                intent.putExtra(ID,  "");
+                intent.putExtra(ID, "");
                 intent.putExtra(MESSAGE, "");
                 intent.putExtra(IMG, "");
                 intent.putExtra(DATE, "");
@@ -110,19 +114,28 @@ public class TimelineFragment extends Fragment {
 
         if (status.equals(SERVICE)) {
             updateService();
-        }else {
+        } else {
             view.findViewById(R.id.fab_new_post).setVisibility(View.GONE);
             updateUser();
         }
     }
 
-    private void updateUser(){
+    private void updateUser() {
+        final int m = Calendar.getInstance().get(Calendar.MONTH) + 1;
         dbRef.child(TIMELINE).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 timelines.clear();
-                for (DataSnapshot ds : dataSnapshot.getChildren()){
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     Timeline timeline = ds.getValue(Timeline.class);
+                    int t = Integer.parseInt(timeline.getDate().split("/")[1]);
+                    if ((t > 10 && t - 10 == m) || t + 2 == m) {
+                        if (!timeline.getImgName().isEmpty()){
+                            sRef.child(timeline.getImgName()).delete();
+                        }
+                        dbRef.child(TIMELINE).child(ds.getKey()).removeValue();
+                        continue;
+                    }
                     timeline.setKey(ds.getKey());
                     ServiceHandle handle = new ServiceHandle(getContext());
                     Services services = handle.getService(timeline.getId());
@@ -131,19 +144,29 @@ public class TimelineFragment extends Fragment {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {}
+            public void onCancelled(DatabaseError databaseError) {
+            }
         });
     }
 
-    private void updateService(){
+    private void updateService() {
+        final int m = Calendar.getInstance().get(Calendar.MONTH) + 1;
         dbRef.child(TIMELINE).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 timelines.clear();
-                for (DataSnapshot ds : dataSnapshot.getChildren()){
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     Timeline timeline = ds.getValue(Timeline.class);
+                    int t = Integer.parseInt(timeline.getDate().split("/")[1]);
+                    if ((t > 10 && t - 10 >= m) || t + 2 >= m) {
+                        if (!timeline.getImgName().isEmpty()){
+                            sRef.child(timeline.getImgName()).delete();
+                        }
+                        dbRef.child(TIMELINE).child(ds.getKey()).removeValue();
+                        continue;
+                    }
                     timeline.setKey(ds.getKey());
-                    if (timeline.getId().equals(id)){
+                    if (timeline.getId().equals(id)) {
                         ServiceHandle handle = new ServiceHandle(getContext());
                         Services services = handle.getService(id);
                         loadImg(timeline, services);
@@ -152,7 +175,8 @@ public class TimelineFragment extends Fragment {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {}
+            public void onCancelled(DatabaseError databaseError) {
+            }
         });
     }
 
@@ -162,14 +186,14 @@ public class TimelineFragment extends Fragment {
         timeline.setName(services.getName());
         timeline.setProfile(bitmap);
 
-        if (timeline.getImgName().isEmpty()){
+        if (timeline.getImgName().isEmpty()) {
             timelines.add(timeline);
             sort();
             return;
         }
 
         final PictureHandle handle = new PictureHandle(context);
-        if (handle.hasPicture(timeline.getImgName())){
+        if (handle.hasPicture(timeline.getImgName())) {
             Log.d("hasPicture", "YES");
             byte[] bytes = handle.getPicture(timeline.getImgName()).getPicture();
             Bitmap b = new MyImage().convertToBitmap(bytes);
@@ -179,9 +203,8 @@ public class TimelineFragment extends Fragment {
             return;
         }
 
-        StorageReference islandRef = FirebaseStorage.getInstance().getReference().child(timeline.getImgName());
         final long ONE_MEGABYTE = 1024 * 1024;
-        islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+        sRef.child(timeline.getImgName()).getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
             public void onSuccess(byte[] bytes) {
                 handle.addPicture(new Pictures(timeline.getImgName(), bytes));
@@ -198,7 +221,7 @@ public class TimelineFragment extends Fragment {
         });
     }
 
-    private void sort(){
+    private void sort() {
         Collections.sort(timelines, new Comparator<Timeline>() {
             @Override
             public int compare(Timeline o1, Timeline o2) {

@@ -64,6 +64,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -104,6 +105,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     private ProgressBar progressBar;
     private TextView netAlert;
     private SharedPreferences.Editor edChat, edLogin;
+    private StorageReference sRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,6 +119,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
                 .enableAutoManage(this, this)
                 .build();
 
+        sRef = FirebaseStorage.getInstance().getReference();
         Intent intent = getIntent();
         keyChat = intent.getStringExtra(KEY_CHAT);
         String chatWithId = intent.getStringExtra(CHAT_WITH_ID);
@@ -359,14 +362,21 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
             return;
         }
 
+        final int m = Calendar.getInstance().get(Calendar.MONTH) + 1;
         mDb.child(keyChat).child(DATA).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 chatList.clear();
                 for (DataSnapshot data : dataSnapshot.getChildren()) {
                     ChatMessage chatMessage = data.getValue(ChatMessage.class);
-                    //chatList.add(chatMessage);
-                    //adapter.notifyDataSetChanged();
+                    int t = Integer.parseInt(chatMessage.getDate().split("-")[1]);
+                    if ((t > 10 && t - 10 >= m) || t + 2 >= m) {
+                        if (chatMessage.getMessage().contains(KEY_IMAGE)){
+                            sRef.child(chatMessage.getMessage().replace(KEY_IMAGE, "")).delete();
+                        }
+                        mDb.child(keyChat).child(DATA).child(data.getKey()).removeValue();
+                        continue;
+                    }
                     loadImg(chatMessage);
                 }
 
