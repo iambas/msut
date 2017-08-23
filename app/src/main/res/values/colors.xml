@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">@color/teal</color>
+    <color name="colorPrimaryDark">@color/tealDark</color>
+    <color name="colorAccent">@color/tealAccent</color>
+
+    <color name="tealDark">#00796B</color>
+    <color name="teal">#009688</color>
+    <color name="tealAccent">#4CAF50</color>
+    <color name="tealLight">#00B3A5</color>
+
+    <color name="btn">@color/teal</color>
+    <color name="btnDark">@color/tealDark</color>
+
+    <color name="fab_call">#F44336</color>
+    <color name="fab_map">#2196F3</color>
+    <color name="fab_chat">@color/teal</color>
+
+    <color name="open">#76FF03</color>
+    <color name="close">#F44336</color>
+    <color name="openLight">#2276FF03</color>
+    <color name="closeLight">#22F44336</color>
+
+    <color name="left">#eee</color>
+    <color name="right">@color/teal</color>
+    <color name="black">#000</color>
+    <color name="white">#ffffff</color>
+    <color name="orange">#FF9800</color>
+    <color name="blackLight">#88000000</color>
+    <color name="btnFacebook">#39579B</color>
+    <color name="fb">#303F9F</color>
+    <color name="iconTab">#ccc</color>
+    <color name="duskYellow">#FFEB3B</color>
+    <color name="lightGrey">#eee</color>
+</resources>

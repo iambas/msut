@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RatingBar
+        android:id="@+id/rating"
+        android:numStars="5"
+        android:stepSize="1.0"
+        android:theme="@style/RatingBar"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <EditText
+        android:id="@+id/edit_rev"
+        android:layout_marginTop="16dp"
+        android:layout_below="@id/rating"
+        android:padding="6dp"
+        android:hint="@string/user_review"
+        android:background="@drawable/bg_edit_white"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</RelativeLayout>

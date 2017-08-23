@@ -1,0 +1,88 @@
+<resources>
+    <string name="app_name">"MSUT"</string>
+    <string name="app_extends">ร้านซ่อมรถจักรยานยนต์ มทส.</string>
+    <string name="fname">ชื่อ</string>
+    <string name="lname">นามสกุล</string>
+    <string name="name">ชื่อ-สกุล</string>
+    <string name="email">อีเมล</string>
+    <string name="password">รหัสผ่าน (อย่างน้อย 6 ตัว)</string>
+    <string name="password2">ยืนยันรหัสผ่าน</string>
+    <string name="min">อย่างน้อย 6 ตัว</string>
+    <string name="fill_fname">กรอกชื่อ</string>
+    <string name="fill_lname">กรอกนามสกุล</string>
+    <string name="fill_email">กรอกอีเมล</string>
+    <string name="fill_password">กรอกรหัสผ่าน</string>
+    <string name="fill_old_pass">กรอกรหัสผ่านเดิม</string>
+    <string name="forget_password"><u>ลืมรหัสผ่าน?</u></string>
+    <string name="hint_old_password">รหัสผ่านเดิม</string>
+    <string name="hint_new_password">รหัสผ่านใหม่</string>
+    <string name="hint_new_password_confirm">ยืนยันรหัสผ่านใหม่</string>
+    <string name="change_password">เปลี่ยนรหัสผ่าน</string>
+    <string name="email_invalid">อีเมลไม่ถูกต้อง!</string>
+    <string name="minimum_password">รหัสผ่านสั้นเกินไป, รหัสผ่านอย่างน้อย 6 ตัว!</string>
+    <string name="hint_email">อีเมล</string>
+    <string name="hint_password">รหัสผ่าน</string>
+    <string name="btn_link_register">ลงทะเบียน</string>
+    <string name="txt_before_reset_password">กรอกอีเมลด้านล่างนี้ ระบบจะส่ง link เพื่อทำการเปลี่ยนรหัสผ่านไปให้คุณทางอีเมล</string>
+    <string name="txt_net_alert">เครือข่ายมีปัญหา! ไม่สามารถโหลดข้อมูลได้\nกดตรงนี้เพื่อลองอีกครั้ง</string>
+    <string name="title_activity_maps">แผนที่</string>
+    <string name="txt_null">ไม่มีรายการแสดง</string>
+    <string name="login">เข้าสู่ระบบ</string>
+    <string name="logout">ออกจากระบบ</string>
+    <string name="about_us"><u>เกี่ยวกับเรา</u></string>
+    <string name="use"><u>วิธีใช้งาน</u></string>
+    <string name="for_user">สำหรับผู้ใช้งานทั่วไป</string>
+    <string name="for_store">สำหรับเจ้าของร้าน</string>
+    <string name="for_store_click">สำหรับเจ้าของร้านคลิกที่นี่</string>
+    <string name="call">การโทร</string>
+    <string name="chat">การแชท</string>
+    <string name="date">วันที่</string>
+    <string name="stat_month">สถิติของเดือน</string>
+    <string name="print">พิมพ์ข้อความ&#8230;</string>
+    <string name="work_time">เวลาทำการ</string>
+    <string name="services">บริการ</string>
+    <string name="distribute">จำหน่าย</string>
+    <string name="edit"><u>[แก้ไข]</u></string>
+    <string name="service_name">ชื่อร้าน</string>
+    <string name="service_pos">ที่ตั้งร้าน</string>
+    <string name="mon_fri">วันจันทร์-ศุกร์</string>
+    <string name="sat_sun">วันเสาร์-อาทิตย์</string>
+    <string name="vacation">ช่วงปิดเทอม</string>
+    <string name="latlng">ตำแหน่ง GPS ร้าน</string>
+    <string name="on_map"><u>ดูตำแหน่ง</u></string>
+    <string name="tel">เบอร์โทร</string>
+    <string name="save">บันทึก</string>
+    <string name="edit_data">แก้ไขข้อมูล</string>
+    <string name="sel_img">เลือกรูปภาพ</string>
+    <string name="update_cover">เปลี่ยนรูปปก</string>
+    <string name="update_profile">เปลี่ยนรูปโปรไฟล์</string>
+    <string name="add_service">เพิ่มร้าน</string>
+    <string name="store">ร้าน</string>
+    <string name="facebook_login">เข้าสู่ระบบด้วย Facebook</string>
+    <string name="status">สถานะร้าน</string>
+    <string name="open">เปิดร้าน</string>
+    <string name="close">ปิดร้าน</string>
+    <string name="review">รีวิว</string>
+    <string name="review2">รีวิวร้าน</string>
+    <string name="service_pro"><u>ดูโปรไฟล์ร้าน</u></string>
+    <string name="user_review">เขียนรีวิว</string>
+    <string name="edit_post">แก้ไขโพสต์</string>
+    <string name="del_post">ลบโพสต์</string>
+    <string name="post">โพสต์</string>
+    <string name="image">รูปภาพ</string>
+
+    <string-array name="month">
+        <item>มกราคม</item>
+        <item>กุมภาพันธ์</item>
+        <item>มีนาคม</item>
+        <item>เมษายน</item>
+        <item>พฤษภาคม</item>
+        <item>มิถุนายน</item>
+        <item>กรกฎาคม</item>
+        <item>สิงหาคม</item>
+        <item>กันยายน</item>
+        <item>ตุลาคม</item>
+        <item>พฤศจิกายน</item>
+        <item>ธันวาคม</item>
+    </string-array>
+</resources>
