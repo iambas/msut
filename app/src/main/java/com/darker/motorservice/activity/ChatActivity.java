@@ -370,7 +370,8 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
                 for (DataSnapshot data : dataSnapshot.getChildren()) {
                     ChatMessage chatMessage = data.getValue(ChatMessage.class);
                     int t = Integer.parseInt(chatMessage.getDate().split("-")[1]);
-                    if ((t > 10 && t - 10 >= m) || t + 2 >= m) {
+                    if (t > 10) t -= 12;
+                    if (t + 2 >= m) {
                         if (chatMessage.getMessage().contains(KEY_IMAGE)){
                             sRef.child(chatMessage.getMessage().replace(KEY_IMAGE, "")).delete();
                         }

@@ -129,7 +129,8 @@ public class TimelineFragment extends Fragment {
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     Timeline timeline = ds.getValue(Timeline.class);
                     int t = Integer.parseInt(timeline.getDate().split("/")[1]);
-                    if ((t > 10 && t - 10 == m) || t + 2 == m) {
+                    if (t > 10) t -= 12;
+                    if (t + 2 == m) {
                         if (!timeline.getImgName().isEmpty()){
                             sRef.child(timeline.getImgName()).delete();
                         }
@@ -158,7 +159,8 @@ public class TimelineFragment extends Fragment {
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     Timeline timeline = ds.getValue(Timeline.class);
                     int t = Integer.parseInt(timeline.getDate().split("/")[1]);
-                    if ((t > 10 && t - 10 >= m) || t + 2 >= m) {
+                    if (t > 10) t -= 12;
+                    if (t + 2 >= m) {
                         if (!timeline.getImgName().isEmpty()){
                             sRef.child(timeline.getImgName()).delete();
                         }

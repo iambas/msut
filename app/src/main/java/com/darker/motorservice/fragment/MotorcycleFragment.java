@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.darker.motorservice.data.Constant.ALERT;
@@ -55,7 +57,13 @@ public class MotorcycleFragment extends Fragment {
         edChat.commit();
 
         ServiceHandle handle = new ServiceHandle(getContext());
-        svList = handle.getAllSerivce();
+        svList = new ArrayList<>();
+        try{
+            svList = handle.getAllSerivce();
+        }catch (Exception e){
+            Log.e("svList Except", e.getMessage());
+        }
+
         adapter = new MotorcycleAdapter(context, svList);
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
