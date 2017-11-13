@@ -35,12 +35,12 @@ import android.widget.Toast;
 
 import com.darker.motorservice.R;
 import com.darker.motorservice.adapter.MessageAdapter;
-import com.darker.motorservice.utils.MyImage;
-import com.darker.motorservice.utils.NetWork;
 import com.darker.motorservice.data.ChatMessage;
 import com.darker.motorservice.data.NewChat;
 import com.darker.motorservice.data.Pictures;
 import com.darker.motorservice.database.PictureHandle;
+import com.darker.motorservice.utils.MyImage;
+import com.darker.motorservice.utils.NetWork;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -199,12 +199,21 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         });
     }
 
+    private boolean stringOk(String s) {
+        return s != null && !s.equals("");
+    }
+
     public void onSendClicked() {
         String msg = editText.getText().toString();
-        if (msg.equals(""))
-            return;
+//        if (msg.equals(""))
+//            return;
+        if (stringOk(msg))
 
-        if (!(new NetWork(this).isNetworkAvailiable())) {
+//        if (!(new NetWork(this).isNetworkAvailiable())) {
+//            Toast.makeText(this, "ข้อผิดพลาดเครือข่าย! ไม่สามารถส่งข้อความได้", Toast.LENGTH_LONG).show();
+//            return;
+//        }
+        if (NetWork.disable(this)){
             Toast.makeText(this, "ข้อผิดพลาดเครือข่าย! ไม่สามารถส่งข้อความได้", Toast.LENGTH_LONG).show();
             return;
         }
@@ -241,7 +250,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     private void uploadImg(final Bitmap bitmap) {
-        if (!(new NetWork(this).isNetworkAvailiable())) {
+        if (NetWork.disable(this)) {
             Toast.makeText(this, "ข้อผิดพลาดเครือข่าย! ไม่สามารถส่งรูปภาพได้", Toast.LENGTH_LONG).show();
             return;
         }
@@ -312,7 +321,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private void refresh() {
         progressBar.setVisibility(View.VISIBLE);
-        if (!(new NetWork(this).isNetworkAvailiable())) {
+        if (NetWork.disable(this)) {
             netAlert.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.GONE);
         } else {
@@ -462,7 +471,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         if (status.equals(USER)) {
-            if (!(new NetWork(this).isNetworkAvailiable()))
+            if (NetWork.disable(this))
                 getMenuInflater().inflate(R.menu.menu_chat_no_net, menu);
             else
                 getMenuInflater().inflate(R.menu.menu_chat_net, menu);
@@ -519,7 +528,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     public void myGps() {
-        if (!(new NetWork(this).isNetworkAvailiable())) return;
+        if (NetWork.disable(this)) return;
         checkGpsStatus();
         if (!GpsStatus) return;
 

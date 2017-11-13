@@ -5,13 +5,10 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 public class NetWork {
-    private Context context;
 
-    public NetWork(Context context){
-        this.context = context;
-    }
+    public NetWork(){}
 
-    public boolean isNetworkAvailiable(){
+    public static boolean isNetworkAvailiable(Context context){
         ConnectivityManager connectivity = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connectivity != null){
             NetworkInfo[] info = connectivity.getAllNetworkInfo();
@@ -23,5 +20,13 @@ public class NetWork {
             }
         }
         return false;
+    }
+
+    public static boolean enable(Context context){
+        return isNetworkAvailiable(context);
+    }
+
+    public static boolean disable(Context context){
+        return !isNetworkAvailiable(context);
     }
 }
