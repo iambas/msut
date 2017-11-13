@@ -15,7 +15,7 @@ import android.widget.TextView;
 import com.darker.motorservice.R;
 import com.darker.motorservice.activity.ChatActivity;
 import com.darker.motorservice.activity.DetailActivity;
-import com.darker.motorservice.assets.MyImage;
+import com.darker.motorservice.utils.MyImage;
 import com.darker.motorservice.data.Services;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;

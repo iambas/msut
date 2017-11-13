@@ -19,7 +19,7 @@ import android.widget.TextView;
 import com.darker.motorservice.R;
 import com.darker.motorservice.activity.MapsActivity;
 import com.darker.motorservice.activity.ShowPictureActivity;
-import com.darker.motorservice.assets.MyImage;
+import com.darker.motorservice.utils.MyImage;
 import com.darker.motorservice.data.ChatMessage;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;

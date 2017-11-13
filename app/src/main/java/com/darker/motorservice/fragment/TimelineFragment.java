@@ -18,7 +18,7 @@ import android.view.ViewGroup;
 import com.darker.motorservice.R;
 import com.darker.motorservice.activity.PostActivity;
 import com.darker.motorservice.adapter.TimelineAdapter;
-import com.darker.motorservice.assets.MyImage;
+import com.darker.motorservice.utils.MyImage;
 import com.darker.motorservice.data.Pictures;
 import com.darker.motorservice.data.Services;
 import com.darker.motorservice.data.Timeline;
@@ -129,8 +129,15 @@ public class TimelineFragment extends Fragment {
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     Timeline timeline = ds.getValue(Timeline.class);
                     int t = Integer.parseInt(timeline.getDate().split("/")[1]);
-                    if (t > 10) t -= 12;
-                    if (t + 2 == m) {
+                    if (t > 10){
+                        if (t - 10 == m) {
+                            if (!timeline.getImgName().isEmpty()){
+                                sRef.child(timeline.getImgName()).delete();
+                            }
+                            dbRef.child(TIMELINE).child(ds.getKey()).removeValue();
+                            continue;
+                        }
+                    } else if (t + 2 <= m) {
                         if (!timeline.getImgName().isEmpty()){
                             sRef.child(timeline.getImgName()).delete();
                         }
@@ -159,8 +166,15 @@ public class TimelineFragment extends Fragment {
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     Timeline timeline = ds.getValue(Timeline.class);
                     int t = Integer.parseInt(timeline.getDate().split("/")[1]);
-                    if (t > 10) t -= 12;
-                    if (t + 2 >= m) {
+                    if (t > 10){
+                        if (t - 10 == m) {
+                            if (!timeline.getImgName().isEmpty()){
+                                sRef.child(timeline.getImgName()).delete();
+                            }
+                            dbRef.child(TIMELINE).child(ds.getKey()).removeValue();
+                            continue;
+                        }
+                    } else if (t + 2 <= m) {
                         if (!timeline.getImgName().isEmpty()){
                             sRef.child(timeline.getImgName()).delete();
                         }
@@ -177,8 +191,7 @@ public class TimelineFragment extends Fragment {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
+            public void onCancelled(DatabaseError databaseError) {}
         });
     }
 

@@ -18,8 +18,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.assets.LoadService;
-import com.darker.motorservice.assets.NetWork;
+import com.darker.motorservice.utils.LoadService;
+import com.darker.motorservice.utils.NetWork;
 import com.darker.motorservice.data.Services;
 import com.darker.motorservice.database.ServiceHandle;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;

@@ -17,7 +17,7 @@ import android.widget.TextView;
 
 import com.darker.motorservice.R;
 import com.darker.motorservice.adapter.StatAdapter;
-import com.darker.motorservice.assets.NetWork;
+import com.darker.motorservice.utils.NetWork;
 import com.darker.motorservice.data.Services;
 import com.darker.motorservice.data.Stat;
 import com.darker.motorservice.database.AdminHandle;

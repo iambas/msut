@@ -8,7 +8,7 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.assets.MyImage;
+import com.darker.motorservice.utils.MyImage;
 import com.darker.motorservice.database.PictureHandle;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;

@@ -14,8 +14,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.assets.LoadService;
-import com.darker.motorservice.assets.MyImage;
+import com.darker.motorservice.utils.LoadService;
+import com.darker.motorservice.utils.MyImage;
 import com.darker.motorservice.data.Services;
 import com.darker.motorservice.database.ServiceHandle;
 import com.google.android.gms.tasks.OnFailureListener;

@@ -11,7 +11,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.assets.NetWork;
+import com.darker.motorservice.utils.NetWork;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;

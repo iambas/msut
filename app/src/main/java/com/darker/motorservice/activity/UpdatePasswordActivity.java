@@ -14,8 +14,8 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.assets.Encoded;
-import com.darker.motorservice.assets.NetWork;
+import com.darker.motorservice.utils.Encoded;
+import com.darker.motorservice.utils.NetWork;
 import com.darker.motorservice.service.BackgroundService;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;

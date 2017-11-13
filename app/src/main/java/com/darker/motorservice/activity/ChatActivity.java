@@ -35,8 +35,8 @@ import android.widget.Toast;
 
 import com.darker.motorservice.R;
 import com.darker.motorservice.adapter.MessageAdapter;
-import com.darker.motorservice.assets.MyImage;
-import com.darker.motorservice.assets.NetWork;
+import com.darker.motorservice.utils.MyImage;
+import com.darker.motorservice.utils.NetWork;
 import com.darker.motorservice.data.ChatMessage;
 import com.darker.motorservice.data.NewChat;
 import com.darker.motorservice.data.Pictures;
@@ -350,8 +350,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
+            public void onCancelled(DatabaseError databaseError) {}
         });
     }
 
@@ -370,8 +369,16 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
                 for (DataSnapshot data : dataSnapshot.getChildren()) {
                     ChatMessage chatMessage = data.getValue(ChatMessage.class);
                     int t = Integer.parseInt(chatMessage.getDate().split("-")[1]);
-                    if (t > 10) t -= 12;
-                    if (t + 2 >= m) {
+                    Log.d("Chat", m + " : " + t);
+                    if (t > 10){
+                        if (t - 10 == m) {
+                            if (chatMessage.getMessage().contains(KEY_IMAGE)){
+                                sRef.child(chatMessage.getMessage().replace(KEY_IMAGE, "")).delete();
+                            }
+                            mDb.child(keyChat).child(DATA).child(data.getKey()).removeValue();
+                            continue;
+                        }
+                    } else if (t + 2 <= m) {
                         if (chatMessage.getMessage().contains(KEY_IMAGE)){
                             sRef.child(chatMessage.getMessage().replace(KEY_IMAGE, "")).delete();
                         }
@@ -399,6 +406,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private void loadImg(final ChatMessage cm) {
         String path = "";
+        // cm.getMessage() = null
         if (cm.getMessage().contains(KEY_IMAGE)){
             path = cm.getMessage().replace(KEY_IMAGE, "");
         }else {

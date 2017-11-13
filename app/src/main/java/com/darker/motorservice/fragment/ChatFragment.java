@@ -16,7 +16,7 @@ import android.widget.TextView;
 
 import com.darker.motorservice.R;
 import com.darker.motorservice.adapter.ChatAdapter;
-import com.darker.motorservice.assets.NetWork;
+import com.darker.motorservice.utils.NetWork;
 import com.darker.motorservice.data.Chat;
 import com.darker.motorservice.data.ChatMessage;
 import com.google.firebase.auth.FirebaseAuth;

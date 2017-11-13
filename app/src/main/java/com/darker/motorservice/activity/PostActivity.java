@@ -18,8 +18,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.assets.MyImage;
-import com.darker.motorservice.assets.NetWork;
+import com.darker.motorservice.utils.MyImage;
+import com.darker.motorservice.utils.NetWork;
 import com.darker.motorservice.data.Pictures;
 import com.darker.motorservice.data.Timeline;
 import com.darker.motorservice.database.PictureHandle;

@@ -18,9 +18,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.assets.Encoded;
-import com.darker.motorservice.assets.LoadService;
-import com.darker.motorservice.assets.NetWork;
+import com.darker.motorservice.utils.Encoded;
+import com.darker.motorservice.utils.LoadService;
+import com.darker.motorservice.utils.NetWork;
 import com.darker.motorservice.data.User;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;

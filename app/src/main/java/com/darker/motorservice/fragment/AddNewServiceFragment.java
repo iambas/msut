@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +15,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.assets.NetWork;
+import com.darker.motorservice.utils.NetWork;
 import com.darker.motorservice.data.Services;
 import com.darker.motorservice.database.ServiceHandle;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -166,23 +165,19 @@ public class AddNewServiceFragment extends Fragment {
     private void uploadImg(final String image, int draw) {
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), draw);
         StorageReference mountainsRef = FirebaseStorage.getInstance().getReference().child(image);
-
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
         byte[] data = baos.toByteArray();
-
         UploadTask uploadTask = mountainsRef.putBytes(data);
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {
-                Log.d("upload", exception.getMessage());
                 progressBar.setVisibility(View.GONE);
                 alert(image + " upload ไม่ได้!");
             }
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Log.d("upload", "OK");
                 progressBar.setVisibility(View.GONE);
                 alert(image + " upload เรียบร้อย");
             }
