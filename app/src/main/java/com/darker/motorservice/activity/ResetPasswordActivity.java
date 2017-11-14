@@ -48,7 +48,7 @@ public class ResetPasswordActivity extends AppCompatActivity {
             alert("กรุณากรอกอีเมลให้ถูกต้อง!");
             return;
         }
-        if (!(new NetWork(this).isNetworkAvailiable())) {
+        if (NetWork.disable(this)) {
             alert("ข้อผิดพลาดเครือข่าย! กรุณาตรวจสอบและลองใหม่อีกครั้ง");
             return;
         }

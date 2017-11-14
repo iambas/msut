@@ -120,7 +120,7 @@ public class AddNewServiceFragment extends Fragment {
                     return;
                 }
 
-                if (!(new NetWork(getContext()).isNetworkAvailiable())) {
+                if (NetWork.disable(getContext())) {
                     alert("เครือข่ายมีปัญหา! ไม่สามารถเพิ่มร้านได้");
                 } else {
                     addNewService();

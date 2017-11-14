@@ -152,7 +152,7 @@ public class UpdateDataServiceActivity extends AppCompatActivity {
 
         String work = formOne + "\n" + formTwo + "\n" + formThree;
 
-        if (!(new NetWork(this).isNetworkAvailiable())){
+        if (NetWork.disable(this)){
             alert("เครือข่ายมีปัญหา! ไม่สามารถบันทึกได้");
         }else{
             progressBar.setVisibility(View.VISIBLE);
@@ -223,7 +223,7 @@ public class UpdateDataServiceActivity extends AppCompatActivity {
     }
 
     public void onEditLatlngClicked(View view){
-        if (!(new NetWork(this).isNetworkAvailiable())) return;
+        if (NetWork.disable(this)) return;
         checkGpsStatus();
         if (!GpsStatus) return;
 

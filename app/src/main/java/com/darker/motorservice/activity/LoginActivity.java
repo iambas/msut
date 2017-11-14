@@ -134,7 +134,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void onFacebookClicked(View view){
-        if (!(new NetWork(view.getContext()).isNetworkAvailiable())){
+        if (NetWork.disable(this)){
             Toast.makeText(view.getContext(), "ข้อผิดพลาดเครือข่าย! ไม่สามารถเข้าสู่ระบบได้", LENGTH_LONG).show();
             return;
         }
@@ -257,8 +257,7 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        boolean isNet = new NetWork(this).isNetworkAvailiable();
-        if (!isNet){
+        if (NetWork.disable(this)){
             alert("ข้อผิดพลาดเครือข่าย! ไม่สามารถเข้าสู่ระบบได้");
             inputPass.setText("");
             return;

@@ -1,5 +1,6 @@
 package com.darker.motorservice.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -182,7 +183,7 @@ public class ReviewFragment extends Fragment {
     }
 
     private void check() {
-        if (!(new NetWork(context).isNetworkAvailiable())) {
+        if (NetWork.disable(getContext())) {
             mView.findViewById(R.id.txt_net_alert).setVisibility(View.VISIBLE);
             txtNull.setVisibility(View.GONE);
             progressBar.setVisibility(View.GONE);
@@ -202,7 +203,7 @@ public class ReviewFragment extends Fragment {
     public void onEditClicked(){
         final DatabaseReference db = dbRef.child(REVIEW).child(id);
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AlertDialogCustom);
-        LayoutInflater inflater = getLayoutInflater(bundle);
+        @SuppressLint("RestrictedApi") LayoutInflater inflater = getLayoutInflater(bundle);
         View vb = inflater.inflate(R.layout.rating, null);
         builder.setView(vb);
 
@@ -230,7 +231,7 @@ public class ReviewFragment extends Fragment {
                     return;
                 }
 
-                if (!(new NetWork(context).isNetworkAvailiable())) {
+                if (NetWork.disable(getContext())) {
                     Toast.makeText(context, "ข้อผิดพลาดเครือข่าย! ไม่สามารถบันทึกได้", Toast.LENGTH_LONG).show();
                     return;
                 }

@@ -65,7 +65,7 @@ public class UpdatePasswordActivity extends AppCompatActivity {
             return;
         }
 
-        if (!(new NetWork(this).isNetworkAvailiable())){
+        if (NetWork.disable(this)){
             alert("เครือข่ายมีปัญหา! ไม่สามารถเปลี่ยนรหัสผ่านได้");
             return;
         }

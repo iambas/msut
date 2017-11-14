@@ -109,7 +109,7 @@ public class StatisticsFragment extends Fragment{
         TextView txtNet = (TextView) mView.findViewById(R.id.txt_net_alert);
         txtNull = (TextView) mView.findViewById(R.id.txt_null);
         progressBar = (ProgressBar) mView.findViewById(R.id.progressBar);
-        if (!(new NetWork(mView.getContext()).isNetworkAvailiable())){
+        if (NetWork.disable(getContext())){
             txtNet.setVisibility(View.VISIBLE);
             txtNet.setOnClickListener(new View.OnClickListener() {
                 @Override

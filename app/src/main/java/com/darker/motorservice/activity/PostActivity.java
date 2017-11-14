@@ -108,7 +108,7 @@ public class PostActivity extends AppCompatActivity {
 
         btnPost.setClickable(false);
         btnImg.setClickable(false);
-        if (!(new NetWork(this).isNetworkAvailiable())) {
+        if (NetWork.disable(this)) {
             alert("เครือข่ายมีปัญหา! ไม่สามารถโพสต์ได้");
             return;
         }

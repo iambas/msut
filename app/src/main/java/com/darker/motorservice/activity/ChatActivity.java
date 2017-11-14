@@ -1,6 +1,7 @@
 package com.darker.motorservice.activity;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -88,6 +89,7 @@ import static com.darker.motorservice.data.Constant.USER;
 
 public class ChatActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
+    public static final String TAG = "ChatActivity";
     private int PLACE_PICKER_REQUEST = 1;
     private int IMAGE_REQUEST = 2;
     private boolean GpsStatus;
@@ -100,10 +102,10 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     private String status;
     private String uid;
     private String service, user, myName;
-    private EditText editText;
+    private EditText edInputMessage;
     private boolean found = false;
     private ProgressBar progressBar;
-    private TextView netAlert;
+    private TextView tvNetAlert;
     private SharedPreferences.Editor edChat, edLogin;
     private StorageReference sRef;
 
@@ -184,14 +186,14 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         }
 
         chatList = new ArrayList<ChatMessage>();
-        adapter = new MessageAdapter(this,R.layout.message_item, chatList);
+        adapter = new MessageAdapter(this, R.layout.message_item, chatList);
         ListView listView = (ListView) findViewById(R.id.list);
         listView.setAdapter(adapter);
 
-        editText = (EditText) findViewById(R.id.input);
-        netAlert = (TextView) findViewById(R.id.txt_net_alert);
+        edInputMessage = (EditText) findViewById(R.id.ed_input_message);
+        tvNetAlert = (TextView) findViewById(R.id.txt_net_alert);
         refresh();
-        netAlert.setOnClickListener(new View.OnClickListener() {
+        tvNetAlert.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 refresh();
@@ -204,19 +206,12 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     public void onSendClicked() {
-        String msg = editText.getText().toString();
-//        if (msg.equals(""))
-//            return;
+        String msg = edInputMessage.getText().toString();
         if (stringOk(msg))
-
-//        if (!(new NetWork(this).isNetworkAvailiable())) {
-//            Toast.makeText(this, "ข้อผิดพลาดเครือข่าย! ไม่สามารถส่งข้อความได้", Toast.LENGTH_LONG).show();
-//            return;
-//        }
-        if (NetWork.disable(this)){
-            Toast.makeText(this, "ข้อผิดพลาดเครือข่าย! ไม่สามารถส่งข้อความได้", Toast.LENGTH_LONG).show();
-            return;
-        }
+            if (NetWork.disable(this)) {
+                Toast.makeText(this, "ข้อผิดพลาดเครือข่าย! ไม่สามารถส่งข้อความได้", Toast.LENGTH_LONG).show();
+                return;
+            }
 
         if (keyChat.isEmpty()) find();
         pushMsg(msg);
@@ -242,34 +237,41 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         builder.setPositiveButton("ส่ง", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                uploadImg(bitmap);
+                checkBeforeUploadImage(bitmap);
             }
         });
         builder.setNegativeButton("ยกเลิก", null);
         builder.show();
     }
 
-    private void uploadImg(final Bitmap bitmap) {
+    private void checkBeforeUploadImage(Bitmap bitmap) {
         if (NetWork.disable(this)) {
             Toast.makeText(this, "ข้อผิดพลาดเครือข่าย! ไม่สามารถส่งรูปภาพได้", Toast.LENGTH_LONG).show();
-            return;
+        } else {
+            prepareImage(bitmap);
+            progressBar.setVisibility(View.VISIBLE);
         }
+    }
 
-        progressBar.setVisibility(View.VISIBLE);
-        String date = new SimpleDateFormat("-yyyy_MM_dd_HH_mm_ss").format(new Date());
+    private void prepareImage(Bitmap bitmap) {
+        String date = getDateFormate("-yyyy_MM_dd_HH_mm_ss");
         final String imgName = "image/" + uid.substring(0, 5) + date + ".png";
         StorageReference mountainsRef = FirebaseStorage.getInstance().getReference().child(imgName);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
         byte[] data = baos.toByteArray();
-
-        Toast.makeText(this, "กำลังส่งรูปภาพ กรุณารอสักครู่...",Toast.LENGTH_SHORT).show();
         UploadTask uploadTask = mountainsRef.putBytes(data);
+        uploadImg(uploadTask, imgName, bitmap);
+    }
+
+    private void uploadImg(UploadTask uploadTask, final String imgName, final Bitmap bitmap) {
+        Toast.makeText(this, "กำลังส่งรูปภาพ กรุณารอสักครู่...", Toast.LENGTH_SHORT).show();
+
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {
                 Log.d("upload", exception.getMessage());
-                Toast.makeText(ChatActivity.this, "การส่งรูปภาพมีปัญหา โปรดลองอีกครั้ง",Toast.LENGTH_SHORT).show();
+                Toast.makeText(ChatActivity.this, "การส่งรูปภาพมีปัญหา โปรดลองอีกครั้ง", Toast.LENGTH_SHORT).show();
                 progressBar.setVisibility(View.GONE);
             }
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -278,28 +280,39 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
                 Log.d("upload", "OK");
                 pushMsg(KEY_IMAGE + imgName);
                 progressBar.setVisibility(View.GONE);
-                Toast.makeText(ChatActivity.this, "ส่งรูปภาพเรียบร้อย",Toast.LENGTH_SHORT).show();
+                Toast.makeText(ChatActivity.this, "ส่งรูปภาพเรียบร้อย", Toast.LENGTH_SHORT).show();
                 pushStat("chat");
-
-                PictureHandle handle = new PictureHandle(ChatActivity.this);
-                byte[] bytes = new MyImage().toByte(bitmap);
-                handle.addPicture(new Pictures(imgName, bytes));
+                pushImageToDatabase(bitmap, imgName);
             }
         });
     }
 
+    private void pushImageToDatabase(Bitmap bitmap, String imgName) {
+        PictureHandle handle = new PictureHandle(ChatActivity.this);
+        byte[] bytes = new MyImage().toByte(bitmap);
+        handle.addPicture(new Pictures(imgName, bytes));
+    }
+
     private void pushMsg(String msg) {
-        String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-        mDb.child(keyChat).child(DATA).push()
+        String time = getDateFormate("yyyy-MM-dd HH:mm:ss");
+        mDb
+                .child(keyChat)
+                .child(DATA)
+                .push()
                 .setValue(new ChatMessage(time, myName, msg, status, ""));
-        editText.setText("");
+        edInputMessage.setText("");
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    private String getDateFormate(String pattern){
+        Date date = new Date();
+        return new SimpleDateFormat(pattern).format(date);
     }
 
     private void pushStat(final String type) {
         DatabaseReference dbStat = FirebaseDatabase.getInstance().getReference().child("stat");
-        Date date = new Date();
-        String my = new SimpleDateFormat("yyyy-MM").format(date);
-        String day = new SimpleDateFormat("dd-MM-yyyy").format(date);
+        String my = getDateFormate("yyyy-MM");
+        String day = getDateFormate("dd-MM-yyyy");
         final DatabaseReference db = dbStat.child(service).child(my).child(day);
         db.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -322,11 +335,11 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     private void refresh() {
         progressBar.setVisibility(View.VISIBLE);
         if (NetWork.disable(this)) {
-            netAlert.setVisibility(View.VISIBLE);
+            tvNetAlert.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.GONE);
         } else {
-            editText.setFocusableInTouchMode(true);
-            netAlert.setVisibility(View.GONE);
+            edInputMessage.setFocusableInTouchMode(true);
+            tvNetAlert.setVisibility(View.GONE);
             find();
         }
     }
@@ -337,25 +350,10 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot data : dataSnapshot.getChildren()) {
-                    if (data.getKey().equals("data")) {
-                        mDb.child(data.getKey()).removeValue();
-                        continue;
-                    }
-                    try {
-                        if (data.child(SERVICE).getValue().toString().equals(service) &&
-                                data.child(USER).getValue().toString().equals(user)) {
-                            keyChat = data.getKey();
-                            found = true;
-                            edLogin.putString(KEY_CHAT, keyChat);
-                            edLogin.commit();
-                            break;
-                        }
-                    } catch (Exception e) {
-                        Log.d("ex", e.getMessage());
-                    }
+                    if (!eachForloop(data)) break;
                 }
                 if (!found) mDb.push().setValue(new NewChat(service, user));
-                query();
+                checkKeyChatEmpty();
             }
 
             @Override
@@ -363,13 +361,36 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         });
     }
 
-    private void query() {
+    private boolean eachForloop(DataSnapshot data){
+        if (data.getKey().equals("data")) {
+            mDb.child(data.getKey()).removeValue();
+            return true;
+        }
+        try {
+            if (data.child(SERVICE).getValue().toString().equals(service) &&
+                    data.child(USER).getValue().toString().equals(user)) {
+                keyChat = data.getKey();
+                found = true;
+                edLogin.putString(KEY_CHAT, keyChat);
+                edLogin.commit();
+                return false;
+            }
+        } catch (Exception e) {
+            Log.d("ex", e.getMessage());
+        }
+        return true;
+    }
+
+    private void checkKeyChatEmpty(){
         if (keyChat.isEmpty()) {
             find();
             progressBar.setVisibility(View.GONE);
-            return;
+        }else{
+            query();
         }
+    }
 
+    private void query() {
         final int m = Calendar.getInstance().get(Calendar.MONTH) + 1;
         mDb.child(keyChat).child(DATA).addValueEventListener(new ValueEventListener() {
             @Override
@@ -377,87 +398,96 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
                 chatList.clear();
                 for (DataSnapshot data : dataSnapshot.getChildren()) {
                     ChatMessage chatMessage = data.getValue(ChatMessage.class);
-                    int t = Integer.parseInt(chatMessage.getDate().split("-")[1]);
-                    Log.d("Chat", m + " : " + t);
-                    if (t > 10){
-                        if (t - 10 == m) {
-                            if (chatMessage.getMessage().contains(KEY_IMAGE)){
-                                sRef.child(chatMessage.getMessage().replace(KEY_IMAGE, "")).delete();
-                            }
-                            mDb.child(keyChat).child(DATA).child(data.getKey()).removeValue();
-                            continue;
-                        }
-                    } else if (t + 2 <= m) {
-                        if (chatMessage.getMessage().contains(KEY_IMAGE)){
-                            sRef.child(chatMessage.getMessage().replace(KEY_IMAGE, "")).delete();
-                        }
-                        mDb.child(keyChat).child(DATA).child(data.getKey()).removeValue();
-                        continue;
-                    }
-                    loadImg(chatMessage);
+                    removeChat(chatMessage, data, m);
+                    prepareLoadImage(chatMessage);
                 }
-
-                Collections.sort(chatList, new Comparator<ChatMessage>() {
-                    @Override
-                    public int compare(ChatMessage o1, ChatMessage o2) {
-                        return o1.toString().compareToIgnoreCase(o2.toString());
-                    }
-                });
-                adapter.notifyDataSetChanged();
-                progressBar.setVisibility(View.GONE);
+                sortChatList();
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
+            public void onCancelled(DatabaseError databaseError) {}
         });
     }
 
-    private void loadImg(final ChatMessage cm) {
-        String path = "";
-        // cm.getMessage() = null
-        if (cm.getMessage().contains(KEY_IMAGE)){
-            path = cm.getMessage().replace(KEY_IMAGE, "");
-        }else {
-            chatList.add(cm);
-            adapter.notifyDataSetChanged();
-            return;
+    private void removeChat(ChatMessage chatMessage, DataSnapshot data, int m){
+        int t = Integer.parseInt(chatMessage.getDate().split("-")[1]);
+        Log.d("Chat", m + " : " + t);
+        if (t > 10) {
+            if (t - 10 == m) {
+                if (chatMessage.getMessage().contains(KEY_IMAGE)) {
+                    sRef.child(chatMessage.getMessage().replace(KEY_IMAGE, "")).delete();
+                }
+                mDb.child(keyChat).child(DATA).child(data.getKey()).removeValue();
+            }
+        } else if (t + 2 <= m) {
+            if (chatMessage.getMessage().contains(KEY_IMAGE)) {
+                sRef.child(chatMessage.getMessage().replace(KEY_IMAGE, "")).delete();
+            }
+            mDb.child(keyChat).child(DATA).child(data.getKey()).removeValue();
         }
+    }
 
+    private void sortChatList(){
+        Collections.sort(chatList, new Comparator<ChatMessage>() {
+            @Override
+            public int compare(ChatMessage o1, ChatMessage o2) {
+                return o1.toString().compareToIgnoreCase(o2.toString());
+            }
+        });
+        adapter.notifyDataSetChanged();
+        progressBar.setVisibility(View.GONE);
+    }
+
+    private void prepareLoadImage(ChatMessage chatMessage){
+        String path = checkMessage(chatMessage);
+        if (path == null) return;
+        if (!setBitmap(path, chatMessage)) return;
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.bg_edit_white);
+        chatMessage.setBitmap(bitmap);
+        addChatMessageToList(chatMessage);
+        loadImg(chatMessage, path);
+    }
+
+    private String checkMessage(ChatMessage chatMessage){
+        if (chatMessage == null) return null;
+        if (chatMessage.getMessage() == null) return null;
+
+        if (chatMessage.getMessage().contains(KEY_IMAGE)) {
+            String path = chatMessage.getMessage().replace(KEY_IMAGE, "");
+            return path;
+        } else {
+            addChatMessageToList(chatMessage);
+            return null;
+        }
+    }
+
+    private void addChatMessageToList(ChatMessage chatMessage){
+        chatList.add(chatMessage);
+        adapter.notifyDataSetChanged();
+    }
+
+    private boolean setBitmap(String path, ChatMessage chatMessage){
         final PictureHandle handle = new PictureHandle(this);
-        if (handle.hasPicture(path)){
+        if (handle.hasPicture(path)) {
             Log.d("hasPicture", "YES");
             byte[] bytes = handle.getPicture(path).getPicture();
             Bitmap bitmap = new MyImage().convertToBitmap(bytes);
-            cm.setBitmap(bitmap);
-            chatList.add(cm);
-            adapter.notifyDataSetChanged();
-            return;
+            chatMessage.setBitmap(bitmap);
+            addChatMessageToList(chatMessage);
+            return true;
         }
+        return false;
+    }
 
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.bg_edit_white);
-        cm.setBitmap(bitmap);
-        chatList.add(cm);
-        adapter.notifyDataSetChanged();
-
-        final String imgName = path;
+    private void loadImg(final ChatMessage chatMessage, final String path) {
         StorageReference islandRef = FirebaseStorage.getInstance().getReference().child(path);
         final long ONE_MEGABYTE = 1024 * 1024;
         islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
             public void onSuccess(byte[] bytes) {
                 Bitmap bitmap = new MyImage().convertToBitmap(bytes);
-                handle.addPicture(new Pictures(imgName, bytes));
-                try {
-                    int index = chatList.indexOf(cm);
-                    ChatMessage c = chatList.get(index);
-                    c.setBitmap(bitmap);
-                    chatList.remove(index);
-                    chatList.add(c);
-                    adapter.notifyDataSetChanged();
-                }catch (Exception e){
-                    Log.d("Excep chatact", e.getMessage());
-                }
+                addPictureToDatabaseWithBytes(bytes, path);
+                removeThenAddChatMessage(chatMessage, bitmap);
                 Log.d("load Picture", "OK");
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -466,6 +496,24 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
                 Log.d("load image", e.getMessage());
             }
         });
+    }
+
+    private void addPictureToDatabaseWithBytes(byte[] bytes, String path){
+        PictureHandle handle = new PictureHandle(this);
+        handle.addPicture(new Pictures(path, bytes));
+    }
+
+    private void removeThenAddChatMessage(ChatMessage chatMessage, Bitmap bitmap){
+        try {
+            int index = chatList.indexOf(chatMessage);
+            ChatMessage c = chatList.get(index);
+            c.setBitmap(bitmap);
+            chatList.remove(index);
+            chatList.add(c);
+            adapter.notifyDataSetChanged();
+        } catch (Exception e) {
+            Log.d("Excep chatact", e.getMessage());
+        }
     }
 
     @Override

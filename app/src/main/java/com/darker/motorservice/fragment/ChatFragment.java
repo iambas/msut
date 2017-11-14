@@ -101,7 +101,7 @@ public class ChatFragment extends Fragment {
 
     private void refresh() {
         progressBar.setVisibility(View.VISIBLE);
-        if (!(new NetWork(context).isNetworkAvailiable())) {
+        if (NetWork.disable(context)) {
             netAlert.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.GONE);
             netAlert.setOnClickListener(new View.OnClickListener() {

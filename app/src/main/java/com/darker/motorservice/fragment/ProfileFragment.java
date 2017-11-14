@@ -122,7 +122,7 @@ public class ProfileFragment extends Fragment {
         services = serviceHandle.getService(id);
 
         view.findViewById(R.id.for_service).setVisibility(View.VISIBLE);
-        if (!(new NetWork(getContext()).isNetworkAvailiable()))
+        if (NetWork.disable(getContext()))
             sw.setBackgroundResource(R.color.white);
         final DatabaseReference db = FirebaseDatabase.getInstance().getReference().child(STATUS).child(services.getId());
         db.addValueEventListener(new ValueEventListener() {
@@ -170,8 +170,7 @@ public class ProfileFragment extends Fragment {
 
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                boolean isNet = new NetWork(getContext()).isNetworkAvailiable();
-                if (!isNet){
+                if (NetWork.disable(getContext())){
                     Toast.makeText(getContext(), "เครือข่ายมีปัญหา! ไม่สามารถเปลี่ยนสถานะร้านได้", Toast.LENGTH_LONG).show();
                     sw.setChecked(!isChecked);
                     return;
@@ -264,7 +263,7 @@ public class ProfileFragment extends Fragment {
     }
 
     private void logout(){
-        if (!(new NetWork(activity).isNetworkAvailiable())){
+        if (NetWork.disable(getContext())){
             Toast.makeText(activity, "เครือข่ายมีปัญหา! ไม่สามารถออกจากระบบได้", Toast.LENGTH_LONG).show();
             return;
         }
