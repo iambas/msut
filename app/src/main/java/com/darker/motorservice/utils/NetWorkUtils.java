@@ -4,9 +4,9 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-public class NetWork {
+public class NetWorkUtils {
 
-    public NetWork(){}
+    public NetWorkUtils(){}
 
     public static boolean isNetworkAvailiable(Context context){
         ConnectivityManager connectivity = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);

@@ -19,8 +19,8 @@ import android.widget.TextView;
 import com.darker.motorservice.R;
 import com.darker.motorservice.activity.MapsActivity;
 import com.darker.motorservice.activity.ShowPictureActivity;
-import com.darker.motorservice.utils.MyImage;
-import com.darker.motorservice.data.ChatMessage;
+import com.darker.motorservice.utils.ImageUtils;
+import com.darker.motorservice.model.ChatMessage;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -39,17 +39,17 @@ import java.util.Date;
 import java.util.List;
 
 import static com.darker.motorservice.R.id.img;
-import static com.darker.motorservice.data.Constant.CHAT;
-import static com.darker.motorservice.data.Constant.CHAT_WITH_ID;
-import static com.darker.motorservice.data.Constant.DATA;
-import static com.darker.motorservice.data.Constant.IMG;
-import static com.darker.motorservice.data.Constant.KEY_CHAT;
-import static com.darker.motorservice.data.Constant.KEY_IMAGE;
-import static com.darker.motorservice.data.Constant.KEY_LOGIN_MOTOR_SERVICE;
-import static com.darker.motorservice.data.Constant.LATLNG;
-import static com.darker.motorservice.data.Constant.NAME;
-import static com.darker.motorservice.data.Constant.STATUS;
-import static com.darker.motorservice.data.Constant.USER;
+import static com.darker.motorservice.Constant.CHAT;
+import static com.darker.motorservice.Constant.CHAT_WITH_ID;
+import static com.darker.motorservice.Constant.DATA;
+import static com.darker.motorservice.Constant.IMG;
+import static com.darker.motorservice.Constant.KEY_CHAT;
+import static com.darker.motorservice.Constant.KEY_IMAGE;
+import static com.darker.motorservice.Constant.KEY_LOGIN_MOTOR_SERVICE;
+import static com.darker.motorservice.Constant.LATLNG;
+import static com.darker.motorservice.Constant.NAME;
+import static com.darker.motorservice.Constant.STATUS;
+import static com.darker.motorservice.Constant.USER;
 
 public class MessageAdapter extends ArrayAdapter {
     private List<ChatMessage> items;
@@ -244,7 +244,7 @@ public class MessageAdapter extends ArrayAdapter {
     private void setImg(ImageView imageView) {
         // set image each store
         if (sh.getString(STATUS, "").equals(USER)) {
-            Bitmap bitmap = new MyImage().getImgProfile(context, sh.getString(CHAT_WITH_ID, ""));
+            Bitmap bitmap = new ImageUtils().getImgProfile(context, sh.getString(CHAT_WITH_ID, ""));
             imageView.setImageBitmap(bitmap);
         } else {
             String img = sh.getString(IMG, "");

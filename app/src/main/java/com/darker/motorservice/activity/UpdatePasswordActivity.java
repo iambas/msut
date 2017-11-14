@@ -14,15 +14,15 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.utils.Encoded;
-import com.darker.motorservice.utils.NetWork;
+import com.darker.motorservice.utils.EncodedUtils;
+import com.darker.motorservice.utils.NetWorkUtils;
 import com.darker.motorservice.service.BackgroundService;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 
-import static com.darker.motorservice.data.Constant.KEY_LOGIN_MOTOR_SERVICE;
-import static com.darker.motorservice.data.Constant.PASSWORD;
+import static com.darker.motorservice.Constant.KEY_LOGIN_MOTOR_SERVICE;
+import static com.darker.motorservice.Constant.PASSWORD;
 
 public class UpdatePasswordActivity extends AppCompatActivity {
 
@@ -65,7 +65,7 @@ public class UpdatePasswordActivity extends AppCompatActivity {
             return;
         }
 
-        if (NetWork.disable(this)){
+        if (NetWorkUtils.disable(this)){
             alert("เครือข่ายมีปัญหา! ไม่สามารถเปลี่ยนรหัสผ่านได้");
             return;
         }
@@ -81,7 +81,7 @@ public class UpdatePasswordActivity extends AppCompatActivity {
         }
 
         Log.d("old password", sh.getString("password", ""));
-        if (sh.getString(PASSWORD, "").equals((new Encoded(oldPass)).getResult())){
+        if (sh.getString(PASSWORD, "").equals((new EncodedUtils(oldPass)).getResult())){
             progressBar.setVisibility(View.VISIBLE);
             try {
                 auth.getCurrentUser().updatePassword(newPass).addOnCompleteListener(new OnCompleteListener<Void>() {

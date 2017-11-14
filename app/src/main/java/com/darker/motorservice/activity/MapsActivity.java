@@ -18,8 +18,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import static com.darker.motorservice.data.Constant.LATLNG;
-import static com.darker.motorservice.data.Constant.NAME;
+import static com.darker.motorservice.Constant.LATLNG;
+import static com.darker.motorservice.Constant.NAME;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 

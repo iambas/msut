@@ -26,10 +26,10 @@ import com.darker.motorservice.activity.MapsActivity;
 import com.darker.motorservice.activity.UpdateDataServiceActivity;
 import com.darker.motorservice.activity.UpdateImageActivity;
 import com.darker.motorservice.activity.UpdatePasswordActivity;
-import com.darker.motorservice.utils.MyImage;
-import com.darker.motorservice.utils.NetWork;
-import com.darker.motorservice.data.Services;
-import com.darker.motorservice.database.ServiceHandle;
+import com.darker.motorservice.utils.ImageUtils;
+import com.darker.motorservice.utils.NetWorkUtils;
+import com.darker.motorservice.model.Services;
+import com.darker.motorservice.database.ServiceDatabase;
 import com.darker.motorservice.service.BackgroundService;
 import com.facebook.login.LoginManager;
 import com.google.firebase.auth.FirebaseAuth;
@@ -40,17 +40,17 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
-import static com.darker.motorservice.data.Constant.COVER;
-import static com.darker.motorservice.data.Constant.ID;
-import static com.darker.motorservice.data.Constant.IMG;
-import static com.darker.motorservice.data.Constant.KEY_LOGIN_MOTOR_SERVICE;
-import static com.darker.motorservice.data.Constant.LATLNG;
-import static com.darker.motorservice.data.Constant.NAME;
-import static com.darker.motorservice.data.Constant.ONLINE;
-import static com.darker.motorservice.data.Constant.PHOTO;
-import static com.darker.motorservice.data.Constant.SERVICE;
-import static com.darker.motorservice.data.Constant.STATUS;
-import static com.darker.motorservice.data.Constant.USER;
+import static com.darker.motorservice.Constant.COVER;
+import static com.darker.motorservice.Constant.ID;
+import static com.darker.motorservice.Constant.IMG;
+import static com.darker.motorservice.Constant.KEY_LOGIN_MOTOR_SERVICE;
+import static com.darker.motorservice.Constant.LATLNG;
+import static com.darker.motorservice.Constant.NAME;
+import static com.darker.motorservice.Constant.ONLINE;
+import static com.darker.motorservice.Constant.PHOTO;
+import static com.darker.motorservice.Constant.SERVICE;
+import static com.darker.motorservice.Constant.STATUS;
+import static com.darker.motorservice.Constant.USER;
 
 public class ProfileFragment extends Fragment {
 
@@ -118,11 +118,11 @@ public class ProfileFragment extends Fragment {
     }
 
     private void service() {
-        ServiceHandle serviceHandle = new ServiceHandle(activity);
-        services = serviceHandle.getService(id);
+        ServiceDatabase serviceDatabase = new ServiceDatabase(activity);
+        services = serviceDatabase.getService(id);
 
         view.findViewById(R.id.for_service).setVisibility(View.VISIBLE);
-        if (NetWork.disable(getContext()))
+        if (NetWorkUtils.disable(getContext()))
             sw.setBackgroundResource(R.color.white);
         final DatabaseReference db = FirebaseDatabase.getInstance().getReference().child(STATUS).child(services.getId());
         db.addValueEventListener(new ValueEventListener() {
@@ -170,7 +170,7 @@ public class ProfileFragment extends Fragment {
 
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (NetWork.disable(getContext())){
+                if (NetWorkUtils.disable(getContext())){
                     Toast.makeText(getContext(), "เครือข่ายมีปัญหา! ไม่สามารถเปลี่ยนสถานะร้านได้", Toast.LENGTH_LONG).show();
                     sw.setChecked(!isChecked);
                     return;
@@ -224,7 +224,7 @@ public class ProfileFragment extends Fragment {
     }
 
     private void setData() {
-        MyImage image = new MyImage();
+        ImageUtils image = new ImageUtils();
         Bitmap cover, profile;
         try{
             cover = image.convertToBitmap(services.getImgCover());
@@ -263,7 +263,7 @@ public class ProfileFragment extends Fragment {
     }
 
     private void logout(){
-        if (NetWork.disable(getContext())){
+        if (NetWorkUtils.disable(getContext())){
             Toast.makeText(activity, "เครือข่ายมีปัญหา! ไม่สามารถออกจากระบบได้", Toast.LENGTH_LONG).show();
             return;
         }

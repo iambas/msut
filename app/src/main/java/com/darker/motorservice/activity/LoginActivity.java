@@ -18,10 +18,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.utils.Encoded;
-import com.darker.motorservice.utils.LoadService;
-import com.darker.motorservice.utils.NetWork;
-import com.darker.motorservice.data.User;
+import com.darker.motorservice.utils.EncodedUtils;
+import com.darker.motorservice.utils.LoadServiceUtils;
+import com.darker.motorservice.utils.NetWorkUtils;
+import com.darker.motorservice.model.User;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -44,16 +44,16 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import static android.widget.Toast.LENGTH_LONG;
-import static com.darker.motorservice.data.Constant.EMAIL;
-import static com.darker.motorservice.data.Constant.ID;
-import static com.darker.motorservice.data.Constant.KEY_LOGIN_MOTOR_SERVICE;
-import static com.darker.motorservice.data.Constant.NAME;
-import static com.darker.motorservice.data.Constant.PASSWORD;
-import static com.darker.motorservice.data.Constant.PHOTO;
-import static com.darker.motorservice.data.Constant.SERVICE;
-import static com.darker.motorservice.data.Constant.STATUS;
-import static com.darker.motorservice.data.Constant.TYPE;
-import static com.darker.motorservice.data.Constant.USER;
+import static com.darker.motorservice.Constant.EMAIL;
+import static com.darker.motorservice.Constant.ID;
+import static com.darker.motorservice.Constant.KEY_LOGIN_MOTOR_SERVICE;
+import static com.darker.motorservice.Constant.NAME;
+import static com.darker.motorservice.Constant.PASSWORD;
+import static com.darker.motorservice.Constant.PHOTO;
+import static com.darker.motorservice.Constant.SERVICE;
+import static com.darker.motorservice.Constant.STATUS;
+import static com.darker.motorservice.Constant.TYPE;
+import static com.darker.motorservice.Constant.USER;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -134,7 +134,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void onFacebookClicked(View view){
-        if (NetWork.disable(this)){
+        if (NetWorkUtils.disable(this)){
             Toast.makeText(view.getContext(), "ข้อผิดพลาดเครือข่าย! ไม่สามารถเข้าสู่ระบบได้", LENGTH_LONG).show();
             return;
         }
@@ -187,8 +187,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void loadDB(){
-        new LoadService(this).loadData();
-        new LoadService(this).loadAdmin();
+        new LoadServiceUtils(this).loadData();
+        new LoadServiceUtils(this).loadAdmin();
     }
 
     private void on(){
@@ -257,7 +257,7 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        if (NetWork.disable(this)){
+        if (NetWorkUtils.disable(this)){
             alert("ข้อผิดพลาดเครือข่าย! ไม่สามารถเข้าสู่ระบบได้");
             inputPass.setText("");
             return;
@@ -286,7 +286,7 @@ public class LoginActivity extends AppCompatActivity {
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     String id = mAuth.getCurrentUser().getUid();
                                     editor.putString(EMAIL, mAuth.getCurrentUser().getEmail());
-                                    editor.putString(PASSWORD, (new Encoded(password)).getResult());
+                                    editor.putString(PASSWORD, (new EncodedUtils(password)).getResult());
                                     editor.putString(STATUS, SERVICE);
                                     editor.putString(ID, id);
                                     editor.commit();

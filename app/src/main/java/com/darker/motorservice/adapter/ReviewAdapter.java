@@ -11,7 +11,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.data.Review;
+import com.darker.motorservice.model.Review;
 
 import java.util.List;
 

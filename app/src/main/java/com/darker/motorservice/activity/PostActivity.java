@@ -18,11 +18,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.utils.MyImage;
-import com.darker.motorservice.utils.NetWork;
-import com.darker.motorservice.data.Pictures;
-import com.darker.motorservice.data.Timeline;
-import com.darker.motorservice.database.PictureHandle;
+import com.darker.motorservice.utils.ImageUtils;
+import com.darker.motorservice.utils.NetWorkUtils;
+import com.darker.motorservice.model.Pictures;
+import com.darker.motorservice.model.Timeline;
+import com.darker.motorservice.database.PictureDatabse;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
@@ -36,13 +36,13 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static com.darker.motorservice.data.Constant.DATE;
-import static com.darker.motorservice.data.Constant.ID;
-import static com.darker.motorservice.data.Constant.IMG;
-import static com.darker.motorservice.data.Constant.KEY;
-import static com.darker.motorservice.data.Constant.KEY_LOGIN_MOTOR_SERVICE;
-import static com.darker.motorservice.data.Constant.MESSAGE;
-import static com.darker.motorservice.data.Constant.TIMELINE;
+import static com.darker.motorservice.Constant.DATE;
+import static com.darker.motorservice.Constant.ID;
+import static com.darker.motorservice.Constant.IMG;
+import static com.darker.motorservice.Constant.KEY;
+import static com.darker.motorservice.Constant.KEY_LOGIN_MOTOR_SERVICE;
+import static com.darker.motorservice.Constant.MESSAGE;
+import static com.darker.motorservice.Constant.TIMELINE;
 
 public class PostActivity extends AppCompatActivity {
 
@@ -92,8 +92,8 @@ public class PostActivity extends AppCompatActivity {
         editMsg.setText(message);
 
         if (!imgName.isEmpty()){
-            PictureHandle handle = new PictureHandle(this);
-            Bitmap bitmap = new MyImage().convertToBitmap(handle.getPicture(imgName).getPicture());
+            PictureDatabse handle = new PictureDatabse(this);
+            Bitmap bitmap = new ImageUtils().convertToBitmap(handle.getPicture(imgName).getPicture());
             imageView.setImageBitmap(bitmap);
             imageView.setVisibility(View.VISIBLE);
         }
@@ -108,7 +108,7 @@ public class PostActivity extends AppCompatActivity {
 
         btnPost.setClickable(false);
         btnImg.setClickable(false);
-        if (NetWork.disable(this)) {
+        if (NetWorkUtils.disable(this)) {
             alert("เครือข่ายมีปัญหา! ไม่สามารถโพสต์ได้");
             return;
         }
@@ -169,7 +169,7 @@ public class PostActivity extends AppCompatActivity {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 Log.d("upload", "OK");
-                PictureHandle handle = new PictureHandle(PostActivity.this);
+                PictureDatabse handle = new PictureDatabse(PostActivity.this);
                 if (edit) {
                     if (handle.hasPicture(image)){
                         handle.updatePicture(new Pictures(image, data));
@@ -202,9 +202,9 @@ public class PostActivity extends AppCompatActivity {
                 try {
                     bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
                     if (bitmap.getWidth() > 800)
-                        bitmap = new MyImage().scaleBitmap(bitmap, 800);
+                        bitmap = new ImageUtils().scaleBitmap(bitmap, 800);
                     else
-                        bitmap = new MyImage().scaleBitmap(bitmap, bitmap.getWidth());
+                        bitmap = new ImageUtils().scaleBitmap(bitmap, bitmap.getWidth());
                     imageView.setImageBitmap(bitmap);
                     imageView.setVisibility(View.VISIBLE);
                 } catch (IOException e) {

@@ -15,8 +15,8 @@ import android.widget.TextView;
 import com.darker.motorservice.R;
 import com.darker.motorservice.activity.ChatActivity;
 import com.darker.motorservice.activity.DetailActivity;
-import com.darker.motorservice.utils.MyImage;
-import com.darker.motorservice.data.Services;
+import com.darker.motorservice.utils.ImageUtils;
+import com.darker.motorservice.model.Services;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -25,14 +25,14 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
-import static com.darker.motorservice.data.Constant.CHAT_WITH_ID;
-import static com.darker.motorservice.data.Constant.CHAT_WITH_NAME;
-import static com.darker.motorservice.data.Constant.ID;
-import static com.darker.motorservice.data.Constant.KEY_CHAT;
-import static com.darker.motorservice.data.Constant.PHOTO;
-import static com.darker.motorservice.data.Constant.STATUS;
-import static com.darker.motorservice.data.Constant.TEL_NUM;
-import static com.darker.motorservice.data.Constant.USER;
+import static com.darker.motorservice.Constant.CHAT_WITH_ID;
+import static com.darker.motorservice.Constant.CHAT_WITH_NAME;
+import static com.darker.motorservice.Constant.ID;
+import static com.darker.motorservice.Constant.KEY_CHAT;
+import static com.darker.motorservice.Constant.PHOTO;
+import static com.darker.motorservice.Constant.STATUS;
+import static com.darker.motorservice.Constant.TEL_NUM;
+import static com.darker.motorservice.Constant.USER;
 
 public class MotorcycleAdapter extends RecyclerView.Adapter<MotorcycleAdapter.ViewHolder> {
 
@@ -72,7 +72,7 @@ public class MotorcycleAdapter extends RecyclerView.Adapter<MotorcycleAdapter.Vi
         holder.txtMessage.setText(services.getPos());
         Bitmap bitmap;
         try{
-            bitmap = new MyImage().convertToBitmap(services.getImgProfile());
+            bitmap = new ImageUtils().convertToBitmap(services.getImgProfile());
         }catch (Exception e){
             bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.pro);
         }

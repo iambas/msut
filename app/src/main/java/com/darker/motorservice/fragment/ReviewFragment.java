@@ -26,11 +26,11 @@ import android.widget.Toast;
 import com.darker.motorservice.R;
 import com.darker.motorservice.activity.DetailActivity;
 import com.darker.motorservice.adapter.ReviewAdapter;
-import com.darker.motorservice.utils.NetWork;
-import com.darker.motorservice.data.Review;
-import com.darker.motorservice.data.Services;
-import com.darker.motorservice.database.AdminHandle;
-import com.darker.motorservice.database.ServiceHandle;
+import com.darker.motorservice.utils.NetWorkUtils;
+import com.darker.motorservice.model.Review;
+import com.darker.motorservice.model.Services;
+import com.darker.motorservice.database.AdminDatabase;
+import com.darker.motorservice.database.ServiceDatabase;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -44,11 +44,11 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-import static com.darker.motorservice.data.Constant.ID;
-import static com.darker.motorservice.data.Constant.KEY_LOGIN_MOTOR_SERVICE;
-import static com.darker.motorservice.data.Constant.REVIEW;
-import static com.darker.motorservice.data.Constant.STATUS;
-import static com.darker.motorservice.data.Constant.USER;
+import static com.darker.motorservice.Constant.ID;
+import static com.darker.motorservice.Constant.KEY_LOGIN_MOTOR_SERVICE;
+import static com.darker.motorservice.Constant.REVIEW;
+import static com.darker.motorservice.Constant.STATUS;
+import static com.darker.motorservice.Constant.USER;
 
 public class ReviewFragment extends Fragment {
 
@@ -92,7 +92,7 @@ public class ReviewFragment extends Fragment {
         SharedPreferences sh = context.getSharedPreferences(KEY_LOGIN_MOTOR_SERVICE, Context.MODE_PRIVATE);
         uid = sh.getString(ID, "");
         String status = sh.getString(STATUS, USER);
-        boolean isAdmin = new AdminHandle(context).isAdmin(uid);
+        boolean isAdmin = new AdminDatabase(context).isAdmin(uid);
 
         dbRef = FirebaseDatabase.getInstance().getReference();
         reviews = new ArrayList<>();
@@ -105,7 +105,7 @@ public class ReviewFragment extends Fragment {
         ratingBar = (RatingBar) view.findViewById(R.id.rating);
 
         if (isAdmin || status.equals(USER)){
-            List<Services> svList = new ServiceHandle(context).getAllSerivce();
+            List<Services> svList = new ServiceDatabase(context).getAllSerivce();
             List<String> nameList = new ArrayList<String>();
             final List<String> idList = new ArrayList<String>();
             id = svList.get(0).getId();
@@ -183,7 +183,7 @@ public class ReviewFragment extends Fragment {
     }
 
     private void check() {
-        if (NetWork.disable(getContext())) {
+        if (NetWorkUtils.disable(getContext())) {
             mView.findViewById(R.id.txt_net_alert).setVisibility(View.VISIBLE);
             txtNull.setVisibility(View.GONE);
             progressBar.setVisibility(View.GONE);
@@ -231,7 +231,7 @@ public class ReviewFragment extends Fragment {
                     return;
                 }
 
-                if (NetWork.disable(getContext())) {
+                if (NetWorkUtils.disable(getContext())) {
                     Toast.makeText(context, "ข้อผิดพลาดเครือข่าย! ไม่สามารถบันทึกได้", Toast.LENGTH_LONG).show();
                     return;
                 }

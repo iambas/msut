@@ -18,10 +18,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.utils.LoadService;
-import com.darker.motorservice.utils.NetWork;
-import com.darker.motorservice.data.Services;
-import com.darker.motorservice.database.ServiceHandle;
+import com.darker.motorservice.utils.LoadServiceUtils;
+import com.darker.motorservice.utils.NetWorkUtils;
+import com.darker.motorservice.model.Services;
+import com.darker.motorservice.database.ServiceDatabase;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.Place;
@@ -35,8 +35,8 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.List;
 
-import static com.darker.motorservice.data.Constant.ID;
-import static com.darker.motorservice.data.Constant.SERVICE;
+import static com.darker.motorservice.Constant.ID;
+import static com.darker.motorservice.Constant.SERVICE;
 
 public class UpdateDataServiceActivity extends AppCompatActivity {
 
@@ -50,7 +50,7 @@ public class UpdateDataServiceActivity extends AppCompatActivity {
     private Button btnSave;
     private List<Services> listSer;
     private ProgressBar progressBar;
-    private ServiceHandle handle;
+    private ServiceDatabase handle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +60,7 @@ public class UpdateDataServiceActivity extends AppCompatActivity {
         getSupportActionBar().setTitle(getResources().getString(R.string.edit_data));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        handle = new ServiceHandle(this);
+        handle = new ServiceDatabase(this);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         btnSave = (Button) findViewById(R.id.btn_save);
         id = getIntent().getStringExtra(ID);
@@ -152,7 +152,7 @@ public class UpdateDataServiceActivity extends AppCompatActivity {
 
         String work = formOne + "\n" + formTwo + "\n" + formThree;
 
-        if (NetWork.disable(this)){
+        if (NetWorkUtils.disable(this)){
             alert("เครือข่ายมีปัญหา! ไม่สามารถบันทึกได้");
         }else{
             progressBar.setVisibility(View.VISIBLE);
@@ -197,7 +197,7 @@ public class UpdateDataServiceActivity extends AppCompatActivity {
     private void update(Services s){
         DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference().child(SERVICE).child(services.getId());
         dbRef.setValue(s);
-        new LoadService(UpdateDataServiceActivity.this).loadData();
+        new LoadServiceUtils(UpdateDataServiceActivity.this).loadData();
         progressBar.setVisibility(View.GONE);
         s.setImgProfile(services.getImgProfile());
         s.setImgCover(services.getImgCover());
@@ -223,7 +223,7 @@ public class UpdateDataServiceActivity extends AppCompatActivity {
     }
 
     public void onEditLatlngClicked(View view){
-        if (NetWork.disable(this)) return;
+        if (NetWorkUtils.disable(this)) return;
         checkGpsStatus();
         if (!GpsStatus) return;
 

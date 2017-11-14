@@ -16,9 +16,9 @@ import android.widget.TextView;
 
 import com.darker.motorservice.R;
 import com.darker.motorservice.adapter.ChatAdapter;
-import com.darker.motorservice.utils.NetWork;
-import com.darker.motorservice.data.Chat;
-import com.darker.motorservice.data.ChatMessage;
+import com.darker.motorservice.utils.NetWorkUtils;
+import com.darker.motorservice.model.Chat;
+import com.darker.motorservice.model.ChatMessage;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -32,16 +32,16 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import static com.darker.motorservice.data.Constant.ALERT;
-import static com.darker.motorservice.data.Constant.CHAT;
-import static com.darker.motorservice.data.Constant.DATA;
-import static com.darker.motorservice.data.Constant.KEY_IMAGE;
-import static com.darker.motorservice.data.Constant.KEY_LOGIN_MOTOR_SERVICE;
-import static com.darker.motorservice.data.Constant.NAME;
-import static com.darker.motorservice.data.Constant.PHOTO;
-import static com.darker.motorservice.data.Constant.SERVICE;
-import static com.darker.motorservice.data.Constant.STATUS;
-import static com.darker.motorservice.data.Constant.USER;
+import static com.darker.motorservice.Constant.ALERT;
+import static com.darker.motorservice.Constant.CHAT;
+import static com.darker.motorservice.Constant.DATA;
+import static com.darker.motorservice.Constant.KEY_IMAGE;
+import static com.darker.motorservice.Constant.KEY_LOGIN_MOTOR_SERVICE;
+import static com.darker.motorservice.Constant.NAME;
+import static com.darker.motorservice.Constant.PHOTO;
+import static com.darker.motorservice.Constant.SERVICE;
+import static com.darker.motorservice.Constant.STATUS;
+import static com.darker.motorservice.Constant.USER;
 
 public class ChatFragment extends Fragment {
 
@@ -101,7 +101,7 @@ public class ChatFragment extends Fragment {
 
     private void refresh() {
         progressBar.setVisibility(View.VISIBLE);
-        if (NetWork.disable(context)) {
+        if (NetWorkUtils.disable(context)) {
             netAlert.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.GONE);
             netAlert.setOnClickListener(new View.OnClickListener() {

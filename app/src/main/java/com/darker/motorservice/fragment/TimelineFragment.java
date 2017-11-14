@@ -18,12 +18,12 @@ import android.view.ViewGroup;
 import com.darker.motorservice.R;
 import com.darker.motorservice.activity.PostActivity;
 import com.darker.motorservice.adapter.TimelineAdapter;
-import com.darker.motorservice.utils.MyImage;
-import com.darker.motorservice.data.Pictures;
-import com.darker.motorservice.data.Services;
-import com.darker.motorservice.data.Timeline;
-import com.darker.motorservice.database.PictureHandle;
-import com.darker.motorservice.database.ServiceHandle;
+import com.darker.motorservice.utils.ImageUtils;
+import com.darker.motorservice.model.Pictures;
+import com.darker.motorservice.model.Services;
+import com.darker.motorservice.model.Timeline;
+import com.darker.motorservice.database.PictureDatabse;
+import com.darker.motorservice.database.ServiceDatabase;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
@@ -40,18 +40,18 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import static com.darker.motorservice.data.Constant.ALERT;
-import static com.darker.motorservice.data.Constant.CHAT;
-import static com.darker.motorservice.data.Constant.DATE;
-import static com.darker.motorservice.data.Constant.ID;
-import static com.darker.motorservice.data.Constant.IMG;
-import static com.darker.motorservice.data.Constant.KEY;
-import static com.darker.motorservice.data.Constant.KEY_LOGIN_MOTOR_SERVICE;
-import static com.darker.motorservice.data.Constant.MESSAGE;
-import static com.darker.motorservice.data.Constant.SERVICE;
-import static com.darker.motorservice.data.Constant.STATUS;
-import static com.darker.motorservice.data.Constant.TIMELINE;
-import static com.darker.motorservice.data.Constant.USER;
+import static com.darker.motorservice.Constant.ALERT;
+import static com.darker.motorservice.Constant.CHAT;
+import static com.darker.motorservice.Constant.DATE;
+import static com.darker.motorservice.Constant.ID;
+import static com.darker.motorservice.Constant.IMG;
+import static com.darker.motorservice.Constant.KEY;
+import static com.darker.motorservice.Constant.KEY_LOGIN_MOTOR_SERVICE;
+import static com.darker.motorservice.Constant.MESSAGE;
+import static com.darker.motorservice.Constant.SERVICE;
+import static com.darker.motorservice.Constant.STATUS;
+import static com.darker.motorservice.Constant.TIMELINE;
+import static com.darker.motorservice.Constant.USER;
 
 public class TimelineFragment extends Fragment {
 
@@ -145,7 +145,7 @@ public class TimelineFragment extends Fragment {
                         continue;
                     }
                     timeline.setKey(ds.getKey());
-                    ServiceHandle handle = new ServiceHandle(getContext());
+                    ServiceDatabase handle = new ServiceDatabase(getContext());
                     Services services = handle.getService(timeline.getId());
                     loadImg(timeline, services);
                 }
@@ -183,7 +183,7 @@ public class TimelineFragment extends Fragment {
                     }
                     timeline.setKey(ds.getKey());
                     if (timeline.getId().equals(id)) {
-                        ServiceHandle handle = new ServiceHandle(getContext());
+                        ServiceDatabase handle = new ServiceDatabase(getContext());
                         Services services = handle.getService(id);
                         loadImg(timeline, services);
                     }
@@ -196,7 +196,7 @@ public class TimelineFragment extends Fragment {
     }
 
     private void loadImg(final Timeline timeline, Services services) {
-        MyImage myImage = new MyImage();
+        ImageUtils myImage = new ImageUtils();
         Bitmap bitmap = myImage.convertToBitmap(services.getImgProfile());
         timeline.setName(services.getName());
         timeline.setProfile(bitmap);
@@ -207,11 +207,11 @@ public class TimelineFragment extends Fragment {
             return;
         }
 
-        final PictureHandle handle = new PictureHandle(context);
+        final PictureDatabse handle = new PictureDatabse(context);
         if (handle.hasPicture(timeline.getImgName())) {
             Log.d("hasPicture", "YES");
             byte[] bytes = handle.getPicture(timeline.getImgName()).getPicture();
-            Bitmap b = new MyImage().convertToBitmap(bytes);
+            Bitmap b = new ImageUtils().convertToBitmap(bytes);
             timeline.setImage(b);
             timelines.add(timeline);
             sort();
@@ -223,7 +223,7 @@ public class TimelineFragment extends Fragment {
             @Override
             public void onSuccess(byte[] bytes) {
                 handle.addPicture(new Pictures(timeline.getImgName(), bytes));
-                Bitmap bitmap = new MyImage().convertToBitmap(bytes);
+                Bitmap bitmap = new ImageUtils().convertToBitmap(bytes);
                 timeline.setImage(bitmap);
                 timelines.add(timeline);
                 sort();

@@ -17,11 +17,11 @@ import android.widget.TextView;
 
 import com.darker.motorservice.R;
 import com.darker.motorservice.adapter.StatAdapter;
-import com.darker.motorservice.utils.NetWork;
-import com.darker.motorservice.data.Services;
-import com.darker.motorservice.data.Stat;
-import com.darker.motorservice.database.AdminHandle;
-import com.darker.motorservice.database.ServiceHandle;
+import com.darker.motorservice.utils.NetWorkUtils;
+import com.darker.motorservice.model.Services;
+import com.darker.motorservice.model.Stat;
+import com.darker.motorservice.database.AdminDatabase;
+import com.darker.motorservice.database.ServiceDatabase;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -73,10 +73,10 @@ public class StatisticsFragment extends Fragment{
         adapter = new StatAdapter(context, R.layout.fragment_statistics_item, statList);
         listView.setAdapter(adapter);
 
-        AdminHandle admin = new AdminHandle(view.getContext());
+        AdminDatabase admin = new AdminDatabase(view.getContext());
         if (admin.isAdmin(uid)){
             view.findViewById(R.id.for_admin).setVisibility(View.VISIBLE);
-            List<Services> list = new ServiceHandle(context).getAllSerivce();
+            List<Services> list = new ServiceDatabase(context).getAllSerivce();
             List<String> sName = new ArrayList<String>();
             final List<String> sId = new ArrayList<String>();
             for (Services s : list){
@@ -109,7 +109,7 @@ public class StatisticsFragment extends Fragment{
         TextView txtNet = (TextView) mView.findViewById(R.id.txt_net_alert);
         txtNull = (TextView) mView.findViewById(R.id.txt_null);
         progressBar = (ProgressBar) mView.findViewById(R.id.progressBar);
-        if (NetWork.disable(getContext())){
+        if (NetWorkUtils.disable(getContext())){
             txtNet.setVisibility(View.VISIBLE);
             txtNet.setOnClickListener(new View.OnClickListener() {
                 @Override
