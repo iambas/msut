@@ -36,10 +36,10 @@ import android.widget.Toast;
 
 import com.darker.motorservice.R;
 import com.darker.motorservice.adapter.MessageAdapter;
+import com.darker.motorservice.database.PictureDatabse;
 import com.darker.motorservice.model.ChatMessage;
 import com.darker.motorservice.model.NewChat;
 import com.darker.motorservice.model.Pictures;
-import com.darker.motorservice.database.PictureDatabse;
 import com.darker.motorservice.utils.ImageUtils;
 import com.darker.motorservice.utils.NetWorkUtils;
 import com.google.android.gms.common.ConnectionResult;
@@ -112,75 +112,42 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     private MessageAdapter messageAdapter;
     private List<ChatMessage> chatMessageList;
     private SharedPreferences.Editor spedChat, spedLogin;
+    private String chatWithId;
+    private String photo;
+    private ImageButton imgBtnImage;
+    private ImageButton imgBtnSend;
+    private SharedPreferences spLogin;
+    private ListView chatListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        GoogleApiClient mGoogleApiClient = new GoogleApiClient
-                .Builder(this)
-                .addApi(Places.GEO_DATA_API)
-                .addApi(Places.PLACE_DETECTION_API)
-                .enableAutoManage(this, this)
-                .build();
+        googleAPI();
+        getDataIntent();
+        LogDataIntent();
+        supportActionBar();
+        initInstance();
+        checkKeyChat();
+        sharedPreChat();
+        setVisibility();
+        setOnClicked();
+        setServiceAndUser();
+        setAdapter();
+        refreshUI();
+    }
 
-        storageRef = FirebaseStorage.getInstance().getReference();
-        Intent intent = getIntent();
-        keyChat = intent.getStringExtra(KEY_CHAT);
-        String chatWithId = intent.getStringExtra(CHAT_WITH_ID);
-        chatWithName = intent.getStringExtra(CHAT_WITH_NAME);
-        telNum = intent.getStringExtra(TEL_NUM);
-        status = intent.getStringExtra(STATUS);
-        String photo = intent.getStringExtra(PHOTO);
-
-        Log.d("chat", "." + keyChat);
-        Log.d("chat", "." + chatWithId);
-        Log.d("chat", "." + chatWithName);
-        Log.d("chat", "." + telNum);
-        Log.d("chat", "." + status);
-        Log.d("chat", "." + photo);
-
+    private void supportActionBar() {
         getSupportActionBar().setTitle(chatWithName);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
 
-        SharedPreferences shLogin = getSharedPreferences(KEY_LOGIN_MOTOR_SERVICE, Context.MODE_PRIVATE);
-        spedLogin = shLogin.edit();
-        spedLogin.putString(IMG, photo);
-        spedLogin.putString(CHAT_WITH_ID, chatWithId);
-        spedLogin.commit();
-        myName = shLogin.getString(NAME, "");
-        if (!keyChat.isEmpty()) {
-            spedLogin.putString(KEY_CHAT, keyChat);
-            spedLogin.commit();
-        }
+    private void setAdapter() {
+        chatListView.setAdapter(messageAdapter);
+    }
 
-        spedChat = getSharedPreferences(CHAT, Context.MODE_PRIVATE).edit();
-        spedChat.putBoolean(ALERT, false);
-        spedChat.commit();
-
-        uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        mDatabase = FirebaseDatabase.getInstance().getReference().child(CHAT);
-
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        progressBar.setVisibility(View.VISIBLE);
-
-        ImageButton btnImg = (ImageButton) findViewById(R.id.btn_img);
-        ImageButton btnSend = (ImageButton) findViewById(R.id.btn_send);
-        btnImg.setVisibility(View.VISIBLE);
-        btnImg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBtnImageClicked();
-            }
-        });
-        btnSend.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onSendClicked();
-            }
-        });
-
+    private void setServiceAndUser() {
         if (status.equals(USER)) {
             service = chatWithId;
             user = uid;
@@ -188,21 +155,100 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
             service = uid;
             user = chatWithId;
         }
+    }
 
-        chatMessageList = new ArrayList<ChatMessage>();
-        messageAdapter = new MessageAdapter(this, R.layout.message_item, chatMessageList);
-        ListView listView = (ListView) findViewById(R.id.list);
-        listView.setAdapter(messageAdapter);
+    private void setVisibility() {
+        imgBtnImage.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
+    }
 
-        edInputMessage = (EditText) findViewById(R.id.ed_input_message);
-        tvNetAlert = (TextView) findViewById(R.id.txt_net_alert);
-        refresh();
+    private void sharedPreChat() {
+        spedChat = getSharedPreferences(CHAT, Context.MODE_PRIVATE).edit();
+        spedChat.putBoolean(ALERT, false);
+        spedChat.apply();
+    }
+
+    private void checkKeyChat() {
+        if (!keyChat.isEmpty()) {
+            spedLogin.putString(KEY_CHAT, keyChat);
+            spedLogin.apply();
+        }
+    }
+
+    private void setOnClicked() {
+        imgBtnImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBtnImageClicked();
+            }
+        });
+        imgBtnSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onSendClicked();
+            }
+        });
         tvNetAlert.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                refresh();
+                refreshUI();
             }
         });
+    }
+
+    private void initInstance() {
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        imgBtnImage = (ImageButton) findViewById(R.id.btn_img);
+        imgBtnSend = (ImageButton) findViewById(R.id.btn_send);
+        chatListView = (ListView) findViewById(R.id.list);
+        edInputMessage = (EditText) findViewById(R.id.ed_input_message);
+        tvNetAlert = (TextView) findViewById(R.id.txt_net_alert);
+
+        spLogin = sharedPreferencesLogin();
+        myName = spLogin.getString(NAME, "");
+        storageRef = FirebaseStorage.getInstance().getReference();
+        uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        mDatabase = FirebaseDatabase.getInstance().getReference().child(CHAT);
+        chatMessageList = new ArrayList<ChatMessage>();
+        messageAdapter = new MessageAdapter(this, R.layout.message_item, chatMessageList);
+    }
+
+    @NonNull
+    private SharedPreferences sharedPreferencesLogin() {
+        SharedPreferences shLogin = getSharedPreferences(KEY_LOGIN_MOTOR_SERVICE, Context.MODE_PRIVATE);
+        spedLogin = shLogin.edit();
+        spedLogin.putString(IMG, photo);
+        spedLogin.putString(CHAT_WITH_ID, chatWithId);
+        spedLogin.apply();
+        return shLogin;
+    }
+
+    private void LogDataIntent() {
+        Log.d("chat", "." + keyChat);
+        Log.d("chat", "." + chatWithId);
+        Log.d("chat", "." + chatWithName);
+        Log.d("chat", "." + telNum);
+        Log.d("chat", "." + status);
+        Log.d("chat", "." + photo);
+    }
+
+    private void getDataIntent() {
+        Intent intent = getIntent();
+        keyChat = intent.getStringExtra(KEY_CHAT);
+        chatWithId = intent.getStringExtra(CHAT_WITH_ID);
+        chatWithName = intent.getStringExtra(CHAT_WITH_NAME);
+        telNum = intent.getStringExtra(TEL_NUM);
+        status = intent.getStringExtra(STATUS);
+        photo = intent.getStringExtra(PHOTO);
+    }
+
+    private void googleAPI() {
+        GoogleApiClient mGoogleApiClient = new GoogleApiClient
+                .Builder(this)
+                .addApi(Places.GEO_DATA_API)
+                .addApi(Places.PLACE_DETECTION_API)
+                .enableAutoManage(this, this)
+                .build();
     }
 
     @Override
@@ -384,7 +430,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         });
     }
 
-    private void refresh() {
+    private void refreshUI() {
         progressBar.setVisibility(View.VISIBLE);
         if (NetWorkUtils.disable(this)) {
             tvNetAlert.setVisibility(View.VISIBLE);
