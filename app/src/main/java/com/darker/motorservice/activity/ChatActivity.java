@@ -90,24 +90,28 @@ import static com.darker.motorservice.Constant.USER;
 public class ChatActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
     public static final String TAG = "ChatActivity";
-    private int PLACE_PICKER_REQUEST = 1;
-    private int IMAGE_REQUEST = 2;
-    private boolean GpsStatus;
-    private DatabaseReference mDb;
-    private MessageAdapter adapter;
-    private List<ChatMessage> chatList;
+    private static final int PLACE_PICKER_REQUEST = 1;
+    private static final int IMAGE_REQUEST = 2;
+
+    private TextView tvNetAlert;
+    private EditText edInputMessage;
+    private ProgressBar progressBar;
+
     private String keyChat;
     private String chatWithName;
     private String telNum;
     private String status;
     private String uid;
     private String service, user, myName;
-    private EditText edInputMessage;
+
+    private boolean gpsStatus;
     private boolean found = false;
-    private ProgressBar progressBar;
-    private TextView tvNetAlert;
-    private SharedPreferences.Editor edChat, edLogin;
-    private StorageReference sRef;
+
+    private DatabaseReference mDatabase;
+    private StorageReference storageRef;
+    private MessageAdapter messageAdapter;
+    private List<ChatMessage> chatMessageList;
+    private SharedPreferences.Editor spedChat, spedLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,7 +125,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
                 .enableAutoManage(this, this)
                 .build();
 
-        sRef = FirebaseStorage.getInstance().getReference();
+        storageRef = FirebaseStorage.getInstance().getReference();
         Intent intent = getIntent();
         keyChat = intent.getStringExtra(KEY_CHAT);
         String chatWithId = intent.getStringExtra(CHAT_WITH_ID);
@@ -141,22 +145,22 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         SharedPreferences shLogin = getSharedPreferences(KEY_LOGIN_MOTOR_SERVICE, Context.MODE_PRIVATE);
-        edLogin = shLogin.edit();
-        edLogin.putString(IMG, photo);
-        edLogin.putString(CHAT_WITH_ID, chatWithId);
-        edLogin.commit();
+        spedLogin = shLogin.edit();
+        spedLogin.putString(IMG, photo);
+        spedLogin.putString(CHAT_WITH_ID, chatWithId);
+        spedLogin.commit();
         myName = shLogin.getString(NAME, "");
         if (!keyChat.isEmpty()) {
-            edLogin.putString(KEY_CHAT, keyChat);
-            edLogin.commit();
+            spedLogin.putString(KEY_CHAT, keyChat);
+            spedLogin.commit();
         }
 
-        edChat = getSharedPreferences(CHAT, Context.MODE_PRIVATE).edit();
-        edChat.putBoolean(ALERT, false);
-        edChat.commit();
+        spedChat = getSharedPreferences(CHAT, Context.MODE_PRIVATE).edit();
+        spedChat.putBoolean(ALERT, false);
+        spedChat.commit();
 
         uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        mDb = FirebaseDatabase.getInstance().getReference().child(CHAT);
+        mDatabase = FirebaseDatabase.getInstance().getReference().child(CHAT);
 
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         progressBar.setVisibility(View.VISIBLE);
@@ -185,10 +189,10 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
             user = chatWithId;
         }
 
-        chatList = new ArrayList<ChatMessage>();
-        adapter = new MessageAdapter(this, R.layout.message_item, chatList);
+        chatMessageList = new ArrayList<ChatMessage>();
+        messageAdapter = new MessageAdapter(this, R.layout.message_item, chatMessageList);
         ListView listView = (ListView) findViewById(R.id.list);
-        listView.setAdapter(adapter);
+        listView.setAdapter(messageAdapter);
 
         edInputMessage = (EditText) findViewById(R.id.ed_input_message);
         tvNetAlert = (TextView) findViewById(R.id.txt_net_alert);
@@ -199,6 +203,54 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
                 refresh();
             }
         });
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        back();
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        back();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        spedChat.putBoolean(ALERT, false);
+        spedChat.commit();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        spedChat.putBoolean(ALERT, false);
+        spedChat.commit();
+        Log.d("Services check", "onResume");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        spedChat.putBoolean(ALERT, true);
+        spedChat.commit();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        spedChat.putBoolean(ALERT, true);
+        spedChat.commit();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        spedChat.putBoolean(ALERT, true);
+        spedChat.commit();
     }
 
     private boolean stringOk(String s) {
@@ -295,7 +347,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private void pushMsg(String msg) {
         String time = getDateFormate("yyyy-MM-dd HH:mm:ss");
-        mDb
+        mDatabase
                 .child(keyChat)
                 .child(DATA)
                 .push()
@@ -346,13 +398,13 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private void find() {
         found = false;
-        mDb.addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot data : dataSnapshot.getChildren()) {
                     if (!eachForloop(data)) break;
                 }
-                if (!found) mDb.push().setValue(new NewChat(service, user));
+                if (!found) mDatabase.push().setValue(new NewChat(service, user));
                 checkKeyChatEmpty();
             }
 
@@ -363,7 +415,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private boolean eachForloop(DataSnapshot data){
         if (data.getKey().equals("data")) {
-            mDb.child(data.getKey()).removeValue();
+            mDatabase.child(data.getKey()).removeValue();
             return true;
         }
         try {
@@ -371,8 +423,8 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
                     data.child(USER).getValue().toString().equals(user)) {
                 keyChat = data.getKey();
                 found = true;
-                edLogin.putString(KEY_CHAT, keyChat);
-                edLogin.commit();
+                spedLogin.putString(KEY_CHAT, keyChat);
+                spedLogin.commit();
                 return false;
             }
         } catch (Exception e) {
@@ -392,10 +444,10 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private void query() {
         final int m = Calendar.getInstance().get(Calendar.MONTH) + 1;
-        mDb.child(keyChat).child(DATA).addValueEventListener(new ValueEventListener() {
+        mDatabase.child(keyChat).child(DATA).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                chatList.clear();
+                chatMessageList.clear();
                 for (DataSnapshot data : dataSnapshot.getChildren()) {
                     ChatMessage chatMessage = data.getValue(ChatMessage.class);
                     removeChat(chatMessage, data, m);
@@ -415,26 +467,26 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         if (t > 10) {
             if (t - 10 == m) {
                 if (chatMessage.getMessage().contains(KEY_IMAGE)) {
-                    sRef.child(chatMessage.getMessage().replace(KEY_IMAGE, "")).delete();
+                    storageRef.child(chatMessage.getMessage().replace(KEY_IMAGE, "")).delete();
                 }
-                mDb.child(keyChat).child(DATA).child(data.getKey()).removeValue();
+                mDatabase.child(keyChat).child(DATA).child(data.getKey()).removeValue();
             }
         } else if (t + 2 <= m) {
             if (chatMessage.getMessage().contains(KEY_IMAGE)) {
-                sRef.child(chatMessage.getMessage().replace(KEY_IMAGE, "")).delete();
+                storageRef.child(chatMessage.getMessage().replace(KEY_IMAGE, "")).delete();
             }
-            mDb.child(keyChat).child(DATA).child(data.getKey()).removeValue();
+            mDatabase.child(keyChat).child(DATA).child(data.getKey()).removeValue();
         }
     }
 
     private void sortChatList(){
-        Collections.sort(chatList, new Comparator<ChatMessage>() {
+        Collections.sort(chatMessageList, new Comparator<ChatMessage>() {
             @Override
             public int compare(ChatMessage o1, ChatMessage o2) {
                 return o1.toString().compareToIgnoreCase(o2.toString());
             }
         });
-        adapter.notifyDataSetChanged();
+        messageAdapter.notifyDataSetChanged();
         progressBar.setVisibility(View.GONE);
     }
 
@@ -462,8 +514,8 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     private void addChatMessageToList(ChatMessage chatMessage){
-        chatList.add(chatMessage);
-        adapter.notifyDataSetChanged();
+        chatMessageList.add(chatMessage);
+        messageAdapter.notifyDataSetChanged();
     }
 
     private boolean setBitmap(String path, ChatMessage chatMessage){
@@ -505,12 +557,12 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private void removeThenAddChatMessage(ChatMessage chatMessage, Bitmap bitmap){
         try {
-            int index = chatList.indexOf(chatMessage);
-            ChatMessage c = chatList.get(index);
+            int index = chatMessageList.indexOf(chatMessage);
+            ChatMessage c = chatMessageList.get(index);
             c.setBitmap(bitmap);
-            chatList.remove(index);
-            chatList.add(c);
-            adapter.notifyDataSetChanged();
+            chatMessageList.remove(index);
+            chatMessageList.add(c);
+            messageAdapter.notifyDataSetChanged();
         } catch (Exception e) {
             Log.d("Excep chatact", e.getMessage());
         }
@@ -578,7 +630,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     public void myGps() {
         if (NetWorkUtils.disable(this)) return;
         checkGpsStatus();
-        if (!GpsStatus) return;
+        if (!gpsStatus) return;
 
         PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
         try {
@@ -621,8 +673,8 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
 
     public void checkGpsStatus() {
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        GpsStatus = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        if (!GpsStatus) {
+        gpsStatus = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        if (!gpsStatus) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
             builder.setMessage("ในการดำเนินการต่อ ให้อุปกรณ์เปิดตำแหน่ง (GPS)");
             builder.setPositiveButton("ตกลง", new DialogInterface.OnClickListener() {
@@ -636,65 +688,17 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         }
     }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        back();
-        return true;
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        back();
-    }
-
     private void back() {
         ActivityManager mngr = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
         List<ActivityManager.RunningTaskInfo> taskList = mngr.getRunningTasks(10);
 
-        edChat.putBoolean(ALERT, true);
-        edChat.commit();
+        spedChat.putBoolean(ALERT, true);
+        spedChat.commit();
         if (taskList.get(0).numActivities == 1 &&
                 taskList.get(0).topActivity.getClassName().equals(this.getClass().getName())) {
             startActivity(new Intent(this, MainActivity.class));
             Log.i("Current", "This is last activity in the stack");
         }
         finish();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        edChat.putBoolean(ALERT, false);
-        edChat.commit();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        edChat.putBoolean(ALERT, false);
-        edChat.commit();
-        Log.d("Services check", "onResume");
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        edChat.putBoolean(ALERT, true);
-        edChat.commit();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        edChat.putBoolean(ALERT, true);
-        edChat.commit();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        edChat.putBoolean(ALERT, true);
-        edChat.commit();
     }
 }
