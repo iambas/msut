@@ -17,4 +17,10 @@ public class StringUtils {
         Date date = new Date();
         return new SimpleDateFormat(pattern).format(date);
     }
+
+    public static boolean stringOk(String string) {
+        if (string == null) return false;
+        if (string.equals("")) return false;
+        return true;
+    }
 }

@@ -186,7 +186,7 @@ public class StatisticsFragment extends Fragment{
                 statList.clear();
                 for (DataSnapshot dataDay : dataMonth.getChildren()){
                     String date = dataDay.getKey();
-                    String numCall = String.valueOf(dataDay.child("call").getChildrenCount());
+                    String numCall = String.valueOf(dataDay.child("dialogCall").getChildrenCount());
                     String numChat = String.valueOf(dataDay.child("chat").getChildrenCount());
                     Stat stat = new Stat(date, numCall, numChat);
                     statList.add(stat);

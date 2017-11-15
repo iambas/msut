@@ -194,7 +194,7 @@ public class DetailActivity extends AppCompatActivity {
         String my = new SimpleDateFormat("yyyy-MM").format(date);
         String day = new SimpleDateFormat("dd-MM-yyyy").format(date);
         final DatabaseReference db = dbStat.child(id).child(my).child(day);
-        db.child("call").child(id).setValue("1");
+        db.child("dialogCall").child(id).setValue("1");
         db.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

@@ -84,6 +84,7 @@ import static com.darker.motorservice.Constant.STATUS;
 import static com.darker.motorservice.Constant.TEL_NUM;
 import static com.darker.motorservice.Constant.USER;
 import static com.darker.motorservice.utils.StringUtils.getDateFormate;
+import static com.darker.motorservice.utils.StringUtils.stringOk;
 
 public class ChatActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -126,6 +127,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         getDataIntent();
         LogDataIntent();
         supportActionBar();
+        bindView();
         initInstance();
         checkKeyChat();
         sharedPreChat();
@@ -242,14 +244,16 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         });
     }
 
-    private void initInstance() {
+    private void bindView(){
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         imgBtnImage = (ImageButton) findViewById(R.id.btn_img);
         imgBtnSend = (ImageButton) findViewById(R.id.btn_send);
         chatListView = (ListView) findViewById(R.id.list);
         edInputMessage = (EditText) findViewById(R.id.ed_input_message);
         tvNetAlert = (TextView) findViewById(R.id.txt_net_alert);
+    }
 
+    private void initInstance() {
         spLogin = sharedPreferencesLogin();
         myName = spLogin.getString(NAME, "");
         storageRef = FirebaseStorage.getInstance().getReference();
@@ -295,10 +299,6 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
                 .addApi(Places.PLACE_DETECTION_API)
                 .enableAutoManage(this, this)
                 .build();
-    }
-
-    private boolean stringOk(String s) {
-        return s != null && !s.equals("");
     }
 
     public void onSendClicked() {
@@ -362,7 +362,6 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private void uploadImg(UploadTask uploadTask, final String imgName, final Bitmap bitmap) {
         Toast.makeText(this, "กำลังส่งรูปภาพ กรุณารอสักครู่...", Toast.LENGTH_SHORT).show();
-
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {
@@ -399,8 +398,6 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         edInputMessage.setText("");
     }
 
-
-
     private void pushStat(final String type) {
         DatabaseReference dbStat = FirebaseDatabase.getInstance().getReference().child("stat");
         String my = getDateFormate("yyyy-MM");
@@ -409,8 +406,8 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         db.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (!dataSnapshot.hasChild("call")) {
-                    db.child("call").setValue("1");
+                if (!dataSnapshot.hasChild("dialogCall")) {
+                    db.child("dialogCall").setValue("1");
                 }
 
                 if (!dataSnapshot.hasChild("chat")) {
@@ -420,8 +417,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
+            public void onCancelled(DatabaseError databaseError) {}
         });
     }
 
@@ -499,8 +495,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
+            public void onCancelled(DatabaseError databaseError) {}
         });
     }
 
@@ -626,7 +621,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_tel:
-                call();
+                dialogCall();
                 return true;
             case R.id.menu_gps:
                 myGps();
@@ -636,12 +631,12 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         }
     }
 
-    public void call() {
+    public void dialogCall() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = getLayoutInflater();
         View vb = inflater.inflate(R.layout.contact_service, null);
         builder.setView(vb);
-        final AlertDialog d = builder.show();
+        final AlertDialog alertDialog = builder.show();
         TextView txtName = (TextView) vb.findViewById(R.id.txt_name);
         txtName.setText("กดปุ่มด้านล่างเพื่อโทรหา " + chatWithName);
 
@@ -649,19 +644,23 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_CALL);
-                intent.setData(Uri.parse("tel:" + telNum));
-
-                if (ActivityCompat.checkSelfPermission(view.getContext(),
-                        android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions((Activity) view.getContext(),
-                            new String[]{Manifest.permission.CALL_PHONE}, 10);
-                }
-                startActivity(intent);
-                pushStat("call");
-                d.dismiss();
+                callPhone(view, alertDialog);
             }
         });
+    }
+
+    private void callPhone(View view, AlertDialog alertDialog) {
+        Intent intent = new Intent(Intent.ACTION_CALL);
+        intent.setData(Uri.parse("tel:" + telNum));
+
+        if (ActivityCompat.checkSelfPermission(view.getContext(),
+                Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions((Activity) view.getContext(),
+                    new String[]{Manifest.permission.CALL_PHONE}, 10);
+        }
+        startActivity(intent);
+        pushStat("dialogCall");
+        alertDialog.dismiss();
     }
 
     @Override
@@ -687,29 +686,44 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        resultPlacePicker(requestCode, resultCode, data);
+        resultImageRequest(requestCode, resultCode, data);
+    }
+
+    private void resultImageRequest(int requestCode, int resultCode, Intent data) {
+        if (requestCode == IMAGE_REQUEST && resultCode == RESULT_OK) {
+            setBitmapForDialog(data);
+        }
+    }
+
+    private void resultPlacePicker(int requestCode, int resultCode, Intent data) {
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
-                Place place = PlacePicker.getPlace(this, data);
-                pushMsg(place.getLatLng().toString());
-                pushStat("chat");
+                pushMessageWithLatLng(data);
             }
         } else {
             Log.d("requestCode", "." + requestCode);
         }
+    }
 
-        if (requestCode == IMAGE_REQUEST && resultCode == RESULT_OK) {
-            Uri imageUri = data.getData();
-            if (imageUri != null) {
-                try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
-                    if (bitmap.getWidth() > 720)
-                        bitmap = new ImageUtils().scaleBitmap(bitmap, 720);
-                    else
-                        bitmap = new ImageUtils().scaleBitmap(bitmap, bitmap.getWidth());
-                    dialogImg(bitmap);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+    private void pushMessageWithLatLng(Intent data) {
+        Place place = PlacePicker.getPlace(this, data);
+        pushMsg(place.getLatLng().toString());
+        pushStat("chat");
+    }
+
+    private void setBitmapForDialog(Intent data) {
+        Uri imageUri = data.getData();
+        if (imageUri != null) {
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                if (bitmap.getWidth() > 720)
+                    bitmap = new ImageUtils().scaleBitmap(bitmap, 720);
+                else
+                    bitmap = new ImageUtils().scaleBitmap(bitmap, bitmap.getWidth());
+                dialogImg(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }

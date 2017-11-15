@@ -70,6 +70,8 @@
     <string name="del_post">ลบโพสต์</string>
     <string name="post">โพสต์</string>
     <string name="image">รูปภาพ</string>
+    <string name="ok">ตกลง</string>
+    <string name="cancel">ยกเลิก</string>
 
     <string-array name="month">
         <item>มกราคม</item>
@@ -85,4 +87,7 @@
         <item>พฤศจิกายน</item>
         <item>ธันวาคม</item>
     </string-array>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
