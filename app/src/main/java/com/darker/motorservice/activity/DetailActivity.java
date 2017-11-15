@@ -19,9 +19,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.utils.MyImage;
-import com.darker.motorservice.data.Services;
-import com.darker.motorservice.database.ServiceHandle;
+import com.darker.motorservice.utils.ImageUtils;
+import com.darker.motorservice.model.Services;
+import com.darker.motorservice.database.ServiceDatabase;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -31,16 +31,16 @@ import com.google.firebase.database.ValueEventListener;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static com.darker.motorservice.data.Constant.CHAT_WITH_ID;
-import static com.darker.motorservice.data.Constant.CHAT_WITH_NAME;
-import static com.darker.motorservice.data.Constant.ID;
-import static com.darker.motorservice.data.Constant.KEY_CHAT;
-import static com.darker.motorservice.data.Constant.LATLNG;
-import static com.darker.motorservice.data.Constant.NAME;
-import static com.darker.motorservice.data.Constant.PHOTO;
-import static com.darker.motorservice.data.Constant.STATUS;
-import static com.darker.motorservice.data.Constant.TEL_NUM;
-import static com.darker.motorservice.data.Constant.USER;
+import static com.darker.motorservice.Constant.CHAT_WITH_ID;
+import static com.darker.motorservice.Constant.CHAT_WITH_NAME;
+import static com.darker.motorservice.Constant.ID;
+import static com.darker.motorservice.Constant.KEY_CHAT;
+import static com.darker.motorservice.Constant.LATLNG;
+import static com.darker.motorservice.Constant.NAME;
+import static com.darker.motorservice.Constant.PHOTO;
+import static com.darker.motorservice.Constant.STATUS;
+import static com.darker.motorservice.Constant.TEL_NUM;
+import static com.darker.motorservice.Constant.USER;
 
 public class DetailActivity extends AppCompatActivity {
 
@@ -56,8 +56,8 @@ public class DetailActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         id = getIntent().getStringExtra(ID);
-        ServiceHandle serviceHandle = new ServiceHandle(this);
-        services = serviceHandle.getService(id);
+        ServiceDatabase serviceDatabase = new ServiceDatabase(this);
+        services = serviceDatabase.getService(id);
         name = services.getName();
         telNum = services.getTel();
         photo = services.getPhoto();
@@ -143,7 +143,7 @@ public class DetailActivity extends AppCompatActivity {
     private void setImage() {
         ImageView imageCover = (ImageView) findViewById(R.id.image);
         ImageView imageProfile = (ImageView) findViewById(R.id.profile_service);
-        MyImage image = new MyImage();
+        ImageUtils image = new ImageUtils();
 
         Bitmap cover, profile;
         try{
@@ -194,7 +194,7 @@ public class DetailActivity extends AppCompatActivity {
         String my = new SimpleDateFormat("yyyy-MM").format(date);
         String day = new SimpleDateFormat("dd-MM-yyyy").format(date);
         final DatabaseReference db = dbStat.child(id).child(my).child(day);
-        db.child("call").child(id).setValue("1");
+        db.child("dialogCall").child(id).setValue("1");
         db.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

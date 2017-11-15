@@ -11,7 +11,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.utils.NetWork;
+import com.darker.motorservice.utils.NetWorkUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -48,7 +48,7 @@ public class ResetPasswordActivity extends AppCompatActivity {
             alert("กรุณากรอกอีเมลให้ถูกต้อง!");
             return;
         }
-        if (!(new NetWork(this).isNetworkAvailiable())) {
+        if (NetWorkUtils.disable(this)) {
             alert("ข้อผิดพลาดเครือข่าย! กรุณาตรวจสอบและลองใหม่อีกครั้ง");
             return;
         }

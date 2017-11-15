@@ -15,9 +15,9 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.utils.NetWork;
-import com.darker.motorservice.data.Services;
-import com.darker.motorservice.database.ServiceHandle;
+import com.darker.motorservice.utils.NetWorkUtils;
+import com.darker.motorservice.model.Services;
+import com.darker.motorservice.database.ServiceDatabase;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -34,9 +34,9 @@ import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 import static com.darker.motorservice.R.drawable.cover;
-import static com.darker.motorservice.data.Constant.NEW_PASSWORD;
-import static com.darker.motorservice.data.Constant.SERVICE;
-import static com.darker.motorservice.data.Constant.STATUS;
+import static com.darker.motorservice.Constant.NEW_PASSWORD;
+import static com.darker.motorservice.Constant.SERVICE;
+import static com.darker.motorservice.Constant.STATUS;
 
 public class AddNewServiceFragment extends Fragment {
 
@@ -77,8 +77,8 @@ public class AddNewServiceFragment extends Fragment {
     }
 
     private void loadEmail() {
-        ServiceHandle serviceHandle = new ServiceHandle(getContext());
-        listSer = serviceHandle.getAllSerivce();
+        ServiceDatabase serviceDatabase = new ServiceDatabase(getContext());
+        listSer = serviceDatabase.getAllSerivce();
     }
 
     private boolean hasEmail(String email) {
@@ -120,7 +120,7 @@ public class AddNewServiceFragment extends Fragment {
                     return;
                 }
 
-                if (!(new NetWork(getContext()).isNetworkAvailiable())) {
+                if (NetWorkUtils.disable(getContext())) {
                     alert("เครือข่ายมีปัญหา! ไม่สามารถเพิ่มร้านได้");
                 } else {
                     addNewService();

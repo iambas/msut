@@ -14,10 +14,10 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.utils.LoadService;
-import com.darker.motorservice.utils.MyImage;
-import com.darker.motorservice.data.Services;
-import com.darker.motorservice.database.ServiceHandle;
+import com.darker.motorservice.utils.LoadServiceUtils;
+import com.darker.motorservice.utils.ImageUtils;
+import com.darker.motorservice.model.Services;
+import com.darker.motorservice.database.ServiceDatabase;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -27,9 +27,9 @@ import com.google.firebase.storage.UploadTask;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import static com.darker.motorservice.data.Constant.COVER;
-import static com.darker.motorservice.data.Constant.ID;
-import static com.darker.motorservice.data.Constant.IMG;
+import static com.darker.motorservice.Constant.COVER;
+import static com.darker.motorservice.Constant.ID;
+import static com.darker.motorservice.Constant.IMG;
 
 public class UpdateImageActivity extends AppCompatActivity {
     private String id, image;
@@ -74,14 +74,14 @@ public class UpdateImageActivity extends AppCompatActivity {
     }
 
     private void imgCover() {
-        Bitmap cover = new MyImage().getImgCover(this, id);
+        Bitmap cover = new ImageUtils().getImgCover(this, id);
         imageView = (ImageView) findViewById(R.id.img_cover);
         imageView.setVisibility(View.VISIBLE);
         imageView.setImageBitmap(cover);
     }
 
     private void imgProfile() {
-        Bitmap profile = new MyImage().getImgProfile(this, id);
+        Bitmap profile = new ImageUtils().getImgProfile(this, id);
         imageView = (ImageView) findViewById(R.id.img_profile);
         imageView.setVisibility(View.VISIBLE);
         imageView.setImageBitmap(profile);
@@ -102,9 +102,9 @@ public class UpdateImageActivity extends AppCompatActivity {
                 try {
                     bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(),imageUri);
                     if (bitmap.getWidth() > size)
-                        bitmap = new MyImage().scaleBitmap(bitmap, size);
+                        bitmap = new ImageUtils().scaleBitmap(bitmap, size);
                     else
-                        bitmap = new MyImage().scaleBitmap(bitmap, bitmap.getWidth());
+                        bitmap = new ImageUtils().scaleBitmap(bitmap, bitmap.getWidth());
                     imageView.setImageBitmap(bitmap);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -138,7 +138,7 @@ public class UpdateImageActivity extends AppCompatActivity {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 Log.d("upload", "OK");
-                new LoadService(UpdateImageActivity.this).loadData();
+                new LoadServiceUtils(UpdateImageActivity.this).loadData();
                 updateDB();
                 progressBar.setVisibility(View.GONE);
                 finish();
@@ -147,8 +147,8 @@ public class UpdateImageActivity extends AppCompatActivity {
     }
 
     private void updateDB(){
-        MyImage image = new MyImage();
-        ServiceHandle handle = new ServiceHandle(this);
+        ImageUtils image = new ImageUtils();
+        ServiceDatabase handle = new ServiceDatabase(this);
         Services s = handle.getService(id);
         if (isCover) {
             s.setImgCover(image.toByte(bitmap));

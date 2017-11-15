@@ -19,8 +19,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.database.AdminHandle;
-import com.darker.motorservice.database.ServiceHandle;
+import com.darker.motorservice.database.AdminDatabase;
+import com.darker.motorservice.database.ServiceDatabase;
 import com.darker.motorservice.fragment.AddNewServiceFragment;
 import com.darker.motorservice.fragment.ChatFragment;
 import com.darker.motorservice.fragment.MotorcycleFragment;
@@ -33,12 +33,12 @@ import com.darker.motorservice.service.BackgroundService;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.darker.motorservice.data.Constant.ALERT;
-import static com.darker.motorservice.data.Constant.CHAT;
-import static com.darker.motorservice.data.Constant.ID;
-import static com.darker.motorservice.data.Constant.KEY_LOGIN_MOTOR_SERVICE;
-import static com.darker.motorservice.data.Constant.STATUS;
-import static com.darker.motorservice.data.Constant.USER;
+import static com.darker.motorservice.Constant.ALERT;
+import static com.darker.motorservice.Constant.CHAT;
+import static com.darker.motorservice.Constant.ID;
+import static com.darker.motorservice.Constant.KEY_LOGIN_MOTOR_SERVICE;
+import static com.darker.motorservice.Constant.STATUS;
+import static com.darker.motorservice.Constant.USER;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
         final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         checkAdmin();
-        if (new ServiceHandle(this).getServiceCount() != 0) {
+        if (new ServiceDatabase(this).getServiceCount() != 0) {
             setup();
         } else {
             progressBar.setVisibility(View.VISIBLE);
@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkAdmin() {
-        AdminHandle admin = new AdminHandle(this);
+        AdminDatabase admin = new AdminDatabase(this);
         isAdmin = admin.isAdmin(shLogin.getString(ID, ""));
     }
 

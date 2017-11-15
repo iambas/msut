@@ -17,8 +17,8 @@ import android.widget.TextView;
 
 import com.darker.motorservice.R;
 import com.darker.motorservice.activity.PostActivity;
-import com.darker.motorservice.data.Timeline;
-import com.darker.motorservice.database.PictureHandle;
+import com.darker.motorservice.model.Timeline;
+import com.darker.motorservice.database.PictureDatabse;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -26,16 +26,16 @@ import com.google.firebase.storage.StorageReference;
 
 import java.util.List;
 
-import static com.darker.motorservice.data.Constant.DATE;
-import static com.darker.motorservice.data.Constant.ID;
-import static com.darker.motorservice.data.Constant.IMG;
-import static com.darker.motorservice.data.Constant.KEY;
-import static com.darker.motorservice.data.Constant.KEY_LOGIN_MOTOR_SERVICE;
-import static com.darker.motorservice.data.Constant.MESSAGE;
-import static com.darker.motorservice.data.Constant.SERVICE;
-import static com.darker.motorservice.data.Constant.STATUS;
-import static com.darker.motorservice.data.Constant.TIMELINE;
-import static com.darker.motorservice.data.Constant.USER;
+import static com.darker.motorservice.Constant.DATE;
+import static com.darker.motorservice.Constant.ID;
+import static com.darker.motorservice.Constant.IMG;
+import static com.darker.motorservice.Constant.KEY;
+import static com.darker.motorservice.Constant.KEY_LOGIN_MOTOR_SERVICE;
+import static com.darker.motorservice.Constant.MESSAGE;
+import static com.darker.motorservice.Constant.SERVICE;
+import static com.darker.motorservice.Constant.STATUS;
+import static com.darker.motorservice.Constant.TIMELINE;
+import static com.darker.motorservice.Constant.USER;
 
 public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.ViewHolder> {
 
@@ -101,7 +101,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.ViewHo
                             }else if(position == 1){
                                 if (!timeline.getImgName().isEmpty()) {
                                     stRef.child(timeline.getImgName()).delete();
-                                    new PictureHandle(context).deletePicture(timeline.getImgName());
+                                    new PictureDatabse(context).deletePicture(timeline.getImgName());
                                 }
                                 dbRef.child(TIMELINE).child(timeline.getKey()).removeValue();
                             }

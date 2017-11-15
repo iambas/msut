@@ -1,4 +1,4 @@
-package com.darker.motorservice.data;
+package com.darker.motorservice.model;
 
 import android.graphics.Bitmap;
 

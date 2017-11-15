@@ -1,4 +1,4 @@
-package com.darker.motorservice.data;
+package com.darker.motorservice.model;
 
 public class Services {
     private String id, name, pos, email, tel, photo, cover, latlng, workTime, service, distribute;

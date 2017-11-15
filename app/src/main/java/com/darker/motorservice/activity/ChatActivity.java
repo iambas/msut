@@ -35,12 +35,12 @@ import android.widget.Toast;
 
 import com.darker.motorservice.R;
 import com.darker.motorservice.adapter.MessageAdapter;
-import com.darker.motorservice.utils.MyImage;
-import com.darker.motorservice.utils.NetWork;
-import com.darker.motorservice.data.ChatMessage;
-import com.darker.motorservice.data.NewChat;
-import com.darker.motorservice.data.Pictures;
-import com.darker.motorservice.database.PictureHandle;
+import com.darker.motorservice.database.PictureDatabse;
+import com.darker.motorservice.model.ChatMessage;
+import com.darker.motorservice.model.NewChat;
+import com.darker.motorservice.model.Pictures;
+import com.darker.motorservice.utils.ImageUtils;
+import com.darker.motorservice.utils.NetWorkUtils;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -62,119 +62,140 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
-import static com.darker.motorservice.data.Constant.ALERT;
-import static com.darker.motorservice.data.Constant.CHAT;
-import static com.darker.motorservice.data.Constant.CHAT_WITH_ID;
-import static com.darker.motorservice.data.Constant.CHAT_WITH_NAME;
-import static com.darker.motorservice.data.Constant.DATA;
-import static com.darker.motorservice.data.Constant.IMG;
-import static com.darker.motorservice.data.Constant.KEY_CHAT;
-import static com.darker.motorservice.data.Constant.KEY_IMAGE;
-import static com.darker.motorservice.data.Constant.KEY_LOGIN_MOTOR_SERVICE;
-import static com.darker.motorservice.data.Constant.NAME;
-import static com.darker.motorservice.data.Constant.PHOTO;
-import static com.darker.motorservice.data.Constant.SERVICE;
-import static com.darker.motorservice.data.Constant.STATUS;
-import static com.darker.motorservice.data.Constant.TEL_NUM;
-import static com.darker.motorservice.data.Constant.USER;
+import static com.darker.motorservice.Constant.ALERT;
+import static com.darker.motorservice.Constant.CHAT;
+import static com.darker.motorservice.Constant.CHAT_WITH_ID;
+import static com.darker.motorservice.Constant.CHAT_WITH_NAME;
+import static com.darker.motorservice.Constant.DATA;
+import static com.darker.motorservice.Constant.IMG;
+import static com.darker.motorservice.Constant.KEY_CHAT;
+import static com.darker.motorservice.Constant.KEY_IMAGE;
+import static com.darker.motorservice.Constant.KEY_LOGIN_MOTOR_SERVICE;
+import static com.darker.motorservice.Constant.NAME;
+import static com.darker.motorservice.Constant.PHOTO;
+import static com.darker.motorservice.Constant.SERVICE;
+import static com.darker.motorservice.Constant.STATUS;
+import static com.darker.motorservice.Constant.TEL_NUM;
+import static com.darker.motorservice.Constant.USER;
+import static com.darker.motorservice.utils.StringUtils.getDateFormate;
+import static com.darker.motorservice.utils.StringUtils.stringOk;
 
 public class ChatActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
-    private int PLACE_PICKER_REQUEST = 1;
-    private int IMAGE_REQUEST = 2;
-    private boolean GpsStatus;
-    private DatabaseReference mDb;
-    private MessageAdapter adapter;
-    private List<ChatMessage> chatList;
+    public static final String TAG = "ChatActivity";
+    private static final int PLACE_PICKER_REQUEST = 1;
+    private static final int IMAGE_REQUEST = 2;
+
+    private TextView tvNetAlert;
+    private EditText edInputMessage;
+    private ProgressBar progressBar;
+
     private String keyChat;
     private String chatWithName;
     private String telNum;
     private String status;
     private String uid;
     private String service, user, myName;
-    private EditText editText;
+
+    private boolean gpsStatus;
     private boolean found = false;
-    private ProgressBar progressBar;
-    private TextView netAlert;
-    private SharedPreferences.Editor edChat, edLogin;
-    private StorageReference sRef;
+
+    private DatabaseReference mDatabase;
+    private StorageReference storageRef;
+    private MessageAdapter messageAdapter;
+    private List<ChatMessage> chatMessageList;
+    private SharedPreferences.Editor spedChat, spedLogin;
+    private String chatWithId;
+    private String photo;
+    private ImageButton imgBtnImage;
+    private ImageButton imgBtnSend;
+    private SharedPreferences spLogin;
+    private ListView chatListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        GoogleApiClient mGoogleApiClient = new GoogleApiClient
-                .Builder(this)
-                .addApi(Places.GEO_DATA_API)
-                .addApi(Places.PLACE_DETECTION_API)
-                .enableAutoManage(this, this)
-                .build();
+        googleAPI();
+        getDataIntent();
+        LogDataIntent();
+        supportActionBar();
+        bindView();
+        initInstance();
+        checkKeyChat();
+        sharedPreChat();
+        setVisibility();
+        setOnClicked();
+        setServiceAndUser();
+        setAdapter();
+        refreshUI();
+    }
 
-        sRef = FirebaseStorage.getInstance().getReference();
-        Intent intent = getIntent();
-        keyChat = intent.getStringExtra(KEY_CHAT);
-        String chatWithId = intent.getStringExtra(CHAT_WITH_ID);
-        chatWithName = intent.getStringExtra(CHAT_WITH_NAME);
-        telNum = intent.getStringExtra(TEL_NUM);
-        status = intent.getStringExtra(STATUS);
-        String photo = intent.getStringExtra(PHOTO);
+    @Override
+    public boolean onSupportNavigateUp() {
+        back();
+        return true;
+    }
 
-        Log.d("chat", "." + keyChat);
-        Log.d("chat", "." + chatWithId);
-        Log.d("chat", "." + chatWithName);
-        Log.d("chat", "." + telNum);
-        Log.d("chat", "." + status);
-        Log.d("chat", "." + photo);
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        back();
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        spedChat.putBoolean(ALERT, false);
+        spedChat.commit();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        spedChat.putBoolean(ALERT, false);
+        spedChat.commit();
+        Log.d("Services check", "onResume");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        spedChat.putBoolean(ALERT, true);
+        spedChat.commit();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        spedChat.putBoolean(ALERT, true);
+        spedChat.commit();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        spedChat.putBoolean(ALERT, true);
+        spedChat.commit();
+    }
+
+    private void supportActionBar() {
         getSupportActionBar().setTitle(chatWithName);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
 
-        SharedPreferences shLogin = getSharedPreferences(KEY_LOGIN_MOTOR_SERVICE, Context.MODE_PRIVATE);
-        edLogin = shLogin.edit();
-        edLogin.putString(IMG, photo);
-        edLogin.putString(CHAT_WITH_ID, chatWithId);
-        edLogin.commit();
-        myName = shLogin.getString(NAME, "");
-        if (!keyChat.isEmpty()) {
-            edLogin.putString(KEY_CHAT, keyChat);
-            edLogin.commit();
-        }
+    private void setAdapter() {
+        chatListView.setAdapter(messageAdapter);
+    }
 
-        edChat = getSharedPreferences(CHAT, Context.MODE_PRIVATE).edit();
-        edChat.putBoolean(ALERT, false);
-        edChat.commit();
-
-        uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        mDb = FirebaseDatabase.getInstance().getReference().child(CHAT);
-
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        progressBar.setVisibility(View.VISIBLE);
-
-        ImageButton btnImg = (ImageButton) findViewById(R.id.btn_img);
-        ImageButton btnSend = (ImageButton) findViewById(R.id.btn_send);
-        btnImg.setVisibility(View.VISIBLE);
-        btnImg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBtnImageClicked();
-            }
-        });
-        btnSend.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onSendClicked();
-            }
-        });
-
+    private void setServiceAndUser() {
         if (status.equals(USER)) {
             service = chatWithId;
             user = uid;
@@ -182,32 +203,111 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
             service = uid;
             user = chatWithId;
         }
+    }
 
-        chatList = new ArrayList<ChatMessage>();
-        adapter = new MessageAdapter(this,R.layout.message_item, chatList);
-        ListView listView = (ListView) findViewById(R.id.list);
-        listView.setAdapter(adapter);
+    private void setVisibility() {
+        imgBtnImage.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
+    }
 
-        editText = (EditText) findViewById(R.id.input);
-        netAlert = (TextView) findViewById(R.id.txt_net_alert);
-        refresh();
-        netAlert.setOnClickListener(new View.OnClickListener() {
+    private void sharedPreChat() {
+        spedChat = getSharedPreferences(CHAT, Context.MODE_PRIVATE).edit();
+        spedChat.putBoolean(ALERT, false);
+        spedChat.apply();
+    }
+
+    private void checkKeyChat() {
+        if (!keyChat.isEmpty()) {
+            spedLogin.putString(KEY_CHAT, keyChat);
+            spedLogin.apply();
+        }
+    }
+
+    private void setOnClicked() {
+        imgBtnImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                refresh();
+                onBtnImageClicked();
+            }
+        });
+        imgBtnSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onSendClicked();
+            }
+        });
+        tvNetAlert.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                refreshUI();
             }
         });
     }
 
-    public void onSendClicked() {
-        String msg = editText.getText().toString();
-        if (msg.equals(""))
-            return;
+    private void bindView(){
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        imgBtnImage = (ImageButton) findViewById(R.id.btn_img);
+        imgBtnSend = (ImageButton) findViewById(R.id.btn_send);
+        chatListView = (ListView) findViewById(R.id.list);
+        edInputMessage = (EditText) findViewById(R.id.ed_input_message);
+        tvNetAlert = (TextView) findViewById(R.id.txt_net_alert);
+    }
 
-        if (!(new NetWork(this).isNetworkAvailiable())) {
-            Toast.makeText(this, "ข้อผิดพลาดเครือข่าย! ไม่สามารถส่งข้อความได้", Toast.LENGTH_LONG).show();
-            return;
-        }
+    private void initInstance() {
+        spLogin = sharedPreferencesLogin();
+        myName = spLogin.getString(NAME, "");
+        storageRef = FirebaseStorage.getInstance().getReference();
+        uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        mDatabase = FirebaseDatabase.getInstance().getReference().child(CHAT);
+        chatMessageList = new ArrayList<ChatMessage>();
+        messageAdapter = new MessageAdapter(this, R.layout.message_item, chatMessageList);
+    }
+
+    @NonNull
+    private SharedPreferences sharedPreferencesLogin() {
+        SharedPreferences shLogin = getSharedPreferences(KEY_LOGIN_MOTOR_SERVICE, Context.MODE_PRIVATE);
+        spedLogin = shLogin.edit();
+        spedLogin.putString(IMG, photo);
+        spedLogin.putString(CHAT_WITH_ID, chatWithId);
+        spedLogin.apply();
+        return shLogin;
+    }
+
+    private void LogDataIntent() {
+        Log.d("chat", "." + keyChat);
+        Log.d("chat", "." + chatWithId);
+        Log.d("chat", "." + chatWithName);
+        Log.d("chat", "." + telNum);
+        Log.d("chat", "." + status);
+        Log.d("chat", "." + photo);
+    }
+
+    private void getDataIntent() {
+        Intent intent = getIntent();
+        keyChat = intent.getStringExtra(KEY_CHAT);
+        chatWithId = intent.getStringExtra(CHAT_WITH_ID);
+        chatWithName = intent.getStringExtra(CHAT_WITH_NAME);
+        telNum = intent.getStringExtra(TEL_NUM);
+        status = intent.getStringExtra(STATUS);
+        photo = intent.getStringExtra(PHOTO);
+    }
+
+    private void googleAPI() {
+        GoogleApiClient mGoogleApiClient = new GoogleApiClient
+                .Builder(this)
+                .addApi(Places.GEO_DATA_API)
+                .addApi(Places.PLACE_DETECTION_API)
+                .enableAutoManage(this, this)
+                .build();
+    }
+
+    public void onSendClicked() {
+        String msg = edInputMessage.getText().toString();
+        if (stringOk(msg))
+            if (NetWorkUtils.disable(this)) {
+                Toast.makeText(this, "ข้อผิดพลาดเครือข่าย! ไม่สามารถส่งข้อความได้", Toast.LENGTH_LONG).show();
+                return;
+            }
 
         if (keyChat.isEmpty()) find();
         pushMsg(msg);
@@ -233,34 +333,40 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         builder.setPositiveButton("ส่ง", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                uploadImg(bitmap);
+                checkBeforeUploadImage(bitmap);
             }
         });
         builder.setNegativeButton("ยกเลิก", null);
         builder.show();
     }
 
-    private void uploadImg(final Bitmap bitmap) {
-        if (!(new NetWork(this).isNetworkAvailiable())) {
+    private void checkBeforeUploadImage(Bitmap bitmap) {
+        if (NetWorkUtils.disable(this)) {
             Toast.makeText(this, "ข้อผิดพลาดเครือข่าย! ไม่สามารถส่งรูปภาพได้", Toast.LENGTH_LONG).show();
-            return;
+        } else {
+            prepareImage(bitmap);
+            progressBar.setVisibility(View.VISIBLE);
         }
+    }
 
-        progressBar.setVisibility(View.VISIBLE);
-        String date = new SimpleDateFormat("-yyyy_MM_dd_HH_mm_ss").format(new Date());
+    private void prepareImage(Bitmap bitmap) {
+        String date = getDateFormate("-yyyy_MM_dd_HH_mm_ss");
         final String imgName = "image/" + uid.substring(0, 5) + date + ".png";
         StorageReference mountainsRef = FirebaseStorage.getInstance().getReference().child(imgName);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
         byte[] data = baos.toByteArray();
-
-        Toast.makeText(this, "กำลังส่งรูปภาพ กรุณารอสักครู่...",Toast.LENGTH_SHORT).show();
         UploadTask uploadTask = mountainsRef.putBytes(data);
+        uploadImg(uploadTask, imgName, bitmap);
+    }
+
+    private void uploadImg(UploadTask uploadTask, final String imgName, final Bitmap bitmap) {
+        Toast.makeText(this, "กำลังส่งรูปภาพ กรุณารอสักครู่...", Toast.LENGTH_SHORT).show();
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {
                 Log.d("upload", exception.getMessage());
-                Toast.makeText(ChatActivity.this, "การส่งรูปภาพมีปัญหา โปรดลองอีกครั้ง",Toast.LENGTH_SHORT).show();
+                Toast.makeText(ChatActivity.this, "การส่งรูปภาพมีปัญหา โปรดลองอีกครั้ง", Toast.LENGTH_SHORT).show();
                 progressBar.setVisibility(View.GONE);
             }
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -269,34 +375,39 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
                 Log.d("upload", "OK");
                 pushMsg(KEY_IMAGE + imgName);
                 progressBar.setVisibility(View.GONE);
-                Toast.makeText(ChatActivity.this, "ส่งรูปภาพเรียบร้อย",Toast.LENGTH_SHORT).show();
+                Toast.makeText(ChatActivity.this, "ส่งรูปภาพเรียบร้อย", Toast.LENGTH_SHORT).show();
                 pushStat("chat");
-
-                PictureHandle handle = new PictureHandle(ChatActivity.this);
-                byte[] bytes = new MyImage().toByte(bitmap);
-                handle.addPicture(new Pictures(imgName, bytes));
+                pushImageToDatabase(bitmap, imgName);
             }
         });
     }
 
+    private void pushImageToDatabase(Bitmap bitmap, String imgName) {
+        PictureDatabse handle = new PictureDatabse(ChatActivity.this);
+        byte[] bytes = new ImageUtils().toByte(bitmap);
+        handle.addPicture(new Pictures(imgName, bytes));
+    }
+
     private void pushMsg(String msg) {
-        String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-        mDb.child(keyChat).child(DATA).push()
+        String time = getDateFormate("yyyy-MM-dd HH:mm:ss");
+        mDatabase
+                .child(keyChat)
+                .child(DATA)
+                .push()
                 .setValue(new ChatMessage(time, myName, msg, status, ""));
-        editText.setText("");
+        edInputMessage.setText("");
     }
 
     private void pushStat(final String type) {
         DatabaseReference dbStat = FirebaseDatabase.getInstance().getReference().child("stat");
-        Date date = new Date();
-        String my = new SimpleDateFormat("yyyy-MM").format(date);
-        String day = new SimpleDateFormat("dd-MM-yyyy").format(date);
+        String my = getDateFormate("yyyy-MM");
+        String day = getDateFormate("dd-MM-yyyy");
         final DatabaseReference db = dbStat.child(service).child(my).child(day);
         db.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (!dataSnapshot.hasChild("call")) {
-                    db.child("call").setValue("1");
+                if (!dataSnapshot.hasChild("dialogCall")) {
+                    db.child("dialogCall").setValue("1");
                 }
 
                 if (!dataSnapshot.hasChild("chat")) {
@@ -310,92 +421,28 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         });
     }
 
-    private void refresh() {
+    private void refreshUI() {
         progressBar.setVisibility(View.VISIBLE);
-        if (!(new NetWork(this).isNetworkAvailiable())) {
-            netAlert.setVisibility(View.VISIBLE);
+        if (NetWorkUtils.disable(this)) {
+            tvNetAlert.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.GONE);
         } else {
-            editText.setFocusableInTouchMode(true);
-            netAlert.setVisibility(View.GONE);
+            edInputMessage.setFocusableInTouchMode(true);
+            tvNetAlert.setVisibility(View.GONE);
             find();
         }
     }
 
     private void find() {
         found = false;
-        mDb.addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot data : dataSnapshot.getChildren()) {
-                    if (data.getKey().equals("data")) {
-                        mDb.child(data.getKey()).removeValue();
-                        continue;
-                    }
-                    try {
-                        if (data.child(SERVICE).getValue().toString().equals(service) &&
-                                data.child(USER).getValue().toString().equals(user)) {
-                            keyChat = data.getKey();
-                            found = true;
-                            edLogin.putString(KEY_CHAT, keyChat);
-                            edLogin.commit();
-                            break;
-                        }
-                    } catch (Exception e) {
-                        Log.d("ex", e.getMessage());
-                    }
+                    if (!eachForloop(data)) break;
                 }
-                if (!found) mDb.push().setValue(new NewChat(service, user));
-                query();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        });
-    }
-
-    private void query() {
-        if (keyChat.isEmpty()) {
-            find();
-            progressBar.setVisibility(View.GONE);
-            return;
-        }
-
-        final int m = Calendar.getInstance().get(Calendar.MONTH) + 1;
-        mDb.child(keyChat).child(DATA).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                chatList.clear();
-                for (DataSnapshot data : dataSnapshot.getChildren()) {
-                    ChatMessage chatMessage = data.getValue(ChatMessage.class);
-                    int t = Integer.parseInt(chatMessage.getDate().split("-")[1]);
-                    Log.d("Chat", m + " : " + t);
-                    if (t > 10){
-                        if (t - 10 == m) {
-                            if (chatMessage.getMessage().contains(KEY_IMAGE)){
-                                sRef.child(chatMessage.getMessage().replace(KEY_IMAGE, "")).delete();
-                            }
-                            mDb.child(keyChat).child(DATA).child(data.getKey()).removeValue();
-                            continue;
-                        }
-                    } else if (t + 2 <= m) {
-                        if (chatMessage.getMessage().contains(KEY_IMAGE)){
-                            sRef.child(chatMessage.getMessage().replace(KEY_IMAGE, "")).delete();
-                        }
-                        mDb.child(keyChat).child(DATA).child(data.getKey()).removeValue();
-                        continue;
-                    }
-                    loadImg(chatMessage);
-                }
-
-                Collections.sort(chatList, new Comparator<ChatMessage>() {
-                    @Override
-                    public int compare(ChatMessage o1, ChatMessage o2) {
-                        return o1.toString().compareToIgnoreCase(o2.toString());
-                    }
-                });
-                adapter.notifyDataSetChanged();
-                progressBar.setVisibility(View.GONE);
+                if (!found) mDatabase.push().setValue(new NewChat(service, user));
+                checkKeyChatEmpty();
             }
 
             @Override
@@ -404,51 +451,133 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         });
     }
 
-    private void loadImg(final ChatMessage cm) {
-        String path = "";
-        // cm.getMessage() = null
-        if (cm.getMessage().contains(KEY_IMAGE)){
-            path = cm.getMessage().replace(KEY_IMAGE, "");
-        }else {
-            chatList.add(cm);
-            adapter.notifyDataSetChanged();
-            return;
+    private boolean eachForloop(DataSnapshot data) {
+        if (data.getKey().equals("data")) {
+            mDatabase.child(data.getKey()).removeValue();
+            return true;
         }
+        try {
+            if (data.child(SERVICE).getValue().toString().equals(service) &&
+                    data.child(USER).getValue().toString().equals(user)) {
+                keyChat = data.getKey();
+                found = true;
+                spedLogin.putString(KEY_CHAT, keyChat);
+                spedLogin.commit();
+                return false;
+            }
+        } catch (Exception e) {
+            Log.d("ex", e.getMessage());
+        }
+        return true;
+    }
 
-        final PictureHandle handle = new PictureHandle(this);
-        if (handle.hasPicture(path)){
+    private void checkKeyChatEmpty() {
+        if (keyChat.isEmpty()) {
+            find();
+            progressBar.setVisibility(View.GONE);
+        } else {
+            query();
+        }
+    }
+
+    private void query() {
+        final int m = Calendar.getInstance().get(Calendar.MONTH) + 1;
+        mDatabase.child(keyChat).child(DATA).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                chatMessageList.clear();
+                for (DataSnapshot data : dataSnapshot.getChildren()) {
+                    ChatMessage chatMessage = data.getValue(ChatMessage.class);
+                    removeChat(chatMessage, data, m);
+                    prepareLoadImage(chatMessage);
+                }
+                sortChatList();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
+    }
+
+    private void removeChat(ChatMessage chatMessage, DataSnapshot data, int m) {
+        int t = Integer.parseInt(chatMessage.getDate().split("-")[1]);
+        Log.d("Chat", m + " : " + t);
+        if (t > 10) {
+            if (t - 10 == m) {
+                if (chatMessage.getMessage().contains(KEY_IMAGE)) {
+                    storageRef.child(chatMessage.getMessage().replace(KEY_IMAGE, "")).delete();
+                }
+                mDatabase.child(keyChat).child(DATA).child(data.getKey()).removeValue();
+            }
+        } else if (t + 2 <= m) {
+            if (chatMessage.getMessage().contains(KEY_IMAGE)) {
+                storageRef.child(chatMessage.getMessage().replace(KEY_IMAGE, "")).delete();
+            }
+            mDatabase.child(keyChat).child(DATA).child(data.getKey()).removeValue();
+        }
+    }
+
+    private void sortChatList() {
+        Collections.sort(chatMessageList, new Comparator<ChatMessage>() {
+            @Override
+            public int compare(ChatMessage o1, ChatMessage o2) {
+                return o1.toString().compareToIgnoreCase(o2.toString());
+            }
+        });
+        messageAdapter.notifyDataSetChanged();
+        progressBar.setVisibility(View.GONE);
+    }
+
+    private void prepareLoadImage(ChatMessage chatMessage) {
+        String path = checkMessage(chatMessage);
+        if (path == null) return;
+        if (!setBitmap(path, chatMessage)) return;
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.bg_edit_white);
+        chatMessage.setBitmap(bitmap);
+        addChatMessageToList(chatMessage);
+        loadImg(chatMessage, path);
+    }
+
+    private String checkMessage(ChatMessage chatMessage) {
+        if (chatMessage == null) return null;
+        if (chatMessage.getMessage() == null) return null;
+
+        if (chatMessage.getMessage().contains(KEY_IMAGE)) {
+            String path = chatMessage.getMessage().replace(KEY_IMAGE, "");
+            return path;
+        } else {
+            addChatMessageToList(chatMessage);
+            return null;
+        }
+    }
+
+    private void addChatMessageToList(ChatMessage chatMessage) {
+        chatMessageList.add(chatMessage);
+        messageAdapter.notifyDataSetChanged();
+    }
+
+    private boolean setBitmap(String path, ChatMessage chatMessage) {
+        final PictureDatabse handle = new PictureDatabse(this);
+        if (handle.hasPicture(path)) {
             Log.d("hasPicture", "YES");
             byte[] bytes = handle.getPicture(path).getPicture();
-            Bitmap bitmap = new MyImage().convertToBitmap(bytes);
-            cm.setBitmap(bitmap);
-            chatList.add(cm);
-            adapter.notifyDataSetChanged();
-            return;
+            Bitmap bitmap = new ImageUtils().convertToBitmap(bytes);
+            chatMessage.setBitmap(bitmap);
+            addChatMessageToList(chatMessage);
+            return true;
         }
+        return false;
+    }
 
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.bg_edit_white);
-        cm.setBitmap(bitmap);
-        chatList.add(cm);
-        adapter.notifyDataSetChanged();
-
-        final String imgName = path;
+    private void loadImg(final ChatMessage chatMessage, final String path) {
         StorageReference islandRef = FirebaseStorage.getInstance().getReference().child(path);
         final long ONE_MEGABYTE = 1024 * 1024;
         islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
             public void onSuccess(byte[] bytes) {
-                Bitmap bitmap = new MyImage().convertToBitmap(bytes);
-                handle.addPicture(new Pictures(imgName, bytes));
-                try {
-                    int index = chatList.indexOf(cm);
-                    ChatMessage c = chatList.get(index);
-                    c.setBitmap(bitmap);
-                    chatList.remove(index);
-                    chatList.add(c);
-                    adapter.notifyDataSetChanged();
-                }catch (Exception e){
-                    Log.d("Excep chatact", e.getMessage());
-                }
+                Bitmap bitmap = new ImageUtils().convertToBitmap(bytes);
+                addPictureToDatabaseWithBytes(bytes, path);
+                removeThenAddChatMessage(chatMessage, bitmap);
                 Log.d("load Picture", "OK");
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -459,10 +588,28 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         });
     }
 
+    private void addPictureToDatabaseWithBytes(byte[] bytes, String path) {
+        PictureDatabse handle = new PictureDatabse(this);
+        handle.addPicture(new Pictures(path, bytes));
+    }
+
+    private void removeThenAddChatMessage(ChatMessage chatMessage, Bitmap bitmap) {
+        try {
+            int index = chatMessageList.indexOf(chatMessage);
+            ChatMessage c = chatMessageList.get(index);
+            c.setBitmap(bitmap);
+            chatMessageList.remove(index);
+            chatMessageList.add(c);
+            messageAdapter.notifyDataSetChanged();
+        } catch (Exception e) {
+            Log.d("Excep chatact", e.getMessage());
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         if (status.equals(USER)) {
-            if (!(new NetWork(this).isNetworkAvailiable()))
+            if (NetWorkUtils.disable(this))
                 getMenuInflater().inflate(R.menu.menu_chat_no_net, menu);
             else
                 getMenuInflater().inflate(R.menu.menu_chat_net, menu);
@@ -474,7 +621,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_tel:
-                call();
+                dialogCall();
                 return true;
             case R.id.menu_gps:
                 myGps();
@@ -484,12 +631,12 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         }
     }
 
-    public void call() {
+    public void dialogCall() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = getLayoutInflater();
         View vb = inflater.inflate(R.layout.contact_service, null);
         builder.setView(vb);
-        final AlertDialog d = builder.show();
+        final AlertDialog alertDialog = builder.show();
         TextView txtName = (TextView) vb.findViewById(R.id.txt_name);
         txtName.setText("กดปุ่มด้านล่างเพื่อโทรหา " + chatWithName);
 
@@ -497,19 +644,23 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_CALL);
-                intent.setData(Uri.parse("tel:" + telNum));
-
-                if (ActivityCompat.checkSelfPermission(view.getContext(),
-                        android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions((Activity) view.getContext(),
-                            new String[]{Manifest.permission.CALL_PHONE}, 10);
-                }
-                startActivity(intent);
-                pushStat("call");
-                d.dismiss();
+                callPhone(view, alertDialog);
             }
         });
+    }
+
+    private void callPhone(View view, AlertDialog alertDialog) {
+        Intent intent = new Intent(Intent.ACTION_CALL);
+        intent.setData(Uri.parse("tel:" + telNum));
+
+        if (ActivityCompat.checkSelfPermission(view.getContext(),
+                Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions((Activity) view.getContext(),
+                    new String[]{Manifest.permission.CALL_PHONE}, 10);
+        }
+        startActivity(intent);
+        pushStat("dialogCall");
+        alertDialog.dismiss();
     }
 
     @Override
@@ -519,9 +670,9 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     public void myGps() {
-        if (!(new NetWork(this).isNetworkAvailiable())) return;
+        if (NetWorkUtils.disable(this)) return;
         checkGpsStatus();
-        if (!GpsStatus) return;
+        if (!gpsStatus) return;
 
         PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
         try {
@@ -535,37 +686,52 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        resultPlacePicker(requestCode, resultCode, data);
+        resultImageRequest(requestCode, resultCode, data);
+    }
+
+    private void resultImageRequest(int requestCode, int resultCode, Intent data) {
+        if (requestCode == IMAGE_REQUEST && resultCode == RESULT_OK) {
+            setBitmapForDialog(data);
+        }
+    }
+
+    private void resultPlacePicker(int requestCode, int resultCode, Intent data) {
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
-                Place place = PlacePicker.getPlace(this, data);
-                pushMsg(place.getLatLng().toString());
-                pushStat("chat");
+                pushMessageWithLatLng(data);
             }
         } else {
             Log.d("requestCode", "." + requestCode);
         }
+    }
 
-        if (requestCode == IMAGE_REQUEST && resultCode == RESULT_OK) {
-            Uri imageUri = data.getData();
-            if (imageUri != null) {
-                try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
-                    if (bitmap.getWidth() > 720)
-                        bitmap = new MyImage().scaleBitmap(bitmap, 720);
-                    else
-                        bitmap = new MyImage().scaleBitmap(bitmap, bitmap.getWidth());
-                    dialogImg(bitmap);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+    private void pushMessageWithLatLng(Intent data) {
+        Place place = PlacePicker.getPlace(this, data);
+        pushMsg(place.getLatLng().toString());
+        pushStat("chat");
+    }
+
+    private void setBitmapForDialog(Intent data) {
+        Uri imageUri = data.getData();
+        if (imageUri != null) {
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                if (bitmap.getWidth() > 720)
+                    bitmap = new ImageUtils().scaleBitmap(bitmap, 720);
+                else
+                    bitmap = new ImageUtils().scaleBitmap(bitmap, bitmap.getWidth());
+                dialogImg(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
 
     public void checkGpsStatus() {
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        GpsStatus = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        if (!GpsStatus) {
+        gpsStatus = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        if (!gpsStatus) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
             builder.setMessage("ในการดำเนินการต่อ ให้อุปกรณ์เปิดตำแหน่ง (GPS)");
             builder.setPositiveButton("ตกลง", new DialogInterface.OnClickListener() {
@@ -579,65 +745,17 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         }
     }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        back();
-        return true;
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        back();
-    }
-
     private void back() {
         ActivityManager mngr = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
         List<ActivityManager.RunningTaskInfo> taskList = mngr.getRunningTasks(10);
 
-        edChat.putBoolean(ALERT, true);
-        edChat.commit();
+        spedChat.putBoolean(ALERT, true);
+        spedChat.commit();
         if (taskList.get(0).numActivities == 1 &&
                 taskList.get(0).topActivity.getClassName().equals(this.getClass().getName())) {
             startActivity(new Intent(this, MainActivity.class));
             Log.i("Current", "This is last activity in the stack");
         }
         finish();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        edChat.putBoolean(ALERT, false);
-        edChat.commit();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        edChat.putBoolean(ALERT, false);
-        edChat.commit();
-        Log.d("Services check", "onResume");
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        edChat.putBoolean(ALERT, true);
-        edChat.commit();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        edChat.putBoolean(ALERT, true);
-        edChat.commit();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        edChat.putBoolean(ALERT, true);
-        edChat.commit();
     }
 }

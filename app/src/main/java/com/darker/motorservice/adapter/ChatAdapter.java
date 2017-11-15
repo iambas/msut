@@ -17,9 +17,9 @@ import android.widget.TextView;
 
 import com.darker.motorservice.R;
 import com.darker.motorservice.activity.ChatActivity;
-import com.darker.motorservice.utils.MyImage;
-import com.darker.motorservice.data.Chat;
-import com.darker.motorservice.database.ServiceHandle;
+import com.darker.motorservice.utils.ImageUtils;
+import com.darker.motorservice.model.Chat;
+import com.darker.motorservice.database.ServiceDatabase;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -34,15 +34,15 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import static com.darker.motorservice.data.Constant.CHAT_WITH_ID;
-import static com.darker.motorservice.data.Constant.CHAT_WITH_NAME;
-import static com.darker.motorservice.data.Constant.KEY_CHAT;
-import static com.darker.motorservice.data.Constant.KEY_LOGIN_MOTOR_SERVICE;
-import static com.darker.motorservice.data.Constant.PHOTO;
-import static com.darker.motorservice.data.Constant.SERVICE;
-import static com.darker.motorservice.data.Constant.STATUS;
-import static com.darker.motorservice.data.Constant.TEL_NUM;
-import static com.darker.motorservice.data.Constant.USER;
+import static com.darker.motorservice.Constant.CHAT_WITH_ID;
+import static com.darker.motorservice.Constant.CHAT_WITH_NAME;
+import static com.darker.motorservice.Constant.KEY_CHAT;
+import static com.darker.motorservice.Constant.KEY_LOGIN_MOTOR_SERVICE;
+import static com.darker.motorservice.Constant.PHOTO;
+import static com.darker.motorservice.Constant.SERVICE;
+import static com.darker.motorservice.Constant.STATUS;
+import static com.darker.motorservice.Constant.TEL_NUM;
+import static com.darker.motorservice.Constant.USER;
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     private List<Chat> items;
@@ -85,7 +85,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         if (isUser) {
             Bitmap bitmap;
             try {
-                bitmap = new MyImage().getImgProfile(context, chat.getChatWithId());
+                bitmap = new ImageUtils().getImgProfile(context, chat.getChatWithId());
             } catch (Exception e) {
                 bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.pro);
             }
@@ -137,7 +137,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                 String telNum = "";
                 if (isUser){
                     status = USER;
-                    telNum = new ServiceHandle(context).getService(chat.getChatWithId()).getTel();
+                    telNum = new ServiceDatabase(context).getService(chat.getChatWithId()).getTel();
                 }else{
                     status = SERVICE;
                 }

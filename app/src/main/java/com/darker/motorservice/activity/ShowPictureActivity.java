@@ -8,14 +8,14 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.utils.MyImage;
-import com.darker.motorservice.database.PictureHandle;
+import com.darker.motorservice.utils.ImageUtils;
+import com.darker.motorservice.database.PictureDatabse;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
-import static com.darker.motorservice.data.Constant.KEY_IMAGE;
+import static com.darker.motorservice.Constant.KEY_IMAGE;
 
 public class ShowPictureActivity extends AppCompatActivity {
 
@@ -25,11 +25,11 @@ public class ShowPictureActivity extends AppCompatActivity {
         setContentView(R.layout.activity_show_picture);
 
         String name = getIntent().getStringExtra(KEY_IMAGE);
-        PictureHandle handle = new PictureHandle(this);
+        PictureDatabse handle = new PictureDatabse(this);
         final ImageView imageView = (ImageView) findViewById(R.id.img);
         try {
             byte[] bytes = handle.getPicture(name).getPicture();
-            Bitmap bitmap = new MyImage().convertToBitmap(bytes);
+            Bitmap bitmap = new ImageUtils().convertToBitmap(bytes);
             imageView.setImageBitmap(bitmap);
         } catch (Exception e) {
             Log.d("excep showAct", e.getMessage());

@@ -11,7 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.data.Stat;
+import com.darker.motorservice.model.Stat;
 
 import java.util.ArrayList;
 

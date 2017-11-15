@@ -14,8 +14,8 @@ import android.view.ViewGroup;
 
 import com.darker.motorservice.R;
 import com.darker.motorservice.adapter.MotorcycleAdapter;
-import com.darker.motorservice.data.Services;
-import com.darker.motorservice.database.ServiceHandle;
+import com.darker.motorservice.model.Services;
+import com.darker.motorservice.database.ServiceDatabase;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -25,9 +25,9 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.darker.motorservice.data.Constant.ALERT;
-import static com.darker.motorservice.data.Constant.CHAT;
-import static com.darker.motorservice.data.Constant.STATUS;
+import static com.darker.motorservice.Constant.ALERT;
+import static com.darker.motorservice.Constant.CHAT;
+import static com.darker.motorservice.Constant.STATUS;
 
 public class MotorcycleFragment extends Fragment {
 
@@ -56,7 +56,7 @@ public class MotorcycleFragment extends Fragment {
         edChat.putBoolean(ALERT, false);
         edChat.commit();
 
-        ServiceHandle handle = new ServiceHandle(getContext());
+        ServiceDatabase handle = new ServiceDatabase(getContext());
         svList = new ArrayList<>();
         try{
             svList = handle.getAllSerivce();
