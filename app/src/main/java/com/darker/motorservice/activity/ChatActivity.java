@@ -673,7 +673,10 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         if (NetWorkUtils.disable(this)) return;
         checkGpsStatus();
         if (!gpsStatus) return;
+        startSelectPlace();
+    }
 
+    private void startSelectPlace() {
         PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
         try {
             startActivityForResult(builder.build(this), PLACE_PICKER_REQUEST);
