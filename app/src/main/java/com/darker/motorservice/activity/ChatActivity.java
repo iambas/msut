@@ -1,7 +1,6 @@
 package com.darker.motorservice.activity;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -63,12 +62,10 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 import static com.darker.motorservice.Constant.ALERT;
@@ -86,6 +83,7 @@ import static com.darker.motorservice.Constant.SERVICE;
 import static com.darker.motorservice.Constant.STATUS;
 import static com.darker.motorservice.Constant.TEL_NUM;
 import static com.darker.motorservice.Constant.USER;
+import static com.darker.motorservice.utils.StringUtils.getDateFormate;
 
 public class ChatActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -136,6 +134,54 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         setServiceAndUser();
         setAdapter();
         refreshUI();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        back();
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        back();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        spedChat.putBoolean(ALERT, false);
+        spedChat.commit();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        spedChat.putBoolean(ALERT, false);
+        spedChat.commit();
+        Log.d("Services check", "onResume");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        spedChat.putBoolean(ALERT, true);
+        spedChat.commit();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        spedChat.putBoolean(ALERT, true);
+        spedChat.commit();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        spedChat.putBoolean(ALERT, true);
+        spedChat.commit();
     }
 
     private void supportActionBar() {
@@ -251,54 +297,6 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
                 .build();
     }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        back();
-        return true;
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        back();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        spedChat.putBoolean(ALERT, false);
-        spedChat.commit();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        spedChat.putBoolean(ALERT, false);
-        spedChat.commit();
-        Log.d("Services check", "onResume");
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        spedChat.putBoolean(ALERT, true);
-        spedChat.commit();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        spedChat.putBoolean(ALERT, true);
-        spedChat.commit();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        spedChat.putBoolean(ALERT, true);
-        spedChat.commit();
-    }
-
     private boolean stringOk(String s) {
         return s != null && !s.equals("");
     }
@@ -401,11 +399,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         edInputMessage.setText("");
     }
 
-    @SuppressLint("SimpleDateFormat")
-    private String getDateFormate(String pattern){
-        Date date = new Date();
-        return new SimpleDateFormat(pattern).format(date);
-    }
+
 
     private void pushStat(final String type) {
         DatabaseReference dbStat = FirebaseDatabase.getInstance().getReference().child("stat");
@@ -426,7 +420,8 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {}
+            public void onCancelled(DatabaseError databaseError) {
+            }
         });
     }
 
@@ -455,11 +450,12 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {}
+            public void onCancelled(DatabaseError databaseError) {
+            }
         });
     }
 
-    private boolean eachForloop(DataSnapshot data){
+    private boolean eachForloop(DataSnapshot data) {
         if (data.getKey().equals("data")) {
             mDatabase.child(data.getKey()).removeValue();
             return true;
@@ -479,11 +475,11 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         return true;
     }
 
-    private void checkKeyChatEmpty(){
+    private void checkKeyChatEmpty() {
         if (keyChat.isEmpty()) {
             find();
             progressBar.setVisibility(View.GONE);
-        }else{
+        } else {
             query();
         }
     }
@@ -503,11 +499,12 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {}
+            public void onCancelled(DatabaseError databaseError) {
+            }
         });
     }
 
-    private void removeChat(ChatMessage chatMessage, DataSnapshot data, int m){
+    private void removeChat(ChatMessage chatMessage, DataSnapshot data, int m) {
         int t = Integer.parseInt(chatMessage.getDate().split("-")[1]);
         Log.d("Chat", m + " : " + t);
         if (t > 10) {
@@ -525,7 +522,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         }
     }
 
-    private void sortChatList(){
+    private void sortChatList() {
         Collections.sort(chatMessageList, new Comparator<ChatMessage>() {
             @Override
             public int compare(ChatMessage o1, ChatMessage o2) {
@@ -536,7 +533,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         progressBar.setVisibility(View.GONE);
     }
 
-    private void prepareLoadImage(ChatMessage chatMessage){
+    private void prepareLoadImage(ChatMessage chatMessage) {
         String path = checkMessage(chatMessage);
         if (path == null) return;
         if (!setBitmap(path, chatMessage)) return;
@@ -546,7 +543,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         loadImg(chatMessage, path);
     }
 
-    private String checkMessage(ChatMessage chatMessage){
+    private String checkMessage(ChatMessage chatMessage) {
         if (chatMessage == null) return null;
         if (chatMessage.getMessage() == null) return null;
 
@@ -559,12 +556,12 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         }
     }
 
-    private void addChatMessageToList(ChatMessage chatMessage){
+    private void addChatMessageToList(ChatMessage chatMessage) {
         chatMessageList.add(chatMessage);
         messageAdapter.notifyDataSetChanged();
     }
 
-    private boolean setBitmap(String path, ChatMessage chatMessage){
+    private boolean setBitmap(String path, ChatMessage chatMessage) {
         final PictureDatabse handle = new PictureDatabse(this);
         if (handle.hasPicture(path)) {
             Log.d("hasPicture", "YES");
@@ -596,12 +593,12 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         });
     }
 
-    private void addPictureToDatabaseWithBytes(byte[] bytes, String path){
+    private void addPictureToDatabaseWithBytes(byte[] bytes, String path) {
         PictureDatabse handle = new PictureDatabse(this);
         handle.addPicture(new Pictures(path, bytes));
     }
 
-    private void removeThenAddChatMessage(ChatMessage chatMessage, Bitmap bitmap){
+    private void removeThenAddChatMessage(ChatMessage chatMessage, Bitmap bitmap) {
         try {
             int index = chatMessageList.indexOf(chatMessage);
             ChatMessage c = chatMessageList.get(index);
