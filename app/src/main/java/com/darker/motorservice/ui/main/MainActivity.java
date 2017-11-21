@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -42,7 +43,6 @@ import static com.darker.motorservice.utils.Constant.STATUS;
 import static com.darker.motorservice.utils.Constant.USER;
 
 public class MainActivity extends AppCompatActivity {
-
     private TabLayout tabLayout;
     private SharedPreferences loginSharedPref;
     private SharedPreferences.Editor chatEditor;
@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean isAdmin = false;
     private ProgressBar progressBar;
     private RelativeLayout loadLayout;
+    private ViewPager containerViewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadView() {
         if (new ServiceDatabase(this).getServiceCount() != 0) {
-            setup();
+            setUpByStatus();
         } else {
             progressBar.setVisibility(View.VISIBLE);
             handlerSetup();
@@ -75,20 +76,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handlerSetup() {
-        new Handler().postDelayed(new Runnable() {
+        int delayMillis = 4000;
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 loadLayout.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.GONE);
-                setup();
+                setUpByStatus();
             }
-        }, 4000);
+        }, delayMillis);
     }
 
     private void bindView() {
         loadLayout = (RelativeLayout) findViewById(R.id.load);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
-
+        containerViewPager = (ViewPager) findViewById(R.id.container);
+        tabLayout = (TabLayout) findViewById(R.id.tabs);
         loadLayout.setVisibility(View.VISIBLE);
     }
 
@@ -109,84 +113,64 @@ public class MainActivity extends AppCompatActivity {
         isAdmin = admin.isAdmin(id);
     }
 
-    private void setup() {
+    private void setUpByStatus() {
         String status = loginSharedPref.getString(STATUS, "");
-        ViewPager viewPager = (ViewPager) findViewById(R.id.container);
-        tabLayout = (TabLayout) findViewById(R.id.tabs);
-
         if (status.equals(USER)) {
-            setupViewPagerUser(viewPager);
-            tabLayout.setupWithViewPager(viewPager);
-            tabUser();
-            tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-                @Override
-                public void onTabSelected(TabLayout.Tab tab) {
-                    setupTabIconsUser(tab.getPosition());
-                }
-
-                @Override
-                public void onTabUnselected(TabLayout.Tab tab) {
-                }
-
-                @Override
-                public void onTabReselected(TabLayout.Tab tab) {
-                }
-            });
+            setTabUser();
         } else {
-            setupViewPagerService(viewPager);
-            tabLayout.setupWithViewPager(viewPager);
-            tabService();
-            tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-                @Override
-                public void onTabSelected(TabLayout.Tab tab) {
-                    setupTabIconsService(tab.getPosition());
-                }
-
-                @Override
-                public void onTabUnselected(TabLayout.Tab tab) {
-                }
-
-                @Override
-                public void onTabReselected(TabLayout.Tab tab) {
-                }
-            });
+            setTabServices();
         }
+    }
+
+    private void setTabServices() {
+        setupViewPagerService(containerViewPager);
+        tabLayout.setupWithViewPager(containerViewPager);
+        tabService();
+        tabLayout.addOnTabSelectedListener(onTabSelectedListener());
+    }
+
+    private void setTabUser() {
+        setupViewPagerUser(containerViewPager);
+        tabLayout.setupWithViewPager(containerViewPager);
+        tabUser();
+        tabLayout.addOnTabSelectedListener(onTabUserListener());
     }
 
     private void tabService() {
         fisrtView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
         firstImageView = (ImageView) fisrtView.findViewById(R.id.tab_icon);
         fisrtTextView = (TextView) fisrtView.findViewById(R.id.tab_text);
-        fisrtTextView.setText("แชท");
+        fisrtTextView.setText(R.string.tab_chat);
 
         secondView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
         secondImageView = (ImageView) secondView.findViewById(R.id.tab_icon);
         secondTextView = (TextView) secondView.findViewById(R.id.tab_text);
-        secondTextView.setText("ไทม์ไลน์");
+        secondTextView.setText(R.string.tab_timeline);
 
-        thirdView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-        thirdImageView = (ImageView) thirdView.findViewById(R.id.tab_icon);
-        thirdTextView = (TextView) thirdView.findViewById(R.id.tab_text);
-        thirdTextView.setText("สถิติ");
+        getStatisticTab();
 
-        fouthView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-        fourthImageView = (ImageView) fouthView.findViewById(R.id.tab_icon);
-        fourthTextView = (TextView) fouthView.findViewById(R.id.tab_text);
-        fourthTextView.setText("รีวิว");
+        getReviewTab();
 
         fifthView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
         fifthImageView = (ImageView) fifthView.findViewById(R.id.tab_icon);
         fifthTextView = (TextView) fifthView.findViewById(R.id.tab_text);
-        fifthTextView.setText("โปรไฟล์");
+        fifthTextView.setText(R.string.tab_profile);
 
         if (isAdmin) {
             sixthView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
             sixthImageView = (ImageView) sixthView.findViewById(R.id.tab_icon);
             sixthTExtView = (TextView) sixthView.findViewById(R.id.tab_text);
-            sixthTExtView.setText("เพิ่มร้าน");
+            sixthTExtView.setText(R.string.tab_add_store);
         }
 
         setupTabIconsService(0);
+    }
+
+    private void getStatisticTab() {
+        thirdView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+        thirdImageView = (ImageView) thirdView.findViewById(R.id.tab_icon);
+        thirdTextView = (TextView) thirdView.findViewById(R.id.tab_text);
+        thirdTextView.setText(R.string.tab_stats);
     }
 
     private void setupTabIconsService(int tab) {
@@ -249,45 +233,60 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupViewPagerService(ViewPager viewPager) {
+        String tabChat = getStringId(R.string.tab_chat);
+        String tabTimeLine = getStringId(R.string.tab_timeline);
+        String tabStats = getStringId(R.string.tab_stats);
+        String tabReview = getStringId(R.string.tab_review);
+        String tabProfile = getStringId(R.string.tab_profile);
+        String tabAddStore = getStringId(R.string.tab_add_store);
+
         SectionsPagerAdapter adapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        adapter.addFrag(new ChatFragment(), "แชท");
-        adapter.addFrag(new TimelineFragment(), "ไทม์ไลน์");
-        adapter.addFrag(new StatisticsFragment(), "สถิติ");
-        adapter.addFrag(new ReviewFragment(), "รีวิว");
-        adapter.addFrag(new ProfileFragment(), "โปรไฟล์");
+        adapter.addFrag(new ChatFragment(), tabChat);
+        adapter.addFrag(new TimelineFragment(), tabTimeLine);
+        adapter.addFrag(new StatisticsFragment(), tabStats);
+        adapter.addFrag(new ReviewFragment(), tabReview);
+        adapter.addFrag(new ProfileFragment(), tabProfile);
         if (isAdmin) {
-            adapter.addFrag(new AddNewServiceFragment(), "เพิ่มร้าน");
+            adapter.addFrag(new AddNewServiceFragment(), tabAddStore);
         }
         viewPager.setAdapter(adapter);
+    }
+
+    private String getStringId(int id){
+        return getResources().getString(id);
     }
 
     private void tabUser() {
         fisrtView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
         firstImageView = (ImageView) fisrtView.findViewById(R.id.tab_icon);
         fisrtTextView = (TextView) fisrtView.findViewById(R.id.tab_text);
-        fisrtTextView.setText("ร้านต่างๆ");
+        fisrtTextView.setText(R.string.tab_store);
 
         secondView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
         secondImageView = (ImageView) secondView.findViewById(R.id.tab_icon);
         secondTextView = (TextView) secondView.findViewById(R.id.tab_text);
-        secondTextView.setText("แชท");
+        secondTextView.setText(R.string.tab_chat);
 
         thirdView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
         thirdImageView = (ImageView) thirdView.findViewById(R.id.tab_icon);
         thirdTextView = (TextView) thirdView.findViewById(R.id.tab_text);
-        thirdTextView.setText("ไทม์ไลน์");
+        thirdTextView.setText(R.string.tab_timeline);
 
-        fouthView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-        fourthImageView = (ImageView) fouthView.findViewById(R.id.tab_icon);
-        fourthTextView = (TextView) fouthView.findViewById(R.id.tab_text);
-        fourthTextView.setText("รีวิว");
+        getReviewTab();
 
         fifthView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
         fifthImageView = (ImageView) fifthView.findViewById(R.id.tab_icon);
         fifthTextView = (TextView) fifthView.findViewById(R.id.tab_text);
-        fifthTextView.setText("โปรไฟล์");
+        fifthTextView.setText(R.string.tab_profile);
 
         setupTabIconsUser(0);
+    }
+
+    private void getReviewTab() {
+        fouthView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+        fourthImageView = (ImageView) fouthView.findViewById(R.id.tab_icon);
+        fourthTextView = (TextView) fouthView.findViewById(R.id.tab_text);
+        fourthTextView.setText(R.string.tab_review);
     }
 
     private void setupTabIconsUser(int tab) {
@@ -339,12 +338,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupViewPagerUser(ViewPager viewPager) {
+        String tabChat = getStringId(R.string.tab_chat);
+        String tabTimeLine = getStringId(R.string.tab_timeline);
+        String tabReview = getStringId(R.string.tab_review);
+        String tabProfile = getStringId(R.string.tab_profile);
+        String tabStore = getStringId(R.string.tab_store);
+
         SectionsPagerAdapter adapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        adapter.addFrag(new MotorcycleFragment(), "ร้านต่างๆ");
-        adapter.addFrag(new ChatFragment(), "แชท");
-        adapter.addFrag(new TimelineFragment(), "ไทม์ไลน์");
-        adapter.addFrag(new ReviewFragment(), "รีวิวร้าน");
-        adapter.addFrag(new ProfileFragment(), "โปรไฟล์");
+        adapter.addFrag(new MotorcycleFragment(), tabStore);
+        adapter.addFrag(new ChatFragment(), tabChat);
+        adapter.addFrag(new TimelineFragment(), tabTimeLine);
+        adapter.addFrag(new ReviewFragment(), tabReview);
+        adapter.addFrag(new ProfileFragment(), tabProfile);
         viewPager.setAdapter(adapter);
     }
 
@@ -416,5 +421,39 @@ public class MainActivity extends AppCompatActivity {
         chatEditor.putBoolean(ALERT, true);
         chatEditor.commit();
         Log.d("Main check", "onDestroy");
+    }
+
+    @NonNull
+    private TabLayout.OnTabSelectedListener onTabUserListener() {
+        return new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                setupTabIconsUser(tab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
+        };
+    }
+
+    @NonNull
+    private TabLayout.OnTabSelectedListener onTabSelectedListener() {
+        return new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                setupTabIconsService(tab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+            }
+        };
     }
 }
