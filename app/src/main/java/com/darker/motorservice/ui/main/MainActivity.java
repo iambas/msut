@@ -43,11 +43,11 @@ import static com.darker.motorservice.utils.Constant.USER;
 public class MainActivity extends AppCompatActivity {
 
     private TabLayout tabLayout;
-    SharedPreferences shLogin;
-    private SharedPreferences.Editor edChat;
-    private View v1, v2, v3, v4, v5, v6;
-    private ImageView i1, i2, i3, i4, i5, i6;
-    private TextView t1, t2, t3, t4, t5, t6;
+    private SharedPreferences loginSharedPref;
+    private SharedPreferences.Editor chatEditor;
+    private View fisrtView, secondView, thirdView, fouthView, fifthView, sixthView;
+    private ImageView firstImageView, secondImageView, thirdImageView, fourthImageView, fifthImageView, sixthImageView;
+    private TextView fisrtTextView, secondTextView, thirdTextView, fourthTextView, fifthTextView, sixthTExtView;
     private boolean isAdmin = false;
 
     @Override
@@ -55,13 +55,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // start service
-        startService(new Intent(this, BackgroundService.class));
-
-        shLogin = getSharedPreferences(KEY_LOGIN_MOTOR_SERVICE, Context.MODE_PRIVATE);
-        edChat = getSharedPreferences(CHAT, Context.MODE_PRIVATE).edit();
-        edChat.putBoolean(ALERT, false);
-        edChat.commit();
+        startBackgroundService();
+        initSharedPreferences();
 
         findViewById(R.id.load).setVisibility(View.VISIBLE);
         final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
@@ -82,13 +77,25 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void initSharedPreferences() {
+        loginSharedPref = getSharedPreferences(KEY_LOGIN_MOTOR_SERVICE, Context.MODE_PRIVATE);
+        chatEditor = getSharedPreferences(CHAT, Context.MODE_PRIVATE).edit();
+        chatEditor.putBoolean(ALERT, false);
+        chatEditor.apply();
+    }
+
+    private void startBackgroundService() {
+        startService(new Intent(this, BackgroundService.class));
+    }
+
     private void checkAdmin() {
         AdminDatabase admin = new AdminDatabase(this);
-        isAdmin = admin.isAdmin(shLogin.getString(ID, ""));
+        String id = loginSharedPref.getString(ID, "");
+        isAdmin = admin.isAdmin(id);
     }
 
     private void setup() {
-        String status = shLogin.getString(STATUS, "");
+        String status = loginSharedPref.getString(STATUS, "");
         ViewPager viewPager = (ViewPager) findViewById(R.id.container);
         tabLayout = (TabLayout) findViewById(R.id.tabs);
 
@@ -132,36 +139,36 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void tabService() {
-        v1 = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-        i1 = (ImageView) v1.findViewById(R.id.tab_icon);
-        t1 = (TextView) v1.findViewById(R.id.tab_text);
-        t1.setText("แชท");
+        fisrtView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+        firstImageView = (ImageView) fisrtView.findViewById(R.id.tab_icon);
+        fisrtTextView = (TextView) fisrtView.findViewById(R.id.tab_text);
+        fisrtTextView.setText("แชท");
 
-        v2 = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-        i2 = (ImageView) v2.findViewById(R.id.tab_icon);
-        t2 = (TextView) v2.findViewById(R.id.tab_text);
-        t2.setText("ไทม์ไลน์");
+        secondView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+        secondImageView = (ImageView) secondView.findViewById(R.id.tab_icon);
+        secondTextView = (TextView) secondView.findViewById(R.id.tab_text);
+        secondTextView.setText("ไทม์ไลน์");
 
-        v3 = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-        i3 = (ImageView) v3.findViewById(R.id.tab_icon);
-        t3 = (TextView) v3.findViewById(R.id.tab_text);
-        t3.setText("สถิติ");
+        thirdView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+        thirdImageView = (ImageView) thirdView.findViewById(R.id.tab_icon);
+        thirdTextView = (TextView) thirdView.findViewById(R.id.tab_text);
+        thirdTextView.setText("สถิติ");
 
-        v4 = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-        i4 = (ImageView) v4.findViewById(R.id.tab_icon);
-        t4 = (TextView) v4.findViewById(R.id.tab_text);
-        t4.setText("รีวิว");
+        fouthView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+        fourthImageView = (ImageView) fouthView.findViewById(R.id.tab_icon);
+        fourthTextView = (TextView) fouthView.findViewById(R.id.tab_text);
+        fourthTextView.setText("รีวิว");
 
-        v5 = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-        i5 = (ImageView) v5.findViewById(R.id.tab_icon);
-        t5 = (TextView) v5.findViewById(R.id.tab_text);
-        t5.setText("โปรไฟล์");
+        fifthView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+        fifthImageView = (ImageView) fifthView.findViewById(R.id.tab_icon);
+        fifthTextView = (TextView) fifthView.findViewById(R.id.tab_text);
+        fifthTextView.setText("โปรไฟล์");
 
         if (isAdmin) {
-            v6 = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-            i6 = (ImageView) v6.findViewById(R.id.tab_icon);
-            t6 = (TextView) v6.findViewById(R.id.tab_text);
-            t6.setText("เพิ่มร้าน");
+            sixthView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+            sixthImageView = (ImageView) sixthView.findViewById(R.id.tab_icon);
+            sixthTExtView = (TextView) sixthView.findViewById(R.id.tab_text);
+            sixthTExtView.setText("เพิ่มร้าน");
         }
 
         setupTabIconsService(0);
@@ -169,61 +176,61 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupTabIconsService(int tab) {
         if (tab == 0) {
-            i1.setImageResource(R.drawable.ic_chat_dark);
-            t1.setTextColor(getResources().getColor(R.color.teal));
+            firstImageView.setImageResource(R.drawable.ic_chat_dark);
+            fisrtTextView.setTextColor(getResources().getColor(R.color.teal));
         } else {
-            i1.setImageResource(R.drawable.ic_chat_white);
-            t1.setTextColor(getResources().getColor(R.color.iconTab));
+            firstImageView.setImageResource(R.drawable.ic_chat_white);
+            fisrtTextView.setTextColor(getResources().getColor(R.color.iconTab));
         }
 
         if (tab == 1) {
-            i2.setImageResource(R.drawable.ic_timeline_dark);
-            t2.setTextColor(getResources().getColor(R.color.teal));
+            secondImageView.setImageResource(R.drawable.ic_timeline_dark);
+            secondTextView.setTextColor(getResources().getColor(R.color.teal));
         } else {
-            i2.setImageResource(R.drawable.ic_timeline_white);
-            t2.setTextColor(getResources().getColor(R.color.iconTab));
+            secondImageView.setImageResource(R.drawable.ic_timeline_white);
+            secondTextView.setTextColor(getResources().getColor(R.color.iconTab));
         }
 
         if (tab == 2) {
-            i3.setImageResource(R.drawable.ic_equalizer_dark);
-            t3.setTextColor(getResources().getColor(R.color.teal));
+            thirdImageView.setImageResource(R.drawable.ic_equalizer_dark);
+            thirdTextView.setTextColor(getResources().getColor(R.color.teal));
         } else {
-            i3.setImageResource(R.drawable.ic_equalizer_white);
-            t3.setTextColor(getResources().getColor(R.color.iconTab));
+            thirdImageView.setImageResource(R.drawable.ic_equalizer_white);
+            thirdTextView.setTextColor(getResources().getColor(R.color.iconTab));
         }
 
         if (tab == 3) {
-            i4.setImageResource(R.drawable.ic_star_dark);
-            t4.setTextColor(getResources().getColor(R.color.teal));
+            fourthImageView.setImageResource(R.drawable.ic_star_dark);
+            fourthTextView.setTextColor(getResources().getColor(R.color.teal));
         } else {
-            i4.setImageResource(R.drawable.ic_star_white);
-            t4.setTextColor(getResources().getColor(R.color.iconTab));
+            fourthImageView.setImageResource(R.drawable.ic_star_white);
+            fourthTextView.setTextColor(getResources().getColor(R.color.iconTab));
         }
 
         if (tab == 4) {
-            i5.setImageResource(R.drawable.ic_person_dark);
-            t5.setTextColor(getResources().getColor(R.color.teal));
+            fifthImageView.setImageResource(R.drawable.ic_person_dark);
+            fifthTextView.setTextColor(getResources().getColor(R.color.teal));
         } else {
-            i5.setImageResource(R.drawable.ic_person_white);
-            t5.setTextColor(getResources().getColor(R.color.iconTab));
+            fifthImageView.setImageResource(R.drawable.ic_person_white);
+            fifthTextView.setTextColor(getResources().getColor(R.color.iconTab));
         }
 
         if (isAdmin) {
             if (tab == 5) {
-                i6.setImageResource(R.drawable.ic_add_circle_dark);
-                t6.setTextColor(getResources().getColor(R.color.teal));
+                sixthImageView.setImageResource(R.drawable.ic_add_circle_dark);
+                sixthTExtView.setTextColor(getResources().getColor(R.color.teal));
             } else {
-                i6.setImageResource(R.drawable.ic_add_circle_white);
-                t6.setTextColor(getResources().getColor(R.color.iconTab));
+                sixthImageView.setImageResource(R.drawable.ic_add_circle_white);
+                sixthTExtView.setTextColor(getResources().getColor(R.color.iconTab));
             }
-            tabLayout.getTabAt(5).setCustomView(v6);
+            tabLayout.getTabAt(5).setCustomView(sixthView);
         }
 
-        tabLayout.getTabAt(0).setCustomView(v1);
-        tabLayout.getTabAt(1).setCustomView(v2);
-        tabLayout.getTabAt(2).setCustomView(v3);
-        tabLayout.getTabAt(3).setCustomView(v4);
-        tabLayout.getTabAt(4).setCustomView(v5);
+        tabLayout.getTabAt(0).setCustomView(fisrtView);
+        tabLayout.getTabAt(1).setCustomView(secondView);
+        tabLayout.getTabAt(2).setCustomView(thirdView);
+        tabLayout.getTabAt(3).setCustomView(fouthView);
+        tabLayout.getTabAt(4).setCustomView(fifthView);
     }
 
     private void setupViewPagerService(ViewPager viewPager) {
@@ -240,80 +247,80 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void tabUser() {
-        v1 = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-        i1 = (ImageView) v1.findViewById(R.id.tab_icon);
-        t1 = (TextView) v1.findViewById(R.id.tab_text);
-        t1.setText("ร้านต่างๆ");
+        fisrtView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+        firstImageView = (ImageView) fisrtView.findViewById(R.id.tab_icon);
+        fisrtTextView = (TextView) fisrtView.findViewById(R.id.tab_text);
+        fisrtTextView.setText("ร้านต่างๆ");
 
-        v2 = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-        i2 = (ImageView) v2.findViewById(R.id.tab_icon);
-        t2 = (TextView) v2.findViewById(R.id.tab_text);
-        t2.setText("แชท");
+        secondView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+        secondImageView = (ImageView) secondView.findViewById(R.id.tab_icon);
+        secondTextView = (TextView) secondView.findViewById(R.id.tab_text);
+        secondTextView.setText("แชท");
 
-        v3 = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-        i3 = (ImageView) v3.findViewById(R.id.tab_icon);
-        t3 = (TextView) v3.findViewById(R.id.tab_text);
-        t3.setText("ไทม์ไลน์");
+        thirdView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+        thirdImageView = (ImageView) thirdView.findViewById(R.id.tab_icon);
+        thirdTextView = (TextView) thirdView.findViewById(R.id.tab_text);
+        thirdTextView.setText("ไทม์ไลน์");
 
-        v4 = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-        i4 = (ImageView) v4.findViewById(R.id.tab_icon);
-        t4 = (TextView) v4.findViewById(R.id.tab_text);
-        t4.setText("รีวิว");
+        fouthView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+        fourthImageView = (ImageView) fouthView.findViewById(R.id.tab_icon);
+        fourthTextView = (TextView) fouthView.findViewById(R.id.tab_text);
+        fourthTextView.setText("รีวิว");
 
-        v5 = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-        i5 = (ImageView) v5.findViewById(R.id.tab_icon);
-        t5 = (TextView) v5.findViewById(R.id.tab_text);
-        t5.setText("โปรไฟล์");
+        fifthView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+        fifthImageView = (ImageView) fifthView.findViewById(R.id.tab_icon);
+        fifthTextView = (TextView) fifthView.findViewById(R.id.tab_text);
+        fifthTextView.setText("โปรไฟล์");
 
         setupTabIconsUser(0);
     }
 
     private void setupTabIconsUser(int tab) {
         if (tab == 0) {
-            i1.setImageResource(R.drawable.ic_motorcycle_dark);
-            t1.setTextColor(getResources().getColor(R.color.teal));
+            firstImageView.setImageResource(R.drawable.ic_motorcycle_dark);
+            fisrtTextView.setTextColor(getResources().getColor(R.color.teal));
         } else {
-            i1.setImageResource(R.drawable.ic_motorcycle_white);
-            t1.setTextColor(getResources().getColor(R.color.iconTab));
+            firstImageView.setImageResource(R.drawable.ic_motorcycle_white);
+            fisrtTextView.setTextColor(getResources().getColor(R.color.iconTab));
         }
 
         if (tab == 1) {
-            i2.setImageResource(R.drawable.ic_chat_dark);
-            t2.setTextColor(getResources().getColor(R.color.teal));
+            secondImageView.setImageResource(R.drawable.ic_chat_dark);
+            secondTextView.setTextColor(getResources().getColor(R.color.teal));
         } else {
-            i2.setImageResource(R.drawable.ic_chat_white);
-            t2.setTextColor(getResources().getColor(R.color.iconTab));
+            secondImageView.setImageResource(R.drawable.ic_chat_white);
+            secondTextView.setTextColor(getResources().getColor(R.color.iconTab));
         }
 
         if (tab == 2) {
-            i3.setImageResource(R.drawable.ic_timeline_dark);
-            t3.setTextColor(getResources().getColor(R.color.teal));
+            thirdImageView.setImageResource(R.drawable.ic_timeline_dark);
+            thirdTextView.setTextColor(getResources().getColor(R.color.teal));
         } else {
-            i3.setImageResource(R.drawable.ic_timeline_white);
-            t3.setTextColor(getResources().getColor(R.color.iconTab));
+            thirdImageView.setImageResource(R.drawable.ic_timeline_white);
+            thirdTextView.setTextColor(getResources().getColor(R.color.iconTab));
         }
 
         if (tab == 3) {
-            i4.setImageResource(R.drawable.ic_star_dark);
-            t4.setTextColor(getResources().getColor(R.color.teal));
+            fourthImageView.setImageResource(R.drawable.ic_star_dark);
+            fourthTextView.setTextColor(getResources().getColor(R.color.teal));
         } else {
-            i4.setImageResource(R.drawable.ic_star_white);
-            t4.setTextColor(getResources().getColor(R.color.iconTab));
+            fourthImageView.setImageResource(R.drawable.ic_star_white);
+            fourthTextView.setTextColor(getResources().getColor(R.color.iconTab));
         }
 
         if (tab == 4) {
-            i5.setImageResource(R.drawable.ic_person_dark);
-            t5.setTextColor(getResources().getColor(R.color.teal));
+            fifthImageView.setImageResource(R.drawable.ic_person_dark);
+            fifthTextView.setTextColor(getResources().getColor(R.color.teal));
         } else {
-            i5.setImageResource(R.drawable.ic_person_white);
-            t5.setTextColor(getResources().getColor(R.color.iconTab));
+            fifthImageView.setImageResource(R.drawable.ic_person_white);
+            fifthTextView.setTextColor(getResources().getColor(R.color.iconTab));
         }
 
-        tabLayout.getTabAt(0).setCustomView(v1);
-        tabLayout.getTabAt(1).setCustomView(v2);
-        tabLayout.getTabAt(2).setCustomView(v3);
-        tabLayout.getTabAt(3).setCustomView(v4);
-        tabLayout.getTabAt(4).setCustomView(v5);
+        tabLayout.getTabAt(0).setCustomView(fisrtView);
+        tabLayout.getTabAt(1).setCustomView(secondView);
+        tabLayout.getTabAt(2).setCustomView(thirdView);
+        tabLayout.getTabAt(3).setCustomView(fouthView);
+        tabLayout.getTabAt(4).setCustomView(fifthView);
     }
 
     private void setupViewPagerUser(ViewPager viewPager) {
@@ -358,8 +365,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onStart() {
-        edChat.putBoolean(ALERT, false);
-        edChat.commit();
+        chatEditor.putBoolean(ALERT, false);
+        chatEditor.commit();
         super.onStart();
         Log.d("Main check", "onStart");
     }
@@ -367,32 +374,32 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        edChat.putBoolean(ALERT, false);
-        edChat.commit();
+        chatEditor.putBoolean(ALERT, false);
+        chatEditor.commit();
         Log.d("Main check", "onResume");
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        edChat.putBoolean(ALERT, true);
-        edChat.commit();
+        chatEditor.putBoolean(ALERT, true);
+        chatEditor.commit();
         Log.d("Main check", "onPause");
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        edChat.putBoolean(ALERT, true);
-        edChat.commit();
+        chatEditor.putBoolean(ALERT, true);
+        chatEditor.commit();
         Log.d("Main check", "onStop");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        edChat.putBoolean(ALERT, true);
-        edChat.commit();
+        chatEditor.putBoolean(ALERT, true);
+        chatEditor.commit();
         Log.d("Main check", "onDestroy");
     }
 }
