@@ -8,7 +8,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.model.Services;
+import com.darker.motorservice.model.ServicesItem;
 import com.darker.motorservice.database.ServiceDatabase;
 
 import java.io.ByteArrayOutputStream;
@@ -21,10 +21,10 @@ public class ImageUtils {
     }
 
     public Bitmap getImgCover(Context context, String id) {
-        Services services = new ServiceDatabase(context).getService(id);
+        ServicesItem servicesItem = new ServiceDatabase(context).getService(id);
         Bitmap bitmap;
         try {
-            bitmap = convertToBitmap(services.getImgCover());
+            bitmap = convertToBitmap(servicesItem.getImgCover());
         } catch (Exception e) {
             bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.cover);
         }
@@ -32,10 +32,10 @@ public class ImageUtils {
     }
 
     public Bitmap getImgProfile(Context context, String id) {
-        Services services = new ServiceDatabase(context).getService(id);
+        ServicesItem servicesItem = new ServiceDatabase(context).getService(id);
         Bitmap bitmap;
         try {
-            bitmap = convertToBitmap(services.getImgProfile());
+            bitmap = convertToBitmap(servicesItem.getImgProfile());
         } catch (Exception e) {
             bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.pro);
         }

@@ -20,7 +20,7 @@
         android:paddingEnd="16dp"
         android:paddingStart="16dp"
         android:paddingTop="4dp"
-        tools:context="com.darker.motorservice.activity.ReviewActivity">
+        tools:context=".ui.update_data_service.ReviewActivity">
 
         <View
             android:id="@+id/top_view"

@@ -63,7 +63,7 @@
     <string name="open">เปิดร้าน</string>
     <string name="close">ปิดร้าน</string>
     <string name="review">รีวิว</string>
-    <string name="review2">รีวิวร้าน</string>
+    <string name="review_store">รีวิวร้าน</string>
     <string name="service_pro"><u>ดูโปรไฟล์ร้าน</u></string>
     <string name="user_review">เขียนรีวิว</string>
     <string name="edit_post">แก้ไขโพสต์</string>

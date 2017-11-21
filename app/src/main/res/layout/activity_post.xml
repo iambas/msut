@@ -7,7 +7,7 @@
     android:descendantFocusability="beforeDescendants"
     android:focusable="true"
     android:focusableInTouchMode="true"
-    tools:context="com.darker.motorservice.activity.PostActivity">
+    tools:context="com.darker.motorservice.ui.post.PostActivity">
 
     <ScrollView
         android:layout_width="match_parent"

@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
-    tools:context="com.darker.motorservice.activity.LoginActivity">
+    tools:context="com.darker.motorservice.ui.login.LoginActivity">
 
     <ImageView
         android:layout_width="150dp"

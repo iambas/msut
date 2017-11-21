@@ -7,7 +7,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.model.Services;
+import com.darker.motorservice.model.ServicesItem;
 import com.darker.motorservice.database.AdminDatabase;
 import com.darker.motorservice.database.ServiceDatabase;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -23,8 +23,8 @@ import com.google.firebase.storage.StorageReference;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 
-import static com.darker.motorservice.Constant.ADMIN;
-import static com.darker.motorservice.Constant.SERVICE;
+import static com.darker.motorservice.utils.Constant.ADMIN;
+import static com.darker.motorservice.utils.Constant.SERVICE;
 
 public class LoadServiceUtils {
 
@@ -71,36 +71,36 @@ public class LoadServiceUtils {
                 if (count > dataSnapshot.getChildrenCount()){
                     handle.delTable();
                     for (DataSnapshot ds : dataSnapshot.getChildren()){
-                        Services services = ds.getValue(Services.class);
+                        ServicesItem servicesItem = ds.getValue(ServicesItem.class);
                         Bitmap cover = BitmapFactory.decodeResource(context.getResources(), R.drawable.cover);
                         Bitmap pro = BitmapFactory.decodeResource(context.getResources(), R.drawable.pro);
-                        services.setImgCover(toByte(cover));
-                        services.setImgProfile(toByte(pro));
-                        handle.addService(services);
+                        servicesItem.setImgCover(toByte(cover));
+                        servicesItem.setImgProfile(toByte(pro));
+                        handle.addService(servicesItem);
 
-                        Log.d("load cover", services.getCover());
-                        Log.d("load profile", services.getPhoto());
-                        loadImg(services, services.getCover(), true);
-                        loadImg(services, services.getPhoto(), false);
+                        Log.d("load cover", servicesItem.getCover());
+                        Log.d("load profile", servicesItem.getPhoto());
+                        loadImg(servicesItem, servicesItem.getCover(), true);
+                        loadImg(servicesItem, servicesItem.getPhoto(), false);
                     }
                     return;
                 }
 
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                    Services services = ds.getValue(Services.class);
-                    if (!handle.hasService(services.getId())) {
+                    ServicesItem servicesItem = ds.getValue(ServicesItem.class);
+                    if (!handle.hasService(servicesItem.getId())) {
                         Log.d("hasService", "NO");
                         Bitmap cover = BitmapFactory.decodeResource(context.getResources(), R.drawable.cover);
                         Bitmap pro = BitmapFactory.decodeResource(context.getResources(), R.drawable.pro);
-                        services.setImgCover(toByte(cover));
-                        services.setImgProfile(toByte(pro));
-                        handle.addService(services);
+                        servicesItem.setImgCover(toByte(cover));
+                        servicesItem.setImgProfile(toByte(pro));
+                        handle.addService(servicesItem);
                     }
 
-                    Log.d("load cover", services.getCover());
-                    Log.d("load profile", services.getPhoto());
-                    loadImg(services, services.getCover(), true);
-                    loadImg(services, services.getPhoto(), false);
+                    Log.d("load cover", servicesItem.getCover());
+                    Log.d("load profile", servicesItem.getPhoto());
+                    loadImg(servicesItem, servicesItem.getCover(), true);
+                    loadImg(servicesItem, servicesItem.getPhoto(), false);
                 }
             }
 
@@ -109,7 +109,7 @@ public class LoadServiceUtils {
         });
     }
 
-    private void loadImg(final Services services, String image, final boolean isCover) {
+    private void loadImg(final ServicesItem servicesItem, String image, final boolean isCover) {
         Log.d("image", image);
         StorageReference islandRef = storageRef.child(image);
 
@@ -117,12 +117,12 @@ public class LoadServiceUtils {
         islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
             public void onSuccess(byte[] bytes) {
-                if (isCover && (!hasImg(services.getId(), bytes, isCover))){
-                        services.setImgCover(bytes);
-                }else if(!isCover && (!hasImg(services.getId(), bytes, !isCover))) {
-                    services.setImgProfile(bytes);
+                if (isCover && (!hasImg(servicesItem.getId(), bytes, isCover))){
+                        servicesItem.setImgCover(bytes);
+                }else if(!isCover && (!hasImg(servicesItem.getId(), bytes, !isCover))) {
+                    servicesItem.setImgProfile(bytes);
                 }
-                handle.updateService(services);
+                handle.updateService(servicesItem);
                 Log.d("load image", "OK");
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -135,8 +135,8 @@ public class LoadServiceUtils {
 
     private boolean hasImg(String id, byte[] bytes, boolean isCover){
         ServiceDatabase handle = new ServiceDatabase(context);
-        Services services = handle.getService(id);
-        byte[] bs = isCover ? services.getImgCover() : services.getImgProfile();
+        ServicesItem servicesItem = handle.getService(id);
+        byte[] bs = isCover ? servicesItem.getImgCover() : servicesItem.getImgProfile();
         return Arrays.equals(bs, bytes);
     }
 

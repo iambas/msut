@@ -6,7 +6,7 @@
     android:descendantFocusability="beforeDescendants"
     android:focusable="true"
     android:focusableInTouchMode="true"
-    tools:context="com.darker.motorservice.activity.UpdateDataServiceActivity">
+    tools:context=".ui.update_data_service.UpdateDataServiceActivity">
 
     <ScrollView
         android:layout_width="match_parent"
