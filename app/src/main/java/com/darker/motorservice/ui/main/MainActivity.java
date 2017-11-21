@@ -7,9 +7,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -23,6 +20,7 @@ import android.widget.TextView;
 import com.darker.motorservice.R;
 import com.darker.motorservice.database.AdminDatabase;
 import com.darker.motorservice.database.ServiceDatabase;
+import com.darker.motorservice.service.BackgroundService;
 import com.darker.motorservice.ui.main.fragment.AddNewServiceFragment;
 import com.darker.motorservice.ui.main.fragment.ChatFragment;
 import com.darker.motorservice.ui.main.fragment.MotorcycleFragment;
@@ -30,10 +28,6 @@ import com.darker.motorservice.ui.main.fragment.ProfileFragment;
 import com.darker.motorservice.ui.main.fragment.ReviewFragment;
 import com.darker.motorservice.ui.main.fragment.StatisticsFragment;
 import com.darker.motorservice.ui.main.fragment.TimelineFragment;
-import com.darker.motorservice.service.BackgroundService;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.darker.motorservice.utils.Constant.ALERT;
 import static com.darker.motorservice.utils.Constant.CHAT;
@@ -351,36 +345,6 @@ public class MainActivity extends AppCompatActivity {
         adapter.addFrag(new ReviewFragment(), tabReview);
         adapter.addFrag(new ProfileFragment(), tabProfile);
         viewPager.setAdapter(adapter);
-    }
-
-    private class SectionsPagerAdapter extends FragmentPagerAdapter {
-
-        private final List<Fragment> mFragmentList = new ArrayList<>();
-        private final List<String> mFragmentTitleList = new ArrayList<>();
-
-        private SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return mFragmentList.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return mFragmentList.size();
-        }
-
-        public void addFrag(Fragment fragment, String title) {
-            mFragmentList.add(fragment);
-            mFragmentTitleList.add(title);
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return mFragmentTitleList.get(position);
-        }
     }
 
     @Override
