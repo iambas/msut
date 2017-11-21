@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.darker.motorservice.R;
@@ -49,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
     private ImageView firstImageView, secondImageView, thirdImageView, fourthImageView, fifthImageView, sixthImageView;
     private TextView fisrtTextView, secondTextView, thirdTextView, fourthTextView, fifthTextView, sixthTExtView;
     private boolean isAdmin = false;
+    private ProgressBar progressBar;
+    private RelativeLayout loadLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,24 +60,36 @@ public class MainActivity extends AppCompatActivity {
 
         startBackgroundService();
         initSharedPreferences();
-
-        findViewById(R.id.load).setVisibility(View.VISIBLE);
-        final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
-
+        bindView();
         checkAdmin();
+        loadView();
+    }
+
+    private void loadView() {
         if (new ServiceDatabase(this).getServiceCount() != 0) {
             setup();
         } else {
             progressBar.setVisibility(View.VISIBLE);
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    findViewById(R.id.load).setVisibility(View.VISIBLE);
-                    progressBar.setVisibility(View.GONE);
-                    setup();
-                }
-            }, 4000);
+            handlerSetup();
         }
+    }
+
+    private void handlerSetup() {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                loadLayout.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.GONE);
+                setup();
+            }
+        }, 4000);
+    }
+
+    private void bindView() {
+        loadLayout = (RelativeLayout) findViewById(R.id.load);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+
+        loadLayout.setVisibility(View.VISIBLE);
     }
 
     private void initSharedPreferences() {
