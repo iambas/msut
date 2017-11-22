@@ -29,6 +29,10 @@ import com.darker.motorservice.ui.main.fragment.ProfileFragment;
 import com.darker.motorservice.ui.main.fragment.ReviewFragment;
 import com.darker.motorservice.ui.main.fragment.StatisticsFragment;
 import com.darker.motorservice.ui.main.fragment.TimelineFragment;
+import com.darker.motorservice.ui.main.model.ViewItem;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.darker.motorservice.utils.Constant.ALERT;
 import static com.darker.motorservice.utils.Constant.CHAT;
@@ -48,6 +52,8 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private RelativeLayout loadLayout;
     private ViewPager containerViewPager;
+
+    private List<ViewItem> viewItemList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,11 +164,14 @@ public class MainActivity extends AppCompatActivity {
             sixthTExtView.setText(R.string.tab_add_store);
         }
 
-        setupTabIconsService(0);
+        addViewItem();
+        setupForServicesIcon();
+        setupServicesAdmin();
+        setCustomView();
     }
 
     @SuppressLint("InflateParams")
-    private View getInflate(){
+    private View getInflate() {
         return LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
     }
 
@@ -173,73 +182,43 @@ public class MainActivity extends AppCompatActivity {
         thirdTextView.setText(R.string.tab_stats);
     }
 
-    private void setupTabIconsService(int tab) {
+    private void addViewItem(){
+        addViewItemToList(firstImageView, fisrtTextView);
+        addViewItemToList(secondImageView, secondTextView);
+        addViewItemToList(thirdImageView, thirdTextView);
+        addViewItemToList(fourthImageView, fourthTextView);
+        addViewItemToList(fifthImageView, fisrtTextView);
+        addViewItemToList(sixthImageView, sixthTExtView);
+    }
 
-        if (tab == 0) {
-            firstImageView.setImageResource(R.drawable.ic_chat_dark);
-            fisrtTextView.setTextColor(getResources().getColor(R.color.teal));
-        } else {
-            firstImageView.setImageResource(R.drawable.ic_chat_white);
-            fisrtTextView.setTextColor(getResources().getColor(R.color.iconTab));
-        }
+    private void setupForServicesIcon() {
+        firstImageView.setImageResource(R.drawable.ic_chat_white);
+        secondImageView.setImageResource(R.drawable.ic_timeline_white);
+        thirdImageView.setImageResource(R.drawable.ic_equalizer_white);
+        fourthImageView.setImageResource(R.drawable.ic_star_white);
+        fifthImageView.setImageResource(R.drawable.ic_person_white);
+    }
 
-        if (tab == 1) {
-            secondImageView.setImageResource(R.drawable.ic_timeline_dark);
-            secondTextView.setTextColor(getResources().getColor(R.color.teal));
-        } else {
-            secondImageView.setImageResource(R.drawable.ic_timeline_white);
-            secondTextView.setTextColor(getResources().getColor(R.color.iconTab));
-        }
-
-        if (tab == 2) {
-            thirdImageView.setImageResource(R.drawable.ic_equalizer_dark);
-            thirdTextView.setTextColor(getResources().getColor(R.color.teal));
-        } else {
-            thirdImageView.setImageResource(R.drawable.ic_equalizer_white);
-            thirdTextView.setTextColor(getResources().getColor(R.color.iconTab));
-        }
-
-        if (tab == 3) {
-            fourthImageView.setImageResource(R.drawable.ic_star_dark);
-            fourthTextView.setTextColor(getResources().getColor(R.color.teal));
-        } else {
-            fourthImageView.setImageResource(R.drawable.ic_star_white);
-            fourthTextView.setTextColor(getResources().getColor(R.color.iconTab));
-        }
-
-        if (tab == 4) {
-            fifthImageView.setImageResource(R.drawable.ic_person_dark);
-            fifthTextView.setTextColor(getResources().getColor(R.color.teal));
-        } else {
-            fifthImageView.setImageResource(R.drawable.ic_person_white);
-            fifthTextView.setTextColor(getResources().getColor(R.color.iconTab));
-        }
-
+    private void setupServicesAdmin() {
         if (isAdmin) {
-            if (tab == 5) {
-                sixthImageView.setImageResource(R.drawable.ic_add_circle_dark);
-                sixthTExtView.setTextColor(getResources().getColor(R.color.teal));
-            } else {
-                sixthImageView.setImageResource(R.drawable.ic_add_circle_white);
-                sixthTExtView.setTextColor(getResources().getColor(R.color.iconTab));
-            }
+            sixthImageView.setImageResource(R.drawable.ic_add_circle_white);
+            sixthTExtView.setTextColor(getResources().getColor(R.color.iconTab));
             tabLayout.getTabAt(5).setCustomView(sixthView);
         }
+    }
 
-        tabLayout.getTabAt(0).setCustomView(fisrtView);
-        tabLayout.getTabAt(1).setCustomView(secondView);
-        tabLayout.getTabAt(2).setCustomView(thirdView);
-        tabLayout.getTabAt(3).setCustomView(fouthView);
-        tabLayout.getTabAt(4).setCustomView(fifthView);
+    private void addViewItemToList(ImageView imageView, TextView textView) {
+        ViewItem viewItem = new ViewItem(imageView, textView);
+        viewItemList.add(viewItem);
     }
 
     private void setupViewPagerService(ViewPager viewPager) {
-        String tabChat = getStringId(R.string.tab_chat);
-        String tabTimeLine = getStringId(R.string.tab_timeline);
-        String tabStats = getStringId(R.string.tab_stats);
-        String tabReview = getStringId(R.string.tab_review);
-        String tabProfile = getStringId(R.string.tab_profile);
-        String tabAddStore = getStringId(R.string.tab_add_store);
+        String tabChat = getString(R.string.tab_chat);
+        String tabTimeLine = getString(R.string.tab_timeline);
+        String tabStats = getString(R.string.tab_stats);
+        String tabReview = getString(R.string.tab_review);
+        String tabProfile = getString(R.string.tab_profile);
+        String tabAddStore = getString(R.string.tab_add_store);
 
         SectionsPagerAdapter adapter = new SectionsPagerAdapter(getSupportFragmentManager());
         adapter.addFrag(new ChatFragment(), tabChat);
@@ -251,10 +230,6 @@ public class MainActivity extends AppCompatActivity {
             adapter.addFrag(new AddNewServiceFragment(), tabAddStore);
         }
         viewPager.setAdapter(adapter);
-    }
-
-    private String getStringId(int id){
-        return getResources().getString(id);
     }
 
     private void tabUser() {
@@ -331,6 +306,10 @@ public class MainActivity extends AppCompatActivity {
             fifthTextView.setTextColor(getResources().getColor(R.color.iconTab));
         }
 
+        setCustomView();
+    }
+
+    private void setCustomView() {
         tabLayout.getTabAt(0).setCustomView(fisrtView);
         tabLayout.getTabAt(1).setCustomView(secondView);
         tabLayout.getTabAt(2).setCustomView(thirdView);
@@ -339,11 +318,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupViewPagerUser(ViewPager viewPager) {
-        String tabChat = getStringId(R.string.tab_chat);
-        String tabTimeLine = getStringId(R.string.tab_timeline);
-        String tabReview = getStringId(R.string.tab_review);
-        String tabProfile = getStringId(R.string.tab_profile);
-        String tabStore = getStringId(R.string.tab_store);
+        String tabChat = getString(R.string.tab_chat);
+        String tabTimeLine = getString(R.string.tab_timeline);
+        String tabReview = getString(R.string.tab_review);
+        String tabProfile = getString(R.string.tab_profile);
+        String tabStore = getString(R.string.tab_store);
 
         SectionsPagerAdapter adapter = new SectionsPagerAdapter(getSupportFragmentManager());
         adapter.addFrag(new MotorcycleFragment(), tabStore);
@@ -403,10 +382,12 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onTabUnselected(TabLayout.Tab tab) {}
+            public void onTabUnselected(TabLayout.Tab tab) {
+            }
 
             @Override
-            public void onTabReselected(TabLayout.Tab tab) {}
+            public void onTabReselected(TabLayout.Tab tab) {
+            }
         };
     }
 
@@ -415,11 +396,20 @@ public class MainActivity extends AppCompatActivity {
         return new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                setupTabIconsService(tab.getPosition());
+//                setupTabIconsService(tab.getPosition());
+
+                int tealColor = getResources().getColor(R.color.teal);
+                ViewItem viewItem = viewItemList.get(tab.getPosition());
+                viewItem.getImageView().setColorFilter(tealColor);
+                viewItem.getTextView().setTextColor(tealColor);
             }
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
+                int tabColor = getResources().getColor(R.color.iconTab);
+                ViewItem viewItem = viewItemList.get(tab.getPosition());
+                viewItem.getImageView().setColorFilter(tabColor);
+                viewItem.getTextView().setTextColor(tabColor);
             }
 
             @Override
