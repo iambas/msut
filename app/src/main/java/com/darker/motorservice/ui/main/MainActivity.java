@@ -42,17 +42,18 @@ import static com.darker.motorservice.utils.Constant.STATUS;
 import static com.darker.motorservice.utils.Constant.USER;
 
 public class MainActivity extends AppCompatActivity {
-    private TabLayout tabLayout;
-    private SharedPreferences loginSharedPref;
-    private SharedPreferences.Editor chatEditor;
     private View fisrtView, secondView, thirdView, fouthView, fifthView, sixthView;
     private ImageView firstImageView, secondImageView, thirdImageView, fourthImageView, fifthImageView, sixthImageView;
     private TextView fisrtTextView, secondTextView, thirdTextView, fourthTextView, fifthTextView, sixthTExtView;
-    private boolean isAdmin = false;
+
+    private TabLayout tabLayout;
     private ProgressBar progressBar;
     private RelativeLayout loadLayout;
     private ViewPager containerViewPager;
 
+    private SharedPreferences loginSharedPref;
+    private SharedPreferences.Editor chatEditor;
+    private boolean isAdmin = false;
     private List<ViewItem> viewItemList = new ArrayList<>();
 
     @Override
@@ -182,13 +183,14 @@ public class MainActivity extends AppCompatActivity {
         thirdTextView.setText(R.string.tab_stats);
     }
 
-    private void addViewItem(){
+    private void addViewItem() {
         addViewItemToList(firstImageView, fisrtTextView);
         addViewItemToList(secondImageView, secondTextView);
         addViewItemToList(thirdImageView, thirdTextView);
         addViewItemToList(fourthImageView, fourthTextView);
-        addViewItemToList(fifthImageView, fisrtTextView);
-        addViewItemToList(sixthImageView, sixthTExtView);
+        addViewItemToList(fifthImageView, fifthTextView);
+        if (isAdmin)
+            addViewItemToList(sixthImageView, sixthTExtView);
     }
 
     private void setupForServicesIcon() {
@@ -255,7 +257,9 @@ public class MainActivity extends AppCompatActivity {
         fifthTextView = (TextView) fifthView.findViewById(R.id.tab_text);
         fifthTextView.setText(R.string.tab_profile);
 
-        setupTabIconsUser(0);
+        addViewItem();
+        setupForUserIcon();
+        setCustomView();
     }
 
     private void getReviewTab() {
@@ -265,48 +269,12 @@ public class MainActivity extends AppCompatActivity {
         fourthTextView.setText(R.string.tab_review);
     }
 
-    private void setupTabIconsUser(int tab) {
-        if (tab == 0) {
-            firstImageView.setImageResource(R.drawable.ic_motorcycle_dark);
-            fisrtTextView.setTextColor(getResources().getColor(R.color.teal));
-        } else {
-            firstImageView.setImageResource(R.drawable.ic_motorcycle_white);
-            fisrtTextView.setTextColor(getResources().getColor(R.color.iconTab));
-        }
-
-        if (tab == 1) {
-            secondImageView.setImageResource(R.drawable.ic_chat_dark);
-            secondTextView.setTextColor(getResources().getColor(R.color.teal));
-        } else {
-            secondImageView.setImageResource(R.drawable.ic_chat_white);
-            secondTextView.setTextColor(getResources().getColor(R.color.iconTab));
-        }
-
-        if (tab == 2) {
-            thirdImageView.setImageResource(R.drawable.ic_timeline_dark);
-            thirdTextView.setTextColor(getResources().getColor(R.color.teal));
-        } else {
-            thirdImageView.setImageResource(R.drawable.ic_timeline_white);
-            thirdTextView.setTextColor(getResources().getColor(R.color.iconTab));
-        }
-
-        if (tab == 3) {
-            fourthImageView.setImageResource(R.drawable.ic_star_dark);
-            fourthTextView.setTextColor(getResources().getColor(R.color.teal));
-        } else {
-            fourthImageView.setImageResource(R.drawable.ic_star_white);
-            fourthTextView.setTextColor(getResources().getColor(R.color.iconTab));
-        }
-
-        if (tab == 4) {
-            fifthImageView.setImageResource(R.drawable.ic_person_dark);
-            fifthTextView.setTextColor(getResources().getColor(R.color.teal));
-        } else {
-            fifthImageView.setImageResource(R.drawable.ic_person_white);
-            fifthTextView.setTextColor(getResources().getColor(R.color.iconTab));
-        }
-
-        setCustomView();
+    private void setupForUserIcon() {
+        firstImageView.setImageResource(R.drawable.ic_motorcycle_white);
+        secondImageView.setImageResource(R.drawable.ic_chat_white);
+        thirdImageView.setImageResource(R.drawable.ic_timeline_white);
+        fourthImageView.setImageResource(R.drawable.ic_star_white);
+        fifthImageView.setImageResource(R.drawable.ic_person_white);
     }
 
     private void setCustomView() {
@@ -373,21 +341,35 @@ public class MainActivity extends AppCompatActivity {
         Log.d("Main check", "onDestroy");
     }
 
+    private void setTanSelected(TabLayout.Tab tab) {
+        int tealColor = getResources().getColor(R.color.teal);
+        ViewItem viewItem = viewItemList.get(tab.getPosition());
+        viewItem.getImageView().setColorFilter(tealColor);
+        viewItem.getTextView().setTextColor(tealColor);
+    }
+
+    private void setTabUnSelected(TabLayout.Tab tab) {
+        int tabColor = getResources().getColor(R.color.iconTab);
+        ViewItem viewItem = viewItemList.get(tab.getPosition());
+        viewItem.getImageView().setColorFilter(tabColor);
+        viewItem.getTextView().setTextColor(tabColor);
+    }
+
     @NonNull
     private TabLayout.OnTabSelectedListener onTabUserListener() {
         return new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                setupTabIconsUser(tab.getPosition());
+                setTanSelected(tab);
             }
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
+                setTabUnSelected(tab);
             }
 
             @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-            }
+            public void onTabReselected(TabLayout.Tab tab) {}
         };
     }
 
@@ -396,25 +378,16 @@ public class MainActivity extends AppCompatActivity {
         return new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-//                setupTabIconsService(tab.getPosition());
-
-                int tealColor = getResources().getColor(R.color.teal);
-                ViewItem viewItem = viewItemList.get(tab.getPosition());
-                viewItem.getImageView().setColorFilter(tealColor);
-                viewItem.getTextView().setTextColor(tealColor);
+                setTanSelected(tab);
             }
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-                int tabColor = getResources().getColor(R.color.iconTab);
-                ViewItem viewItem = viewItemList.get(tab.getPosition());
-                viewItem.getImageView().setColorFilter(tabColor);
-                viewItem.getTextView().setTextColor(tabColor);
+                setTabUnSelected(tab);
             }
 
             @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-            }
+            public void onTabReselected(TabLayout.Tab tab) {}
         };
     }
 }
