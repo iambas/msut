@@ -174,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupTabIconsService(int tab) {
+
         if (tab == 0) {
             firstImageView.setImageResource(R.drawable.ic_chat_dark);
             fisrtTextView.setTextColor(getResources().getColor(R.color.teal));

@@ -49,7 +49,7 @@
             android:label="@string/title_activity_maps"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ui.chatItem.ChatActivity"
+            android:name=".ui.chat.ChatActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
         <activity
