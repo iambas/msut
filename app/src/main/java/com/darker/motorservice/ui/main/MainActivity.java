@@ -1,5 +1,6 @@
 package com.darker.motorservice.ui.main;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -120,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
         setupViewPagerService(containerViewPager);
         tabLayout.setupWithViewPager(containerViewPager);
         tabService();
-        tabLayout.addOnTabSelectedListener(onTabSelectedListener());
+        tabLayout.addOnTabSelectedListener(onTabServicesSelectedListener());
     }
 
     private void setTabUser() {
@@ -131,12 +132,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void tabService() {
-        fisrtView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+        fisrtView = getInflate();
         firstImageView = (ImageView) fisrtView.findViewById(R.id.tab_icon);
         fisrtTextView = (TextView) fisrtView.findViewById(R.id.tab_text);
         fisrtTextView.setText(R.string.tab_chat);
 
-        secondView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+        secondView = getInflate();
         secondImageView = (ImageView) secondView.findViewById(R.id.tab_icon);
         secondTextView = (TextView) secondView.findViewById(R.id.tab_text);
         secondTextView.setText(R.string.tab_timeline);
@@ -145,13 +146,13 @@ public class MainActivity extends AppCompatActivity {
 
         getReviewTab();
 
-        fifthView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+        fifthView = getInflate();
         fifthImageView = (ImageView) fifthView.findViewById(R.id.tab_icon);
         fifthTextView = (TextView) fifthView.findViewById(R.id.tab_text);
         fifthTextView.setText(R.string.tab_profile);
 
         if (isAdmin) {
-            sixthView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+            sixthView = getInflate();
             sixthImageView = (ImageView) sixthView.findViewById(R.id.tab_icon);
             sixthTExtView = (TextView) sixthView.findViewById(R.id.tab_text);
             sixthTExtView.setText(R.string.tab_add_store);
@@ -160,8 +161,13 @@ public class MainActivity extends AppCompatActivity {
         setupTabIconsService(0);
     }
 
+    @SuppressLint("InflateParams")
+    private View getInflate(){
+        return LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+    }
+
     private void getStatisticTab() {
-        thirdView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+        thirdView = getInflate();
         thirdImageView = (ImageView) thirdView.findViewById(R.id.tab_icon);
         thirdTextView = (TextView) thirdView.findViewById(R.id.tab_text);
         thirdTextView.setText(R.string.tab_stats);
@@ -251,24 +257,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void tabUser() {
-        fisrtView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+        fisrtView = getInflate();
         firstImageView = (ImageView) fisrtView.findViewById(R.id.tab_icon);
         fisrtTextView = (TextView) fisrtView.findViewById(R.id.tab_text);
         fisrtTextView.setText(R.string.tab_store);
 
-        secondView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+        secondView = getInflate();
         secondImageView = (ImageView) secondView.findViewById(R.id.tab_icon);
         secondTextView = (TextView) secondView.findViewById(R.id.tab_text);
         secondTextView.setText(R.string.tab_chat);
 
-        thirdView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+        thirdView = getInflate();
         thirdImageView = (ImageView) thirdView.findViewById(R.id.tab_icon);
         thirdTextView = (TextView) thirdView.findViewById(R.id.tab_text);
         thirdTextView.setText(R.string.tab_timeline);
 
         getReviewTab();
 
-        fifthView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+        fifthView = getInflate();
         fifthImageView = (ImageView) fifthView.findViewById(R.id.tab_icon);
         fifthTextView = (TextView) fifthView.findViewById(R.id.tab_text);
         fifthTextView.setText(R.string.tab_profile);
@@ -277,7 +283,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getReviewTab() {
-        fouthView = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+        fouthView = getInflate();
         fourthImageView = (ImageView) fouthView.findViewById(R.id.tab_icon);
         fourthTextView = (TextView) fouthView.findViewById(R.id.tab_text);
         fourthTextView.setText(R.string.tab_review);
@@ -404,7 +410,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @NonNull
-    private TabLayout.OnTabSelectedListener onTabSelectedListener() {
+    private TabLayout.OnTabSelectedListener onTabServicesSelectedListener() {
         return new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
