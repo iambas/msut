@@ -30,6 +30,7 @@ import com.darker.motorservice.ui.main.fragment.ReviewFragment;
 import com.darker.motorservice.ui.main.fragment.StatisticsFragment;
 import com.darker.motorservice.ui.main.fragment.TimelineFragment;
 import com.darker.motorservice.ui.main.model.ViewItem;
+import com.darker.motorservice.utils.ImageUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,10 +43,6 @@ import static com.darker.motorservice.utils.Constant.STATUS;
 import static com.darker.motorservice.utils.Constant.USER;
 
 public class MainActivity extends AppCompatActivity {
-    private View fisrtView, secondView, thirdView, fouthView, fifthView, sixthView;
-    private ImageView firstImageView, secondImageView, thirdImageView, fourthImageView, fifthImageView, sixthImageView;
-    private TextView fisrtTextView, secondTextView, thirdTextView, fourthTextView, fifthTextView, sixthTExtView;
-
     private TabLayout tabLayout;
     private ProgressBar progressBar;
     private RelativeLayout loadLayout;
@@ -66,6 +63,46 @@ public class MainActivity extends AppCompatActivity {
         bindView();
         checkAdmin();
         loadView();
+    }
+
+    @Override
+    public void onStart() {
+        chatEditor.putBoolean(ALERT, false);
+        chatEditor.commit();
+        super.onStart();
+        Log.d("Main check", "onStart");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        chatEditor.putBoolean(ALERT, false);
+        chatEditor.commit();
+        Log.d("Main check", "onResume");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        chatEditor.putBoolean(ALERT, true);
+        chatEditor.commit();
+        Log.d("Main check", "onPause");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        chatEditor.putBoolean(ALERT, true);
+        chatEditor.commit();
+        Log.d("Main check", "onStop");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        chatEditor.putBoolean(ALERT, true);
+        chatEditor.commit();
+        Log.d("Main check", "onDestroy");
     }
 
     private void loadView() {
@@ -128,89 +165,59 @@ public class MainActivity extends AppCompatActivity {
         setupViewPagerService(containerViewPager);
         tabLayout.setupWithViewPager(containerViewPager);
         tabService();
-        tabLayout.addOnTabSelectedListener(onTabServicesSelectedListener());
+        tabLayout.addOnTabSelectedListener(onTabSelectedListener());
     }
 
     private void setTabUser() {
         setupViewPagerUser(containerViewPager);
         tabLayout.setupWithViewPager(containerViewPager);
         tabUser();
-        tabLayout.addOnTabSelectedListener(onTabUserListener());
-    }
-
-    private void tabService() {
-        fisrtView = getInflate();
-        firstImageView = (ImageView) fisrtView.findViewById(R.id.tab_icon);
-        fisrtTextView = (TextView) fisrtView.findViewById(R.id.tab_text);
-        fisrtTextView.setText(R.string.tab_chat);
-
-        secondView = getInflate();
-        secondImageView = (ImageView) secondView.findViewById(R.id.tab_icon);
-        secondTextView = (TextView) secondView.findViewById(R.id.tab_text);
-        secondTextView.setText(R.string.tab_timeline);
-
-        getStatisticTab();
-
-        getReviewTab();
-
-        fifthView = getInflate();
-        fifthImageView = (ImageView) fifthView.findViewById(R.id.tab_icon);
-        fifthTextView = (TextView) fifthView.findViewById(R.id.tab_text);
-        fifthTextView.setText(R.string.tab_profile);
-
-        if (isAdmin) {
-            sixthView = getInflate();
-            sixthImageView = (ImageView) sixthView.findViewById(R.id.tab_icon);
-            sixthTExtView = (TextView) sixthView.findViewById(R.id.tab_text);
-            sixthTExtView.setText(R.string.tab_add_store);
-        }
-
-        addViewItem();
-        setupForServicesIcon();
-        setupServicesAdmin();
-        setCustomView();
+        tabLayout.addOnTabSelectedListener(onTabSelectedListener());
     }
 
     @SuppressLint("InflateParams")
-    private View getInflate() {
-        return LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+    private void tabSetter(String tabText, int tabIcon) {
+        View view = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+        ImageView imageView = (ImageView) view.findViewById(R.id.tab_icon);
+        TextView textView = (TextView) view.findViewById(R.id.tab_text);
+        textView.setText(tabText);
+        addViewItemToList(view, imageView, textView, tabIcon);
     }
 
-    private void getStatisticTab() {
-        thirdView = getInflate();
-        thirdImageView = (ImageView) thirdView.findViewById(R.id.tab_icon);
-        thirdTextView = (TextView) thirdView.findViewById(R.id.tab_text);
-        thirdTextView.setText(R.string.tab_stats);
-    }
-
-    private void addViewItem() {
-        addViewItemToList(firstImageView, fisrtTextView);
-        addViewItemToList(secondImageView, secondTextView);
-        addViewItemToList(thirdImageView, thirdTextView);
-        addViewItemToList(fourthImageView, fourthTextView);
-        addViewItemToList(fifthImageView, fifthTextView);
-        if (isAdmin)
-            addViewItemToList(sixthImageView, sixthTExtView);
-    }
-
-    private void setupForServicesIcon() {
-        firstImageView.setImageResource(R.drawable.ic_chat_white);
-        secondImageView.setImageResource(R.drawable.ic_timeline_white);
-        thirdImageView.setImageResource(R.drawable.ic_equalizer_white);
-        fourthImageView.setImageResource(R.drawable.ic_star_white);
-        fifthImageView.setImageResource(R.drawable.ic_person_white);
-    }
-
-    private void setupServicesAdmin() {
-        if (isAdmin) {
-            sixthImageView.setImageResource(R.drawable.ic_add_circle_white);
-            sixthTExtView.setTextColor(getResources().getColor(R.color.iconTab));
-            tabLayout.getTabAt(5).setCustomView(sixthView);
+    private void setCustomView() {
+        for (int i = 0; i < viewItemList.size(); i++){
+            View view = viewItemList.get(i).getView();
+            tabLayout.getTabAt(i).setCustomView(view);
         }
     }
 
-    private void addViewItemToList(ImageView imageView, TextView textView) {
-        ViewItem viewItem = new ViewItem(imageView, textView);
+    private void tabService() {
+        setTextAndIconStoreTab();
+        setTabIcon();
+        setCustomView();
+    }
+
+    private void setTextAndIconStoreTab() {
+        int[] iconStores = ImageUtils.getStoreIcon();
+        String[] tabStores = getResources().getStringArray(R.array.tab_store);
+
+        for (int i = 0; i < iconStores.length; i++){
+            tabSetter(tabStores[i], iconStores[i]);
+        }
+
+        if (isAdmin){
+            tabSetter(getString(R.string.tab_add_store), R.drawable.ic_add_circle_white);
+        }
+    }
+
+    private void setTabIcon() {
+        for (ViewItem viewItem: viewItemList) {
+            viewItem.getImageView().setImageResource(viewItem.getDrawable());
+        }
+    }
+
+    private void addViewItemToList(View view, ImageView imageView, TextView textView, int tabIcon) {
+        ViewItem viewItem = new ViewItem(view, imageView, textView, tabIcon);
         viewItemList.add(viewItem);
     }
 
@@ -235,54 +242,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void tabUser() {
-        fisrtView = getInflate();
-        firstImageView = (ImageView) fisrtView.findViewById(R.id.tab_icon);
-        fisrtTextView = (TextView) fisrtView.findViewById(R.id.tab_text);
-        fisrtTextView.setText(R.string.tab_store);
-
-        secondView = getInflate();
-        secondImageView = (ImageView) secondView.findViewById(R.id.tab_icon);
-        secondTextView = (TextView) secondView.findViewById(R.id.tab_text);
-        secondTextView.setText(R.string.tab_chat);
-
-        thirdView = getInflate();
-        thirdImageView = (ImageView) thirdView.findViewById(R.id.tab_icon);
-        thirdTextView = (TextView) thirdView.findViewById(R.id.tab_text);
-        thirdTextView.setText(R.string.tab_timeline);
-
-        getReviewTab();
-
-        fifthView = getInflate();
-        fifthImageView = (ImageView) fifthView.findViewById(R.id.tab_icon);
-        fifthTextView = (TextView) fifthView.findViewById(R.id.tab_text);
-        fifthTextView.setText(R.string.tab_profile);
-
-        addViewItem();
-        setupForUserIcon();
+        setTextAndIconUserTab();
+        setTabIcon();
         setCustomView();
     }
 
-    private void getReviewTab() {
-        fouthView = getInflate();
-        fourthImageView = (ImageView) fouthView.findViewById(R.id.tab_icon);
-        fourthTextView = (TextView) fouthView.findViewById(R.id.tab_text);
-        fourthTextView.setText(R.string.tab_review);
-    }
+    private void setTextAndIconUserTab() {
+        int[] iconUsers = ImageUtils.getUserIcon();
+        String[] tabTexts = getResources().getStringArray(R.array.tab_user);
 
-    private void setupForUserIcon() {
-        firstImageView.setImageResource(R.drawable.ic_motorcycle_white);
-        secondImageView.setImageResource(R.drawable.ic_chat_white);
-        thirdImageView.setImageResource(R.drawable.ic_timeline_white);
-        fourthImageView.setImageResource(R.drawable.ic_star_white);
-        fifthImageView.setImageResource(R.drawable.ic_person_white);
-    }
-
-    private void setCustomView() {
-        tabLayout.getTabAt(0).setCustomView(fisrtView);
-        tabLayout.getTabAt(1).setCustomView(secondView);
-        tabLayout.getTabAt(2).setCustomView(thirdView);
-        tabLayout.getTabAt(3).setCustomView(fouthView);
-        tabLayout.getTabAt(4).setCustomView(fifthView);
+        for (int i = 0; i < iconUsers.length; i++){
+            tabSetter(tabTexts[i], iconUsers[i]);
+        }
     }
 
     private void setupViewPagerUser(ViewPager viewPager) {
@@ -301,47 +272,7 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setAdapter(adapter);
     }
 
-    @Override
-    public void onStart() {
-        chatEditor.putBoolean(ALERT, false);
-        chatEditor.commit();
-        super.onStart();
-        Log.d("Main check", "onStart");
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        chatEditor.putBoolean(ALERT, false);
-        chatEditor.commit();
-        Log.d("Main check", "onResume");
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        chatEditor.putBoolean(ALERT, true);
-        chatEditor.commit();
-        Log.d("Main check", "onPause");
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        chatEditor.putBoolean(ALERT, true);
-        chatEditor.commit();
-        Log.d("Main check", "onStop");
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        chatEditor.putBoolean(ALERT, true);
-        chatEditor.commit();
-        Log.d("Main check", "onDestroy");
-    }
-
-    private void setTanSelected(TabLayout.Tab tab) {
+    private void setTabSelected(TabLayout.Tab tab) {
         int tealColor = getResources().getColor(R.color.teal);
         ViewItem viewItem = viewItemList.get(tab.getPosition());
         viewItem.getImageView().setColorFilter(tealColor);
@@ -356,11 +287,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @NonNull
-    private TabLayout.OnTabSelectedListener onTabUserListener() {
+    private TabLayout.OnTabSelectedListener onTabSelectedListener() {
         return new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                setTanSelected(tab);
+                setTabSelected(tab);
             }
 
             @Override
@@ -369,25 +300,8 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onTabReselected(TabLayout.Tab tab) {}
-        };
-    }
-
-    @NonNull
-    private TabLayout.OnTabSelectedListener onTabServicesSelectedListener() {
-        return new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                setTanSelected(tab);
+            public void onTabReselected(TabLayout.Tab tab) {
             }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-                setTabUnSelected(tab);
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {}
         };
     }
 }

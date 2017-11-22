@@ -68,4 +68,24 @@ public class ImageUtils {
 
         return output;
     }
+
+    public static int[] getStoreIcon(){
+        return new int[]{
+                R.drawable.ic_chat_white,
+                R.drawable.ic_timeline_white,
+                R.drawable.ic_equalizer_white,
+                R.drawable.ic_star_white,
+                R.drawable.ic_person_white
+        };
+    }
+
+    public static int[] getUserIcon(){
+        return new int[]{
+                R.drawable.ic_motorcycle_white,
+                R.drawable.ic_chat_white,
+                R.drawable.ic_timeline_white,
+                R.drawable.ic_star_white,
+                R.drawable.ic_person_white
+        };
+    }
 }

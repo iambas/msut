@@ -1,5 +1,6 @@
 package com.darker.motorservice.ui.main.model;
 
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -8,10 +9,27 @@ import android.widget.TextView;
  */
 
 public class ViewItem {
+    private View view;
     private ImageView imageView;
     private TextView textView;
+    private int drawable;
 
     public ViewItem() {}
+
+    public ViewItem(View view, ImageView imageView, TextView textView, int drawable) {
+        this.view = view;
+        this.imageView = imageView;
+        this.textView = textView;
+        this.drawable = drawable;
+    }
+
+    public View getView() {
+        return view;
+    }
+
+    public void setView(View view) {
+        this.view = view;
+    }
 
     public ImageView getImageView() {
         return imageView;
@@ -21,16 +39,19 @@ public class ViewItem {
         this.imageView = imageView;
     }
 
-    public ViewItem(ImageView imageView, TextView textView) {
-        this.imageView = imageView;
-        this.textView = textView;
-    }
-
     public TextView getTextView() {
         return textView;
     }
 
     public void setTextView(TextView textView) {
         this.textView = textView;
+    }
+
+    public int getDrawable() {
+        return drawable;
+    }
+
+    public void setDrawable(int drawable) {
+        this.drawable = drawable;
     }
 }

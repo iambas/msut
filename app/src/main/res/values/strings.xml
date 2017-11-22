@@ -97,4 +97,20 @@
     <string name="tab_stats">สถิติ</string>
     <string name="tab_review">รีวิว</string>
     <string name="tab_store">ร้านต่างๆ</string>
+
+    <string-array name="tab_store">
+        <item>แชท</item>
+        <item>ไทม์ไลน์</item>
+        <item>สถิติ</item>
+        <item>รีวิว</item>
+        <item>โปรไฟล์</item>
+    </string-array>
+
+    <string-array name="tab_user">
+        <item>ร้านต่างๆ</item>
+        <item>แชท</item>
+        <item>ไทม์ไลน์</item>
+        <item>รีวิว</item>
+        <item>โปรไฟล์</item>
+    </string-array>
 </resources>
