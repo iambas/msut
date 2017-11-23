@@ -35,6 +35,7 @@ import android.widget.Toast;
 
 import com.darker.motorservice.R;
 import com.darker.motorservice.database.PictureDatabse;
+import com.darker.motorservice.ui.main.callback.ImageUploadCallback;
 import com.darker.motorservice.ui.main.model.PictureItem;
 import com.darker.motorservice.ui.chat.model.ChatMessageItem;
 import com.darker.motorservice.ui.chat.model.NewChatItem;
@@ -380,6 +381,30 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
                 pushImageToDatabase(bitmap, imgName);
             }
         });
+
+        ImageUtils.uploadImage(imgName, bitmap, getImageUploadCallback());
+    }
+
+    @NonNull
+    private ImageUploadCallback getImageUploadCallback() {
+        return new ImageUploadCallback() {
+
+            @Override
+            public void onSuccess(String imageName, Bitmap bitmap) {
+                Log.d("upload", "OK");
+                pushMsg(KEY_IMAGE + imageName);
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(ChatActivity.this, "ส่งรูปภาพเรียบร้อย", Toast.LENGTH_SHORT).show();
+                pushStat("chat");
+                pushImageToDatabase(bitmap, imageName);
+            }
+
+            @Override
+            public void onFailure(String imageName) {
+                Toast.makeText(ChatActivity.this, "การส่งรูปภาพมีปัญหา โปรดลองอีกครั้ง", Toast.LENGTH_SHORT).show();
+                progressBar.setVisibility(View.GONE);
+            }
+        };
     }
 
     private void pushImageToDatabase(Bitmap bitmap, String imgName) {

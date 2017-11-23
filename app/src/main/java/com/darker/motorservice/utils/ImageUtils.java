@@ -6,10 +6,17 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.support.annotation.NonNull;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.model.ServicesItem;
 import com.darker.motorservice.database.ServiceDatabase;
+import com.darker.motorservice.model.ServicesItem;
+import com.darker.motorservice.ui.main.callback.ImageUploadCallback;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 
@@ -87,5 +94,30 @@ public class ImageUtils {
                 R.drawable.ic_star_white,
                 R.drawable.ic_person_white
         };
+    }
+
+    public static void uploadImage(final String imageName, final Bitmap imageBitmap, final ImageUploadCallback callback){
+        UploadTask uploadTask = getUploadTask(imageName, imageBitmap);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                callback.onFailure(imageName);
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                callback.onSuccess(imageName, imageBitmap);
+            }
+        });
+    }
+
+    private static UploadTask getUploadTask(String imageName, Bitmap imageBitmap){
+        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+        StorageReference mountainsRef = storageReference.child(imageName);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+        byte[] data = baos.toByteArray();
+        return mountainsRef.putBytes(data);
     }
 }

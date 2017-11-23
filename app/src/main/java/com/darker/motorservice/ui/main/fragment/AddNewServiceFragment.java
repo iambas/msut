@@ -17,21 +17,17 @@ import android.widget.Toast;
 import com.darker.motorservice.R;
 import com.darker.motorservice.database.ServiceDatabase;
 import com.darker.motorservice.model.ServicesItem;
+import com.darker.motorservice.ui.main.callback.ImageUploadCallback;
+import com.darker.motorservice.utils.ImageUtils;
 import com.darker.motorservice.utils.NetWorkUtils;
 import com.darker.motorservice.utils.StringUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
-import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 import static com.darker.motorservice.R.drawable.cover;
@@ -211,24 +207,44 @@ public class AddNewServiceFragment extends Fragment {
 
     private void uploadImg(final String image, int draw) {
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), draw);
-        StorageReference mountainsRef = FirebaseStorage.getInstance().getReference().child(image);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-        byte[] data = baos.toByteArray();
-        UploadTask uploadTask = mountainsRef.putBytes(data);
-        uploadTask.addOnFailureListener(new OnFailureListener() {
+//        StorageReference mountainsRef = FirebaseStorage.getInstance().getReference().child(image);
+//        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+//        byte[] data = baos.toByteArray();
+//        UploadTask uploadTask = mountainsRef.putBytes(data);
+//        uploadTask.addOnFailureListener(new OnFailureListener() {
+//            @Override
+//            public void onFailure(@NonNull Exception exception) {
+//                progressBar.setVisibility(View.GONE);
+//                alert(image + " upload ไม่ได้!");
+//            }
+//        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+//            @Override
+//            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+//                progressBar.setVisibility(View.GONE);
+//                alert(image + " upload เรียบร้อย");
+//            }
+//        });
+
+        ImageUtils.uploadImage(image, bitmap, getImageUploadCallback());
+    }
+
+    @NonNull
+    private ImageUploadCallback getImageUploadCallback() {
+        return new ImageUploadCallback() {
+
             @Override
-            public void onFailure(@NonNull Exception exception) {
+            public void onSuccess(String imageName, Bitmap bitmap) {
                 progressBar.setVisibility(View.GONE);
-                alert(image + " upload ไม่ได้!");
+                alert(imageName + " upload เรียบร้อย");
             }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+
             @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+            public void onFailure(String imageName) {
                 progressBar.setVisibility(View.GONE);
-                alert(image + " upload เรียบร้อย");
+                alert(imageName + " upload ไม่ได้!");
             }
-        });
+        };
     }
 
     private void alert(String msg) {
