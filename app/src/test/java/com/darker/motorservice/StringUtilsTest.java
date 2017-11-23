@@ -59,4 +59,46 @@ public class StringUtilsTest {
     public void phoneNumberNull_isNotCorrect(){
         Assert.assertFalse(StringUtils.isPhoneNumber(null));
     }
+
+    @Test
+    public void email_isCorrect(){
+        String email = "test@mail.com";
+        Assert.assertTrue(StringUtils.isEmail(email));
+    }
+
+    @Test
+    public void email_null_isNotCorrect(){
+        String email = null;
+        Assert.assertFalse(StringUtils.isEmail(email));
+    }
+
+    @Test
+    public void email_textEmpty_isNotCorrect(){
+        String email = "";
+        Assert.assertFalse(StringUtils.isEmail(email));
+    }
+
+    @Test
+    public void email_normalText_isNotCorrect(){
+        String email = "qweqw";
+        Assert.assertFalse(StringUtils.isEmail(email));
+    }
+
+    @Test
+    public void email_wrongFormat_isNotCorrect(){
+        String email = "a@mail";
+        Assert.assertFalse(StringUtils.isEmail(email));
+    }
+
+    @Test
+    public void email_wrongFormatWithDot_isNotCorrect(){
+        String email = "a@mail.";
+        Assert.assertFalse(StringUtils.isEmail(email));
+    }
+
+    @Test
+    public void email_notAt_isNotCorrect(){
+        String email = "mail.com";
+        Assert.assertFalse(StringUtils.isEmail(email));
+    }
 }

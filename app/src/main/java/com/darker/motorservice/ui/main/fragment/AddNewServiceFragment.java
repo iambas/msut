@@ -103,9 +103,12 @@ public class AddNewServiceFragment extends Fragment {
                 btnAddNewStore.setClickable(false);
                 getTextEditText();
 
-                if (validateText()) return;
+                if (validateText()){
+                    alert("กรุณากรอกข้อมูลให้ครบ");
+                    return;
+                }
 
-                if (StringUtils.isPhoneNumber(phoneNumber)) {
+                if (!StringUtils.isPhoneNumber(phoneNumber)) {
                     alert("เบอร์โทรศัพท์ไม่ถูกต้อง!");
                     return;
                 }
@@ -135,10 +138,9 @@ public class AddNewServiceFragment extends Fragment {
                 StringUtils.stringOk(position) ||
                 StringUtils.stringOk(phoneNumber) ||
                 StringUtils.stringOk(email)) {
-            alert("กรุณากรอกข้อมูลให้ครบ");
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 
     private void getTextEditText() {

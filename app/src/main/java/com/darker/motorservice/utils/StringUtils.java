@@ -10,9 +10,11 @@ import java.util.Date;
  */
 
 public class StringUtils {
-    public static final String REGX = "\\d{9,10}";
+    private static final String PHONE_PATTERN = "\\d{9,10}";
+    private static final String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
 
-    public StringUtils(){}
+    public StringUtils() {
+    }
 
     @SuppressLint("SimpleDateFormat")
     public static String getDateFormate(String pattern) {
@@ -26,12 +28,15 @@ public class StringUtils {
         return true;
     }
 
-    public static boolean isPhoneNumber(String textTest){
+    public static boolean isPhoneNumber(String textTest) {
         if (textTest == null) return false;
-        return textTest.matches(REGX);
+        return textTest.matches(PHONE_PATTERN);
     }
 
-    public static boolean isEmail(String testEmail){
-        return android.util.Patterns.EMAIL_ADDRESS.matcher(testEmail).matches();
+    public static boolean isEmail(String email) {
+        if (email == null) {
+            return false;
+        }
+        return email.matches(EMAIL_PATTERN);
     }
 }
