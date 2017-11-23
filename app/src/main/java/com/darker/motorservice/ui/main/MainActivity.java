@@ -195,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
         setTextAndIconStoreTab();
         setTabIcon();
         setCustomView();
+        setTabSelected(0);
     }
 
     private void setTextAndIconStoreTab() {
@@ -245,6 +246,7 @@ public class MainActivity extends AppCompatActivity {
         setTextAndIconUserTab();
         setTabIcon();
         setCustomView();
+        setTabSelected(0);
     }
 
     private void setTextAndIconUserTab() {
@@ -272,16 +274,16 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setAdapter(adapter);
     }
 
-    private void setTabSelected(TabLayout.Tab tab) {
+    private void setTabSelected(int position) {
         int tealColor = getResources().getColor(R.color.teal);
-        ViewItem viewItem = viewItemList.get(tab.getPosition());
+        ViewItem viewItem = viewItemList.get(position);
         viewItem.getImageView().setColorFilter(tealColor);
         viewItem.getTextView().setTextColor(tealColor);
     }
 
-    private void setTabUnSelected(TabLayout.Tab tab) {
+    private void setTabUnSelected(int position) {
         int tabColor = getResources().getColor(R.color.iconTab);
-        ViewItem viewItem = viewItemList.get(tab.getPosition());
+        ViewItem viewItem = viewItemList.get(position);
         viewItem.getImageView().setColorFilter(tabColor);
         viewItem.getTextView().setTextColor(tabColor);
     }
@@ -291,12 +293,12 @@ public class MainActivity extends AppCompatActivity {
         return new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                setTabSelected(tab);
+                setTabSelected(tab.getPosition());
             }
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-                setTabUnSelected(tab);
+                setTabUnSelected(tab.getPosition());
             }
 
             @Override
