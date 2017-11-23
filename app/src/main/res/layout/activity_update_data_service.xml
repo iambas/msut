@@ -219,7 +219,7 @@
                 android:background="@drawable/bg_edit_white"
                 android:lineSpacingExtra="6dp"
                 android:padding="6dp"
-                android:text="@string/t1"
+                android:text="@string/default_services"
                 android:textColor="@color/black" />
 
             <TextView
@@ -239,7 +239,7 @@
                 android:background="@drawable/bg_edit_white"
                 android:lineSpacingExtra="6dp"
                 android:padding="6dp"
-                android:text="@string/t2"
+                android:text="@string/default_distribute"
                 android:textColor="@color/black" />
 
             <Button

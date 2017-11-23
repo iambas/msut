@@ -97,6 +97,8 @@
     <string name="tab_stats">สถิติ</string>
     <string name="tab_review">รีวิว</string>
     <string name="tab_store">ร้านต่างๆ</string>
+    <string name="default_latlng">14.8823047,102.0206782</string>
+    <string name="default_time_work">วันจันทร์-ศุกร์ เวลา 08:00-12:00, 13:00-20:00 น. วันเสาร์-อาทิตย์ เวลา 08:00-12:00 น. ปิดเทอม เวลา 09:00-17:00 น.</string>
 
     <string-array name="tab_store">
         <item>แชท</item>

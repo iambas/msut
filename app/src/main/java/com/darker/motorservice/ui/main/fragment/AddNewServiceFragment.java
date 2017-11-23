@@ -167,20 +167,46 @@ public class AddNewServiceFragment extends Fragment {
     }
 
     private void addNewDataService(String uid) {
+        ServicesItem servicesItem = setServiceItem(uid);
+        setValueToFirebase(uid, servicesItem);
+        uploadImageToStorage(servicesItem);
+        clearEditText();
+    }
+
+    private void uploadImageToStorage(ServicesItem servicesItem) {
+        uploadImg(servicesItem.getCover(), cover);
+        uploadImg(servicesItem.getPhoto(), R.drawable.pro);
+    }
+
+    private void setValueToFirebase(String uid, ServicesItem servicesItem) {
         DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
+        dbRef.child(SERVICE).child(uid).setValue(servicesItem);
+        dbRef.child(STATUS).child(uid).setValue(false);
+    }
+
+    private ServicesItem setServiceItem(String uid){
         String imgName = email.split("@")[0];
         String imgCover = imgName + "_cover.png";
         String imgPro = imgName + "_pro.png";
-        String latlng = "14.8823047,102.0206782";
-        String work = "วันจันทร์-ศุกร์ เวลา 08:00-12:00, 13:00-20:00 น.\nวันเสาร์-อาทิตย์ เวลา 08:00-12:00 น.\nปิดเทอม เวลา 09:00-17:00 น.";
-        String s = getResources().getString(R.string.t1);
-        String d = getResources().getString(R.string.t2);
-        ServicesItem servicesItem = new ServicesItem(uid, name, position, email, phoneNumber, imgPro, imgCover, latlng, work, s, d);
-        dbRef.child(SERVICE).child(uid).setValue(servicesItem);
-        dbRef.child(STATUS).child(uid).setValue(false);
-        uploadImg(imgCover, cover);
-        uploadImg(imgPro, R.drawable.pro);
-        clearEditText();
+        String latlng = getString(R.string.default_latlng);
+        String work = getString(R.string.default_time_work);
+        String servies = getString(R.string.default_services);
+        String distribute = getString(R.string.default_distribute);
+
+        ServicesItem servicesItem = new ServicesItem();
+        servicesItem.setId(uid);
+        servicesItem.setName(name);
+        servicesItem.setPos(position);
+        servicesItem.setEmail(email);
+        servicesItem.setTel(phoneNumber);
+        servicesItem.setPhoto(imgPro);
+        servicesItem.setCover(imgCover);
+        servicesItem.setLatlng(latlng);
+        servicesItem.setWorkTime(work);
+        servicesItem.setService(servies);
+        servicesItem.setDistribute(distribute);
+
+        return servicesItem;
     }
 
     private void uploadImg(final String image, int draw) {
