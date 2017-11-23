@@ -37,6 +37,7 @@ import static com.darker.motorservice.R.drawable.cover;
 import static com.darker.motorservice.utils.Constant.NEW_PASSWORD;
 import static com.darker.motorservice.utils.Constant.SERVICE;
 import static com.darker.motorservice.utils.Constant.STATUS;
+import static com.darker.motorservice.utils.StringUtils.stringOk;
 
 public class AddNewServiceFragment extends Fragment {
     private EditText edName, edPosition, edPhoneNumber, edEmail;
@@ -62,15 +63,18 @@ public class AddNewServiceFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        bindView(view);
+        loadEmail();
+        onBtnAddClicked();
+    }
+
+    private void bindView(View view) {
         edName = (EditText) view.findViewById(R.id.form_name);
         edPosition = (EditText) view.findViewById(R.id.form_pos);
         edPhoneNumber = (EditText) view.findViewById(R.id.form_tel);
         edEmail = (EditText) view.findViewById(R.id.form_email);
         btnAddNewStore = (Button) view.findViewById(R.id.btn_add);
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
-
-        loadEmail();
-        onBtnAddClicked();
     }
 
     private void loadEmail() {
@@ -92,12 +96,9 @@ public class AddNewServiceFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 btnAddNewStore.setClickable(false);
-                name = edName.getText().toString();
-                position = edPosition.getText().toString();
-                phoneNumber = edPhoneNumber.getText().toString();
-                email = edEmail.getText().toString();
+                getTextEditText();
 
-                if (name.isEmpty() || position.isEmpty() || phoneNumber.isEmpty() || email.isEmpty()) {
+                if (stringOk(name) || stringOk(position) || stringOk(phoneNumber) || stringOk(email)) {
                     alert("กรุณากรอกข้อมูลให้ครบ");
                     return;
                 }
@@ -124,6 +125,13 @@ public class AddNewServiceFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void getTextEditText() {
+        name = edName.getText().toString();
+        position = edPosition.getText().toString();
+        phoneNumber = edPhoneNumber.getText().toString();
+        email = edEmail.getText().toString();
     }
 
     private void addNewService() {
