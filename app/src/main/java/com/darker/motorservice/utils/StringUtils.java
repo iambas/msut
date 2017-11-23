@@ -10,6 +10,8 @@ import java.util.Date;
  */
 
 public class StringUtils {
+    public static final String REGX = "\\d{9,10}";
+
     public StringUtils(){}
 
     @SuppressLint("SimpleDateFormat")
@@ -22,5 +24,9 @@ public class StringUtils {
         if (string == null) return false;
         if (string.equals("")) return false;
         return true;
+    }
+
+    public static boolean isPhoneNumber(String textTest){
+        return textTest.matches(REGX);
     }
 }
