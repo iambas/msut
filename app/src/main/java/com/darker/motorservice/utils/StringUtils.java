@@ -22,11 +22,12 @@ public class StringUtils {
 
     public static boolean stringOk(String string) {
         if (string == null) return false;
-        if (string.equals("")) return false;
+        if (string.isEmpty()) return false;
         return true;
     }
 
     public static boolean isPhoneNumber(String textTest){
+        if (textTest == null) return false;
         return textTest.matches(REGX);
     }
 }
