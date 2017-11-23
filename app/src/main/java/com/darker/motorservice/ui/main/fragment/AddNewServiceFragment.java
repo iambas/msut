@@ -15,9 +15,10 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.utils.NetWorkUtils;
-import com.darker.motorservice.model.ServicesItem;
 import com.darker.motorservice.database.ServiceDatabase;
+import com.darker.motorservice.model.ServicesItem;
+import com.darker.motorservice.utils.NetWorkUtils;
+import com.darker.motorservice.utils.StringUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -37,7 +38,6 @@ import static com.darker.motorservice.R.drawable.cover;
 import static com.darker.motorservice.utils.Constant.NEW_PASSWORD;
 import static com.darker.motorservice.utils.Constant.SERVICE;
 import static com.darker.motorservice.utils.Constant.STATUS;
-import static com.darker.motorservice.utils.StringUtils.stringOk;
 
 public class AddNewServiceFragment extends Fragment {
     private EditText edName, edPosition, edPhoneNumber, edEmail;
@@ -92,23 +92,25 @@ public class AddNewServiceFragment extends Fragment {
     }
 
     private void onBtnAddClicked() {
-        btnAddNewStore.setOnClickListener(new View.OnClickListener() {
+        btnAddNewStore.setOnClickListener(onClickListener());
+    }
+
+    @NonNull
+    private View.OnClickListener onClickListener() {
+        return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 btnAddNewStore.setClickable(false);
                 getTextEditText();
 
-                if (stringOk(name) || stringOk(position) || stringOk(phoneNumber) || stringOk(email)) {
-                    alert("กรุณากรอกข้อมูลให้ครบ");
-                    return;
-                }
+                if (validateText()) return;
 
-                if (phoneNumber.length() < 9) {
+                if (StringUtils.isPhoneNumber(phoneNumber)) {
                     alert("เบอร์โทรศัพท์ไม่ถูกต้อง!");
                     return;
                 }
 
-                if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                if (!StringUtils.isEmail(email)) {
                     alert("กรุณากรอกอีเมลที่ถูกต้อง!");
                     return;
                 }
@@ -120,11 +122,23 @@ public class AddNewServiceFragment extends Fragment {
 
                 if (NetWorkUtils.disable(getContext())) {
                     alert("เครือข่ายมีปัญหา! ไม่สามารถเพิ่มร้านได้");
-                } else {
-                    addNewService();
+                    return;
                 }
+
+                addNewService();
             }
-        });
+        };
+    }
+
+    private boolean validateText() {
+        if (StringUtils.stringOk(name) ||
+                StringUtils.stringOk(position) ||
+                StringUtils.stringOk(phoneNumber) ||
+                StringUtils.stringOk(email)) {
+            alert("กรุณากรอกข้อมูลให้ครบ");
+            return true;
+        }
+        return false;
     }
 
     private void getTextEditText() {

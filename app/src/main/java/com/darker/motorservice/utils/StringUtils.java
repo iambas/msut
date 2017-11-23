@@ -30,4 +30,8 @@ public class StringUtils {
         if (textTest == null) return false;
         return textTest.matches(REGX);
     }
+
+    public static boolean isEmail(String testEmail){
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(testEmail).matches();
+    }
 }
