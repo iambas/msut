@@ -39,13 +39,11 @@ import static com.darker.motorservice.utils.Constant.SERVICE;
 import static com.darker.motorservice.utils.Constant.STATUS;
 
 public class AddNewServiceFragment extends Fragment {
-
-    private View view;
-    private EditText editName, editPos, editTel, editEmail;
-    private Button btnAdd;
-    private String name, pos, tel, email;
+    private EditText edName, edPosition, edPhoneNumber, edEmail;
+    private Button btnAddNewStore;
+    private String name, position, phoneNumber, email;
     private ProgressBar progressBar;
-    private List<ServicesItem> listSer;
+    private List<ServicesItem> servicesItemList;
 
     public AddNewServiceFragment() {
     }
@@ -64,12 +62,11 @@ public class AddNewServiceFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        this.view = view;
-        editName = (EditText) view.findViewById(R.id.form_name);
-        editPos = (EditText) view.findViewById(R.id.form_pos);
-        editTel = (EditText) view.findViewById(R.id.form_tel);
-        editEmail = (EditText) view.findViewById(R.id.form_email);
-        btnAdd = (Button) view.findViewById(R.id.btn_add);
+        edName = (EditText) view.findViewById(R.id.form_name);
+        edPosition = (EditText) view.findViewById(R.id.form_pos);
+        edPhoneNumber = (EditText) view.findViewById(R.id.form_tel);
+        edEmail = (EditText) view.findViewById(R.id.form_email);
+        btnAddNewStore = (Button) view.findViewById(R.id.btn_add);
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
 
         loadEmail();
@@ -78,11 +75,11 @@ public class AddNewServiceFragment extends Fragment {
 
     private void loadEmail() {
         ServiceDatabase serviceDatabase = new ServiceDatabase(getContext());
-        listSer = serviceDatabase.getAllSerivce();
+        servicesItemList = serviceDatabase.getAllSerivce();
     }
 
     private boolean hasEmail(String email) {
-        for (ServicesItem s : listSer) {
+        for (ServicesItem s : servicesItemList) {
             if (s.getEmail().equals(email)) {
                 return true;
             }
@@ -91,21 +88,21 @@ public class AddNewServiceFragment extends Fragment {
     }
 
     private void onBtnAddClicked() {
-        btnAdd.setOnClickListener(new View.OnClickListener() {
+        btnAddNewStore.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                btnAdd.setClickable(false);
-                name = editName.getText().toString();
-                pos = editPos.getText().toString();
-                tel = editTel.getText().toString();
-                email = editEmail.getText().toString();
+                btnAddNewStore.setClickable(false);
+                name = edName.getText().toString();
+                position = edPosition.getText().toString();
+                phoneNumber = edPhoneNumber.getText().toString();
+                email = edEmail.getText().toString();
 
-                if (name.isEmpty() || pos.isEmpty() || tel.isEmpty() || email.isEmpty()) {
+                if (name.isEmpty() || position.isEmpty() || phoneNumber.isEmpty() || email.isEmpty()) {
                     alert("กรุณากรอกข้อมูลให้ครบ");
                     return;
                 }
 
-                if (tel.length() < 9) {
+                if (phoneNumber.length() < 9) {
                     alert("เบอร์โทรศัพท์ไม่ถูกต้อง!");
                     return;
                 }
@@ -154,7 +151,7 @@ public class AddNewServiceFragment extends Fragment {
         String work = "วันจันทร์-ศุกร์ เวลา 08:00-12:00, 13:00-20:00 น.\nวันเสาร์-อาทิตย์ เวลา 08:00-12:00 น.\nปิดเทอม เวลา 09:00-17:00 น.";
         String s = getResources().getString(R.string.t1);
         String d = getResources().getString(R.string.t2);
-        ServicesItem servicesItem = new ServicesItem(uid, name, pos, email, tel, imgPro, imgCover, latlng, work, s, d);
+        ServicesItem servicesItem = new ServicesItem(uid, name, position, email, phoneNumber, imgPro, imgCover, latlng, work, s, d);
         dbRef.child(SERVICE).child(uid).setValue(servicesItem);
         dbRef.child(STATUS).child(uid).setValue(false);
         uploadImg(imgCover, cover);
@@ -186,14 +183,14 @@ public class AddNewServiceFragment extends Fragment {
 
     private void alert(String msg) {
         Toast.makeText(getContext(), msg, Toast.LENGTH_LONG).show();
-        btnAdd.setClickable(true);
+        btnAddNewStore.setClickable(true);
     }
 
     private void clearEditText() {
-        editName.setText("");
-        editName.setText("");
-        editPos.setText("");
-        editTel.setText("");
-        editEmail.setText("");
+        edName.setText("");
+        edName.setText("");
+        edPosition.setText("");
+        edPhoneNumber.setText("");
+        edEmail.setText("");
     }
 }
