@@ -14,4 +14,14 @@ public class StringUtilsTest {
     public void stringNotNull_isTrue(){
         Assert.assertTrue(stringOk("1234"));
     }
+
+    @Test
+    public void stringNull_isNotCurrect(){
+        Assert.assertFalse(stringOk(null));
+    }
+
+    @Test
+    public void stringEmpty_isNotCurrect(){
+        Assert.assertFalse(stringOk(""));
+    }
 }
