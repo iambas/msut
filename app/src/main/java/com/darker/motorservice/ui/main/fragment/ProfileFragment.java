@@ -202,23 +202,27 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
         if (isChecked != mStatus) {
             if (isChecked) {
                 db.setValue(true);
-                Toast.makeText(getContext(), "เปิดร้าน", Toast.LENGTH_SHORT).show();
+                toastAlert("เปิดร้าน");
             } else {
                 db.setValue(false);
-                Toast.makeText(getContext(), "ปิดร้าน", Toast.LENGTH_SHORT).show();
+                toastAlert("ปิดร้าน");
             }
         }
     }
 
     private boolean checkNetworkForSetSwitch(boolean isChecked) {
         if (NetWorkUtils.disable(getContext())){
-            Toast.makeText(getContext(), "เครือข่ายมีปัญหา! ไม่สามารถเปลี่ยนสถานะร้านได้", Toast.LENGTH_LONG).show();
+            toastAlert("เครือข่ายมีปัญหา! ไม่สามารถเปลี่ยนสถานะร้านได้");
             mSwitch.setChecked(!isChecked);
             return true;
         }
         return false;
     }
-    
+
+    private void toastAlert(String text) {
+        Toast.makeText(getContext(), text, Toast.LENGTH_SHORT).show();
+    }
+
     private void checkOnlineStatus(DatabaseReference dbRef) {
         dbRef.addValueEventListener(new ValueEventListener() {
             @Override
