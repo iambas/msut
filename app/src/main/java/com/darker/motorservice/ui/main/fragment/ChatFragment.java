@@ -46,15 +46,14 @@ import static com.darker.motorservice.utils.Constant.USER;
 public class ChatFragment extends Fragment {
 
     private Context context;
-
     private DatabaseReference dbChat, dbChatWith;
 
-    private ChatAdapter adapter;
+    private ChatAdapter chatAdapter;
     private List<ChatItem> chatItemList;
     private ProgressBar progressBar;
-    private TextView netAlert, txtNull;
+    private TextView tvNetworkAlert, tvTextNull;
     private String uid, status, chatChild;
-    private SharedPreferences.Editor edChat;
+    private SharedPreferences.Editor shedChat;
 
     public ChatFragment() {
     }
@@ -76,9 +75,9 @@ public class ChatFragment extends Fragment {
         context = view.getContext();
         SharedPreferences shLogin = context.getSharedPreferences(KEY_LOGIN_MOTOR_SERVICE, Context.MODE_PRIVATE);
         status = shLogin.getString(STATUS, "");
-        edChat = context.getSharedPreferences(CHAT, Context.MODE_PRIVATE).edit();
-        edChat.putBoolean(ALERT, false);
-        edChat.commit();
+        shedChat = context.getSharedPreferences(CHAT, Context.MODE_PRIVATE).edit();
+        shedChat.putBoolean(ALERT, false);
+        shedChat.commit();
 
         FirebaseAuth auth = FirebaseAuth.getInstance();
         uid = auth.getCurrentUser().getUid();
@@ -87,31 +86,31 @@ public class ChatFragment extends Fragment {
         dbChatWith = FirebaseDatabase.getInstance().getReference().child(chatChild);
 
         chatItemList = new ArrayList<ChatItem>();
-        adapter = new ChatAdapter(context, chatItemList);
+        chatAdapter = new ChatAdapter(context, chatItemList);
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        recyclerView.setAdapter(adapter);
+        recyclerView.setAdapter(chatAdapter);
 
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
-        netAlert = (TextView) view.findViewById(R.id.txt_net_alert);
-        txtNull = (TextView) view.findViewById(R.id.txt_null);
+        tvNetworkAlert = (TextView) view.findViewById(R.id.txt_net_alert);
+        tvTextNull = (TextView) view.findViewById(R.id.txt_null);
         refresh();
     }
 
     private void refresh() {
         progressBar.setVisibility(View.VISIBLE);
         if (NetWorkUtils.disable(context)) {
-            netAlert.setVisibility(View.VISIBLE);
+            tvNetworkAlert.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.GONE);
-            netAlert.setOnClickListener(new View.OnClickListener() {
+            tvNetworkAlert.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     refresh();
                 }
             });
         } else {
-            netAlert.setVisibility(View.GONE);
+            tvNetworkAlert.setVisibility(View.GONE);
             readData();
         }
     }
@@ -150,7 +149,7 @@ public class ChatFragment extends Fragment {
 
                 if (!has) {
                     progressBar.setVisibility(View.GONE);
-                    txtNull.setVisibility(View.VISIBLE);
+                    tvTextNull.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -201,9 +200,9 @@ public class ChatFragment extends Fragment {
                                 return s2.toString().compareToIgnoreCase(s1.toString());
                             }
                         });
-                        adapter.notifyDataSetChanged();
+                        chatAdapter.notifyDataSetChanged();
                         list();
-                        txtNull.setVisibility(View.GONE);
+                        tvTextNull.setVisibility(View.GONE);
                         progressBar.setVisibility(View.GONE);
                     }
 
@@ -230,7 +229,7 @@ public class ChatFragment extends Fragment {
                 i--;
                 sr--;
             }
-            adapter.notifyDataSetChanged();
+            chatAdapter.notifyDataSetChanged();
         }
     }
 
@@ -242,7 +241,7 @@ public class ChatFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        edChat.putBoolean(ALERT, false);
-        edChat.commit();
+        shedChat.putBoolean(ALERT, false);
+        shedChat.commit();
     }
 }
