@@ -134,35 +134,42 @@ public class ChatFragment extends Fragment {
             public void onDataChange(DataSnapshot dataChat) {
                 chatItemList.clear();
                 boolean has = false;
-                for (final DataSnapshot data : dataChat.getChildren()) {
-                    if (!data.hasChild(DATA)) continue;
-                    if (data.child(status).getValue().toString().equals(uid)) {
+                for (final DataSnapshot dsChild : dataChat.getChildren()) {
+                    if (!dsChild.hasChild(DATA)) continue;
+                    String idOfStatus = dsChild.child(status).getValue().toString();
+                    if (idOfStatus.equals(uid)) {
                         has = true;
-                        final String keyChat = data.getKey();
-                        final String chatWithId = data.child(chatChild).getValue().toString();
-
-                        dbChatWith.child(chatWithId).addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataChatWith) {
-                                try {
-                                    String chatWithName = dataChatWith.child(NAME).getValue().toString();
-                                    String photo = dataChatWith.child(PHOTO).getValue().toString();
-                                    addList(data, keyChat, chatWithId, chatWithName, photo);
-                                } catch (NullPointerException e) {
-                                    Log.d("Exception ChatFrag name", e.getMessage());
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-                            }
-                        });
+                        final String keyChat = dsChild.getKey();
+                        final String chatWithId = dsChild.child(chatChild).getValue().toString();
+                        queryOfChatWithId(dsChild, keyChat, chatWithId);
                     }
                 }
+                checkHasData(has);
+            }
 
-                if (!has) {
-                    progressBar.setVisibility(View.GONE);
-                    tvTextNull.setVisibility(View.VISIBLE);
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+    }
+
+    private void checkHasData(boolean has) {
+        if (!has) {
+            progressBar.setVisibility(View.GONE);
+            tvTextNull.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void queryOfChatWithId(final DataSnapshot dsChild, final String keyChat, final String chatWithId) {
+        dbChatWith.child(chatWithId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataChatWith) {
+                try {
+                    String chatWithName = dataChatWith.child(NAME).getValue().toString();
+                    String photo = dataChatWith.child(PHOTO).getValue().toString();
+                    addList(dsChild, keyChat, chatWithId, chatWithName, photo);
+                } catch (NullPointerException e) {
+                    Log.d("Exception ChatFrag name", e.getMessage());
                 }
             }
 
@@ -180,32 +187,32 @@ public class ChatFragment extends Fragment {
                 query.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataLast) {
-                        ChatMessageItem chat = new ChatMessageItem();
+                        ChatMessageItem chatItem = new ChatMessageItem();
                         for (DataSnapshot ds : dataLast.getChildren()) {
-                            chat = ds.getValue(ChatMessageItem.class);
+                            chatItem = ds.getValue(ChatMessageItem.class);
                         }
 
                         String msg = "";
                         try {
-                            msg = chat.getMessage();
+                            msg = chatItem.getMessage();
                         } catch (NullPointerException e) {
                             Log.d("Exception ChatFrag msg", e.getMessage());
                             return;
                         }
                         final String[] arrMsg = msg.split(": ");
                         if (arrMsg[0].equals("lat/lng")) {
-                            if (status.equals(chat.getStatus())) {
+                            if (status.equals(chatItem.getStatus())) {
                                 msg = "คุณได้ส่งตำแหน่ง GPS";
                             } else {
-                                msg = chat.getSender() + " ได้ส่งตำแหน่ง GPS";
+                                msg = chatItem.getSender() + " ได้ส่งตำแหน่ง GPS";
                             }
-                        } else if (chat.getMessage().contains(KEY_IMAGE)) {
-                            msg = status.equals(chat.getStatus()) ? "คุณได้ส่งรูปภาพ" : chat.getSender() + " ได้ส่งรูปภาพ";
+                        } else if (chatItem.getMessage().contains(KEY_IMAGE)) {
+                            msg = status.equals(chatItem.getStatus()) ? "คุณได้ส่งรูปภาพ" : chatItem.getSender() + " ได้ส่งรูปภาพ";
                         } else {
-                            msg = status.equals(chat.getStatus()) ? "คุณ: " + msg : msg;
+                            msg = status.equals(chatItem.getStatus()) ? "คุณ: " + msg : msg;
                         }
 
-                        final ChatItem myChatItem = new ChatItem(keyChat, chatWithId, chatWithName, msg, chat.getDate(), chat.getRead(), chat.getStatus(), photo);
+                        final ChatItem myChatItem = new ChatItem(keyChat, chatWithId, chatWithName, msg, chatItem.getDate(), chatItem.getRead(), chatItem.getStatus(), photo);
                         chatItemList.add(myChatItem);
                         Collections.sort(chatItemList, new Comparator<ChatItem>() {
                             @Override
