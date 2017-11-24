@@ -101,7 +101,25 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
             case R.id.btn_user_logout:
                 confirm();
                 break;
-                case
+            case R.id.btn_service_logout:
+                confirm();
+                break;
+            case R.id.cover_service:
+                startUpdateImageActivity(true, servicesItem.getCover());
+                break;
+            case R.id.profile_service:
+                startUpdateImageActivity(false, servicesItem.getPhoto());
+                break;
+            case R.id.on_map:
+                startMapsActivity();
+                break;
+            case R.id.btn_update_data:
+                startUpdateDataServiceActivity();
+                break;
+            case R.id.btn_update_pass:
+                startActivity(new Intent(activity, UpdatePasswordActivity.class));
+                break;
+            default: break;
         }
     }
 
@@ -141,6 +159,14 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
         Picasso.with(view.getContext()).load(url).error(R.drawable.ic_account_circle_large).into(imageView);
     }
 
+    private void startUpdateImageActivity(boolean isCover, String imageName){
+        Intent intent = new Intent(activity, UpdateImageActivity.class);
+        intent.putExtra(COVER, isCover);
+        intent.putExtra(IMG, imageName);
+        intent.putExtra(ID, id);
+        startActivity(intent);
+    }
+
     private void service() {
         ServiceDatabase serviceDatabase = new ServiceDatabase(activity);
         servicesItem = serviceDatabase.getService(id);
@@ -167,28 +193,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
             public void onCancelled(DatabaseError databaseError) {}
         });
 
-        // click edit cover
-        view.findViewById(R.id.cover_service).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(activity, UpdateImageActivity.class);
-                intent.putExtra(COVER, true);
-                intent.putExtra(IMG, servicesItem.getCover());
-                intent.putExtra(ID, id);
-                startActivity(intent);
-            }
-        });
-        // click edit profile
-        view.findViewById(R.id.profile_service).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(activity, UpdateImageActivity.class);
-                intent.putExtra(COVER, false);
-                intent.putExtra(IMG, servicesItem.getPhoto());
-                intent.putExtra(ID, id);
-                startActivity(intent);
-            }
-        });
         // switch
         sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
@@ -210,41 +214,21 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
                 }
             }
         });
-        // click map
-        view.findViewById(R.id.on_map).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(activity, MapsActivity.class);
-                intent.putExtra(NAME, servicesItem.getName());
-                intent.putExtra(LATLNG, servicesItem.getLatlng());
-                startActivity(intent);
-            }
-        });
-        // click edit data
-        view.findViewById(R.id.btn_update_data).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(activity, UpdateDataServiceActivity.class);
-                intent.putExtra(ID, servicesItem.getId());
-                startActivity(intent);
-            }
-        });
-        // click updata password
-        view.findViewById(R.id.btn_update_pass).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(activity, UpdatePasswordActivity.class));
-            }
-        });
-        // click logout
-        view.findViewById(R.id.btn_service_logout).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                confirm();
-            }
-        });
 
         setData();
+    }
+
+    private void startUpdateDataServiceActivity() {
+        Intent intent = new Intent(activity, UpdateDataServiceActivity.class);
+        intent.putExtra(ID, servicesItem.getId());
+        startActivity(intent);
+    }
+
+    private void startMapsActivity() {
+        Intent intent = new Intent(activity, MapsActivity.class);
+        intent.putExtra(NAME, servicesItem.getName());
+        intent.putExtra(LATLNG, servicesItem.getLatlng());
+        startActivity(intent);
     }
 
     private void setData() {
