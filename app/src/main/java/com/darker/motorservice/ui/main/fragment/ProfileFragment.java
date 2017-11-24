@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -23,7 +22,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.darker.motorservice.R;
+import com.darker.motorservice.database.ServiceDatabase;
 import com.darker.motorservice.model.ServicesItem;
+import com.darker.motorservice.service.BackgroundService;
 import com.darker.motorservice.ui.login.LoginActivity;
 import com.darker.motorservice.ui.map.MapsActivity;
 import com.darker.motorservice.ui.update_data_service.UpdateDataServiceActivity;
@@ -31,8 +32,6 @@ import com.darker.motorservice.ui.update_image.UpdateImageActivity;
 import com.darker.motorservice.ui.update_password.UpdatePasswordActivity;
 import com.darker.motorservice.utils.ImageUtils;
 import com.darker.motorservice.utils.NetWorkUtils;
-import com.darker.motorservice.database.ServiceDatabase;
-import com.darker.motorservice.service.BackgroundService;
 import com.facebook.login.LoginManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -189,32 +188,38 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
         view.findViewById(R.id.for_service).setVisibility(View.VISIBLE);
     }
 
-    private void onSwitchChange(final DatabaseReference db) {
+    private void onSwitchChange(final DatabaseReference dbRef) {
         mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (NetWorkUtils.disable(getContext())){
-                    Toast.makeText(getContext(), "เครือข่ายมีปัญหา! ไม่สามารถเปลี่ยนสถานะร้านได้", Toast.LENGTH_LONG).show();
-                    mSwitch.setChecked(!isChecked);
-                    return;
-                }
-                if (isChecked != mStatus) {
-                    if (isChecked) {
-                        db.setValue(true);
-                        Toast.makeText(getContext(), "เปิดร้าน", Toast.LENGTH_SHORT).show();
-                    } else {
-                        db.setValue(false);
-                        Toast.makeText(getContext(), "ปิดร้าน", Toast.LENGTH_SHORT).show();
-                    }
-                }
+                if (checkNetworkForSetSwitch(isChecked)) return;
+                setOnlineStatus(isChecked, dbRef);
             }
         });
     }
 
+    private void setOnlineStatus(boolean isChecked, DatabaseReference db) {
+        if (isChecked != mStatus) {
+            if (isChecked) {
+                db.setValue(true);
+                Toast.makeText(getContext(), "เปิดร้าน", Toast.LENGTH_SHORT).show();
+            } else {
+                db.setValue(false);
+                Toast.makeText(getContext(), "ปิดร้าน", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 
-
-    @NonNull
-    private DatabaseReference checkOnlineStatus(DatabaseReference dbRef) {
+    private boolean checkNetworkForSetSwitch(boolean isChecked) {
+        if (NetWorkUtils.disable(getContext())){
+            Toast.makeText(getContext(), "เครือข่ายมีปัญหา! ไม่สามารถเปลี่ยนสถานะร้านได้", Toast.LENGTH_LONG).show();
+            mSwitch.setChecked(!isChecked);
+            return true;
+        }
+        return false;
+    }
+    
+    private void checkOnlineStatus(DatabaseReference dbRef) {
         dbRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
