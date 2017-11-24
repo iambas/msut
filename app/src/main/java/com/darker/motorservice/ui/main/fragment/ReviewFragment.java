@@ -92,6 +92,22 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
         checkStatus(view);
     }
 
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.fab_edit:
+                onEditClicked();
+                break;
+            case R.id.go_service:
+                startDetailActivity();
+                break;
+            case R.id.txt_net_alert:
+                update();
+                break;
+            default: break;
+        }
+    }
+
     private void checkStatus(View view) {
         boolean isAdmin = new AdminDatabase(context).isAdmin(uid);
         if (isAdmin || status.equals(USER)){
@@ -164,20 +180,6 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
         context.startActivity(intent);
     }
 
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()){
-            case R.id.fab_edit:
-                onEditClicked();
-                break;
-            case R.id.go_service:
-                startDetailActivity();
-                break;
-            default: break;
-        }
-    }
-
     private void initListView(View view) {
         reviewItems = new ArrayList<>();
         adapter = new ReviewAdapter(context, R.layout.review_item, reviewItems);
@@ -220,22 +222,19 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
         }
     }
 
-    private void check() {
+    private void checkNetwork() {
         if (NetWorkUtils.disable(getContext())) {
-            mView.findViewById(R.id.txt_net_alert).setVisibility(View.VISIBLE);
-            txtNull.setVisibility(View.GONE);
-            progressBar.setVisibility(View.GONE);
-            adapter.notifyDataSetChanged();
+            setViewNetworkDisable();
         } else {
             mView.findViewById(R.id.txt_net_alert).setVisibility(View.GONE);
         }
+    }
 
-        mView.findViewById(R.id.txt_net_alert).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                update();
-            }
-        });
+    private void setViewNetworkDisable() {
+        mView.findViewById(R.id.txt_net_alert).setVisibility(View.VISIBLE);
+        txtNull.setVisibility(View.GONE);
+        progressBar.setVisibility(View.GONE);
+        adapter.notifyDataSetChanged();
     }
 
     public void onEditClicked(){
@@ -286,7 +285,7 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
 
     private void update() {
         progressBar.setVisibility(View.VISIBLE);
-        check();
+        checkNetwork();
         DatabaseReference db = dbRef.child(REVIEW).child(id);
         db.addValueEventListener(new ValueEventListener() {
             @Override
