@@ -54,7 +54,7 @@ public class MotorcycleFragment extends Fragment {
         SharedPreferences(view);
         setUpServicesItemList();
         setRecycleView(view);
-        update();
+        updateOnline();
     }
 
     private void SharedPreferences(View view) {
@@ -82,22 +82,14 @@ public class MotorcycleFragment extends Fragment {
         recyclerView.setAdapter(motorcycleAdapter);
     }
 
-    private void update() {
+    private void updateOnline() {
         DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
         dbRef.child(STATUS).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                    if ((boolean) ds.getValue()) {
-                        String key = ds.getKey();
-                        for (ServicesItem s : servicesItemList){
-                            if (s.getId().equals(key)){
-                                servicesItemList.remove(s);
-                                servicesItemList.add(0,s);
-                                motorcycleAdapter.notifyDataSetChanged();
-                                break;
-                            }
-                        }
+                for (DataSnapshot dataChild : dataSnapshot.getChildren()) {
+                    if ((boolean) dataChild.getValue()) {
+                        updateServicesItemList(dataChild);
                     }
                 }
             }
@@ -105,5 +97,17 @@ public class MotorcycleFragment extends Fragment {
             @Override
             public void onCancelled(DatabaseError databaseError) {}
         });
+    }
+
+    private void updateServicesItemList(DataSnapshot dataChild) {
+        String key = dataChild.getKey();
+        for (ServicesItem servicesItem : servicesItemList){
+            if (servicesItem.getId().equals(key)){
+                servicesItemList.remove(servicesItem);
+                servicesItemList.add(0,servicesItem);
+                motorcycleAdapter.notifyDataSetChanged();
+                break;
+            }
+        }
     }
 }
