@@ -6,17 +6,6 @@ public class ChatItem {
     public ChatItem() {
     }
 
-    public ChatItem(String keyChat, String chatWithId, String chatWithName, String message, String date, String read, String status, String photo) {
-        this.keyChat = keyChat;
-        this.chatWithId = chatWithId;
-        this.chatWithName = chatWithName;
-        this.message = message;
-        this.date = date;
-        this.read = read;
-        this.status = status;
-        this.photo = photo;
-    }
-
     public void setKeyChat(String keyChat) {
         this.keyChat = keyChat;
     }
