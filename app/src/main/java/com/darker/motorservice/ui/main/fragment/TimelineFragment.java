@@ -53,13 +53,12 @@ import static com.darker.motorservice.utils.Constant.STATUS;
 import static com.darker.motorservice.utils.Constant.TIMELINE;
 import static com.darker.motorservice.utils.Constant.USER;
 
-public class TimelineFragment extends Fragment {
+public class TimelineFragment extends Fragment implements View.OnClickListener{
 
     private List<TimelineItem> timelineItems;
-    private TimelineAdapter adapter;
+    private TimelineAdapter timelineAdapter;
     private String id;
     private DatabaseReference dbRef;
-    private Bundle bundle;
     private Context context;
     private StorageReference sRef;
 
@@ -80,38 +79,62 @@ public class TimelineFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        bundle = savedInstanceState;
-        context = view.getContext();
-        sRef = FirebaseStorage.getInstance().getReference();
-        SharedPreferences.Editor edChat = context.getSharedPreferences(CHAT, Context.MODE_PRIVATE).edit();
-        edChat.putBoolean(ALERT, false);
-        edChat.commit();
+        bindContextAndFirebase(view);
+        chatSharedPreference();
+        String status = getStatusSharedPreferences();
+        setRecycleView(view);
+        checkUserStatus(view, status);
+    }
 
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.fab_new_post:
+                startPsotActivity();
+                break;
+            default: break;
+        }
+    }
+
+    @NonNull
+    private String getStatusSharedPreferences() {
         SharedPreferences sh = context.getSharedPreferences(KEY_LOGIN_MOTOR_SERVICE, Context.MODE_PRIVATE);
         id = sh.getString(ID, "");
-        String status = sh.getString(STATUS, USER);
-        dbRef = FirebaseDatabase.getInstance().getReference();
+        return sh.getString(STATUS, USER);
+    }
 
+    private void bindContextAndFirebase(View view) {
+        context = view.getContext();
+        dbRef = FirebaseDatabase.getInstance().getReference();
+        sRef = FirebaseStorage.getInstance().getReference();
+    }
+
+    private void chatSharedPreference() {
+        SharedPreferences.Editor edChat = context.getSharedPreferences(CHAT, Context.MODE_PRIVATE).edit();
+        edChat.putBoolean(ALERT, false);
+        edChat.apply();
+    }
+
+    private void setRecycleView(View view) {
         timelineItems = new ArrayList<>();
-        adapter = new TimelineAdapter(context, timelineItems);
+        timelineAdapter = new TimelineAdapter(context, timelineItems);
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        recyclerView.setAdapter(adapter);
+        recyclerView.setAdapter(timelineAdapter);
+    }
 
-        view.findViewById(R.id.fab_new_post).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(context, PostActivity.class);
-                intent.putExtra(KEY, "");
-                intent.putExtra(ID, "");
-                intent.putExtra(MESSAGE, "");
-                intent.putExtra(IMG, "");
-                intent.putExtra(DATE, "");
-                startActivity(intent);
-            }
-        });
+    private void startPsotActivity() {
+        Intent intent = new Intent(context, PostActivity.class);
+        intent.putExtra(KEY, "");
+        intent.putExtra(ID, "");
+        intent.putExtra(MESSAGE, "");
+        intent.putExtra(IMG, "");
+        intent.putExtra(DATE, "");
+        startActivity(intent);
+    }
 
+    private void checkUserStatus(View view, String status) {
         if (status.equals(SERVICE)) {
             updateService();
         } else {
@@ -196,8 +219,7 @@ public class TimelineFragment extends Fragment {
     }
 
     private void loadImg(final TimelineItem timelineItem, ServicesItem servicesItem) {
-        ImageUtils myImage = new ImageUtils();
-        Bitmap bitmap = myImage.convertToBitmap(servicesItem.getImgProfile());
+        Bitmap bitmap = ImageUtils.convertToBitmap(servicesItem.getImgProfile());
         timelineItem.setName(servicesItem.getName());
         timelineItem.setProfile(bitmap);
 
@@ -211,7 +233,7 @@ public class TimelineFragment extends Fragment {
         if (handle.hasPicture(timelineItem.getImgName())) {
             Log.d("hasPicture", "YES");
             byte[] bytes = handle.getPicture(timelineItem.getImgName()).getPicture();
-            Bitmap b = new ImageUtils().convertToBitmap(bytes);
+            Bitmap b = ImageUtils.convertToBitmap(bytes);
             timelineItem.setImage(b);
             timelineItems.add(timelineItem);
             sort();
@@ -223,7 +245,7 @@ public class TimelineFragment extends Fragment {
             @Override
             public void onSuccess(byte[] bytes) {
                 handle.addPicture(new PictureItem(timelineItem.getImgName(), bytes));
-                Bitmap bitmap = new ImageUtils().convertToBitmap(bytes);
+                Bitmap bitmap = ImageUtils.convertToBitmap(bytes);
                 timelineItem.setImage(bitmap);
                 timelineItems.add(timelineItem);
                 sort();
@@ -243,6 +265,6 @@ public class TimelineFragment extends Fragment {
                 return o2.toString().compareToIgnoreCase(o1.toString());
             }
         });
-        adapter.notifyDataSetChanged();
+        timelineAdapter.notifyDataSetChanged();
     }
 }
