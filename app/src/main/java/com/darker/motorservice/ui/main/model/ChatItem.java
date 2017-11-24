@@ -1,12 +1,12 @@
 package com.darker.motorservice.ui.main.model;
 
 public class ChatItem {
-
     private String keyChat, chatWithId, chatWithName, message, date, read, status, photo;
 
-    public ChatItem(){}
+    public ChatItem() {
+    }
 
-    public ChatItem(String keyChat, String chatWithId, String chatWithName, String message, String date, String read, String status, String photo){
+    public ChatItem(String keyChat, String chatWithId, String chatWithName, String message, String date, String read, String status, String photo) {
         this.keyChat = keyChat;
         this.chatWithId = chatWithId;
         this.chatWithName = chatWithName;
@@ -14,6 +14,38 @@ public class ChatItem {
         this.date = date;
         this.read = read;
         this.status = status;
+        this.photo = photo;
+    }
+
+    public void setKeyChat(String keyChat) {
+        this.keyChat = keyChat;
+    }
+
+    public void setChatWithId(String chatWithId) {
+        this.chatWithId = chatWithId;
+    }
+
+    public void setChatWithName(String chatWithName) {
+        this.chatWithName = chatWithName;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public void setRead(String read) {
+        this.read = read;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setPhoto(String photo) {
         this.photo = photo;
     }
 
