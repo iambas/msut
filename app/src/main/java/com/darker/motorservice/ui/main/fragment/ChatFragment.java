@@ -73,32 +73,45 @@ public class ChatFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         context = view.getContext();
-        SharedPreferences shLogin = context.getSharedPreferences(KEY_LOGIN_MOTOR_SERVICE, Context.MODE_PRIVATE);
-        status = shLogin.getString(STATUS, "");
-        shedChat = context.getSharedPreferences(CHAT, Context.MODE_PRIVATE).edit();
-        shedChat.putBoolean(ALERT, false);
-        shedChat.commit();
+        loginSharedPreference();
+        setUpDataFirebase();
+        setUpRecyclerView(view);
+        bindView(view);
+        checkRefreshOrReadData();
+    }
 
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        uid = auth.getCurrentUser().getUid();
-        chatChild = status.equals(USER) ? SERVICE : USER;
-        dbChat = FirebaseDatabase.getInstance().getReference().child(CHAT);
-        dbChatWith = FirebaseDatabase.getInstance().getReference().child(chatChild);
+    private void bindView(View view) {
+        progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
+        tvNetworkAlert = (TextView) view.findViewById(R.id.txt_net_alert);
+        tvTextNull = (TextView) view.findViewById(R.id.txt_null);
+    }
 
+    private void setUpRecyclerView(View view) {
         chatItemList = new ArrayList<ChatItem>();
         chatAdapter = new ChatAdapter(context, chatItemList);
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.setAdapter(chatAdapter);
-
-        progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
-        tvNetworkAlert = (TextView) view.findViewById(R.id.txt_net_alert);
-        tvTextNull = (TextView) view.findViewById(R.id.txt_null);
-        refresh();
     }
 
-    private void refresh() {
+    private void setUpDataFirebase() {
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        uid = auth.getCurrentUser().getUid();
+        chatChild = status.equals(USER) ? SERVICE : USER;
+        dbChat = FirebaseDatabase.getInstance().getReference().child(CHAT);
+        dbChatWith = FirebaseDatabase.getInstance().getReference().child(chatChild);
+    }
+
+    private void loginSharedPreference() {
+        SharedPreferences shLogin = context.getSharedPreferences(KEY_LOGIN_MOTOR_SERVICE, Context.MODE_PRIVATE);
+        status = shLogin.getString(STATUS, "");
+        shedChat = context.getSharedPreferences(CHAT, Context.MODE_PRIVATE).edit();
+        shedChat.putBoolean(ALERT, false);
+        shedChat.apply();
+    }
+
+    private void checkRefreshOrReadData() {
         progressBar.setVisibility(View.VISIBLE);
         if (NetWorkUtils.disable(context)) {
             tvNetworkAlert.setVisibility(View.VISIBLE);
@@ -106,7 +119,7 @@ public class ChatFragment extends Fragment {
             tvNetworkAlert.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    refresh();
+                    checkRefreshOrReadData();
                 }
             });
         } else {
