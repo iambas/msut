@@ -99,10 +99,10 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.btn_user_logout:
-                confirm();
+                confirmDialog();
                 break;
             case R.id.btn_service_logout:
-                confirm();
+                confirmDialog();
                 break;
             case R.id.cover_service:
                 startUpdateImageActivity(true, servicesItem.getCover());
@@ -172,7 +172,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
         DatabaseReference dbRef = getDatabaseReference();
         queryOnlineStatus(dbRef);
         onSwitchChange(dbRef);
-        setData();
+        setupViewService();
     }
 
     private void checkNetworkForSetBackGround() {
@@ -264,22 +264,12 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
         startActivity(intent);
     }
 
-    private void setData() {
-        ImageUtils image = new ImageUtils();
-        Bitmap cover, profile;
-        try{
-            cover = image.convertToBitmap(servicesItem.getImgCover());
-        } catch (Exception e){
-            cover = BitmapFactory.decodeResource(getResources(), R.drawable.cover);
-        }
-        try{
-            profile = image.convertToBitmap(servicesItem.getImgProfile());
-        }catch (Exception e){
-            profile = BitmapFactory.decodeResource(getResources(), R.drawable.pro);
-        }
-        ((ImageView) view.findViewById(R.id.cover_service)).setImageBitmap(cover);
-        ((ImageView) view.findViewById(R.id.profile_service)).setImageBitmap(profile);
+    private void setupViewService() {
+        setupImageView();
+        setupTextView();
+    }
 
+    private void setupTextView() {
         ((TextView) view.findViewById(R.id.service_name)).setText(servicesItem.getName());
         ((TextView) view.findViewById(R.id.service_pos)).setText(servicesItem.getPos());
         ((TextView) view.findViewById(R.id.tel)).setText(servicesItem.getTel());
@@ -290,7 +280,35 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
         ((TextView) view.findViewById(R.id.distribute)).setText(servicesItem.getDistribute());
     }
 
-    private void confirm(){
+    private void setupImageView() {
+        ImageUtils image = new ImageUtils();
+        Bitmap cover = getCoverBitmap(image);
+        Bitmap profile = getProfileBitmap(image);
+        ((ImageView) view.findViewById(R.id.cover_service)).setImageBitmap(cover);
+        ((ImageView) view.findViewById(R.id.profile_service)).setImageBitmap(profile);
+    }
+
+    private Bitmap getProfileBitmap(ImageUtils image) {
+        Bitmap profile;
+        try{
+            profile = image.convertToBitmap(servicesItem.getImgProfile());
+        }catch (Exception e){
+            profile = BitmapFactory.decodeResource(getResources(), R.drawable.pro);
+        }
+        return profile;
+    }
+
+    private Bitmap getCoverBitmap(ImageUtils image) {
+        Bitmap cover;
+        try{
+            cover = image.convertToBitmap(servicesItem.getImgCover());
+        } catch (Exception e){
+            cover = BitmapFactory.decodeResource(getResources(), R.drawable.cover);
+        }
+        return cover;
+    }
+
+    private void confirmDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AlertDialogCustom);
         builder.setMessage("คุณกำลังจะออกจากระบบ");
         builder.setPositiveButton("ใช่", new DialogInterface.OnClickListener() {
