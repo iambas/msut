@@ -1,5 +1,6 @@
 package com.darker.motorservice.ui.main.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -52,12 +53,12 @@ import static com.darker.motorservice.utils.Constant.SERVICE;
 import static com.darker.motorservice.utils.Constant.STATUS;
 import static com.darker.motorservice.utils.Constant.USER;
 
-public class ProfileFragment extends Fragment {
+public class ProfileFragment extends Fragment implements View.OnClickListener{
 
     private String id, status;
     private View view;
-    private SharedPreferences sh;
-    private SharedPreferences.Editor ed;
+    private SharedPreferences preferences;
+    private SharedPreferences.Editor editor;
     private ServicesItem servicesItem;
     private FragmentActivity activity;
     private boolean mStatus;
@@ -81,34 +82,57 @@ public class ProfileFragment extends Fragment {
 
         this.view = view;
         activity = getActivity();
-        sh = view.getContext().getSharedPreferences(KEY_LOGIN_MOTOR_SERVICE, Context.MODE_PRIVATE);
-        ed = sh.edit();
-        id = sh.getString(ID, "");
-        status = sh.getString(STATUS, "");
-        mStatus = sh.getBoolean(ONLINE, false);
-        sw = (Switch) view.findViewById(R.id.status);
-        if (mStatus) {
-            sw.setBackgroundResource(R.color.openLight);
-        } else {
-            sw.setBackgroundResource(R.color.closeLight);
-        }
 
+        initDataFromSharedPreferences(view);
+        switchOnOff(view);
+        checkStatus();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (status.equals(SERVICE))
+            service();
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.btn_user_logout:
+                confirm();
+                break;
+                case
+        }
+    }
+
+    private void checkStatus() {
         if (status.equals(USER))
             user();
         else
             service();
     }
 
-    private void user() {
-        view.findViewById(R.id.btn_user_logout).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                confirm();
-            }
-        });
+    private void switchOnOff(View view) {
+        sw = (Switch) view.findViewById(R.id.status);
+        if (mStatus) {
+            sw.setBackgroundResource(R.color.openLight);
+        } else {
+            sw.setBackgroundResource(R.color.closeLight);
+        }
+    }
 
-        String name = sh.getString(NAME, "");
-        String photo = sh.getString(PHOTO, "pro.png");
+    @SuppressLint("CommitPrefEdits")
+    private void initDataFromSharedPreferences(View view) {
+        preferences = view.getContext().getSharedPreferences(KEY_LOGIN_MOTOR_SERVICE, Context.MODE_PRIVATE);
+        editor = preferences.edit();
+        id = preferences.getString(ID, "");
+        status = preferences.getString(STATUS, "");
+        mStatus = preferences.getBoolean(ONLINE, false);
+    }
+
+    private void user() {
+        String name = preferences.getString(NAME, "");
+        String photo = preferences.getString(PHOTO, "pro.png");
         String url = "https://graph.facebook.com/" + photo + "/picture?height=250&width=250";
 
         view.findViewById(R.id.for_user).setVisibility(View.VISIBLE);
@@ -129,8 +153,8 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mStatus = (boolean) dataSnapshot.getValue();
-                ed.putBoolean(ONLINE, mStatus);
-                ed.commit();
+                editor.putBoolean(ONLINE, mStatus);
+                editor.commit();
                 sw.setChecked(mStatus);
                 if (mStatus) {
                     sw.setBackgroundResource(R.color.openLight);
@@ -271,19 +295,11 @@ public class ProfileFragment extends Fragment {
         SharedPreferences sharedPref = activity.getSharedPreferences(KEY_LOGIN_MOTOR_SERVICE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.clear();
-        editor.commit();
+        editor.apply();
         FirebaseAuth.getInstance().signOut();
         LoginManager.getInstance().logOut();
         activity.finish();
         startActivity(new Intent(activity, LoginActivity.class));
         activity.stopService(new Intent(activity, BackgroundService.class));
-    }
-
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (status.equals(SERVICE))
-            service();
     }
 }
