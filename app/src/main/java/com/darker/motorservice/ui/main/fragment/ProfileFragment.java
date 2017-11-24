@@ -132,11 +132,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
 
     private void switchOnOff(View view) {
         mSwitch = (Switch) view.findViewById(R.id.status);
-        if (mStatus) {
-            mSwitch.setBackgroundResource(R.color.openLight);
-        } else {
-            mSwitch.setBackgroundResource(R.color.closeLight);
-        }
+        setBackgroundSwitch();
     }
 
     @SuppressLint("CommitPrefEdits")
@@ -174,7 +170,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
         showUiForOwnerStore();
         checkNetworkForSetBackGround();
         DatabaseReference dbRef = getDatabaseReference();
-        checkOnlineStatus(dbRef);
+        queryOnlineStatus(dbRef);
         onSwitchChange(dbRef);
         setData();
     }
@@ -223,24 +219,32 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
         Toast.makeText(getContext(), text, Toast.LENGTH_SHORT).show();
     }
 
-    private void checkOnlineStatus(DatabaseReference dbRef) {
+    private void queryOnlineStatus(DatabaseReference dbRef) {
         dbRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mStatus = (boolean) dataSnapshot.getValue();
-                editor.putBoolean(ONLINE, mStatus);
-                editor.commit();
+                editorOnlineStatus();
                 mSwitch.setChecked(mStatus);
-                if (mStatus) {
-                    mSwitch.setBackgroundResource(R.color.openLight);
-                } else {
-                    mSwitch.setBackgroundResource(R.color.closeLight);
-                }
+                setBackgroundSwitch();
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {}
         });
+    }
+
+    private void editorOnlineStatus() {
+        editor.putBoolean(ONLINE, mStatus);
+        editor.commit();
+    }
+
+    private void setBackgroundSwitch() {
+        if (mStatus) {
+            mSwitch.setBackgroundResource(R.color.openLight);
+        } else {
+            mSwitch.setBackgroundResource(R.color.closeLight);
+        }
     }
 
     private DatabaseReference getDatabaseReference() {
