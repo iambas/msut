@@ -180,47 +180,60 @@ public class TimelineFragment extends Fragment implements View.OnClickListener{
         if (status.equals(USER)){
             ServiceDatabase handle = new ServiceDatabase(getContext());
             ServicesItem servicesItem = handle.getService(timelineItem.getId());
-            loadImg(timelineItem, servicesItem);
+            setUpLoadImage(timelineItem, servicesItem);
         }else{
             if (timelineItem.getId().equals(id)) {
                 ServiceDatabase handle = new ServiceDatabase(getContext());
                 ServicesItem servicesItem = handle.getService(id);
-                loadImg(timelineItem, servicesItem);
+                setUpLoadImage(timelineItem, servicesItem);
             }
         }
     }
 
-    private void loadImg(final TimelineItem timelineItem, ServicesItem servicesItem) {
+    private void setUpLoadImage(final TimelineItem timelineItem, ServicesItem servicesItem) {
         Bitmap bitmap = ImageUtils.convertToBitmap(servicesItem.getImgProfile());
         timelineItem.setName(servicesItem.getName());
         timelineItem.setProfile(bitmap);
 
         if (timelineItem.getImgName().isEmpty()) {
             timelineItems.add(timelineItem);
-            sort();
+            sortTimelineItems();
             return;
         }
 
-        final PictureDatabse handle = new PictureDatabse(context);
-        if (handle.hasPicture(timelineItem.getImgName())) {
+        PictureDatabse handle = new PictureDatabse(context);
+        String imagePath = timelineItem.getImgName();
+        if (checkHasImage(timelineItem, handle, imagePath)) return;
+        loadImageFromStorage(timelineItem, handle, imagePath);
+    }
+
+    private boolean checkHasImage(TimelineItem timelineItem, PictureDatabse handle, String imagePath) {
+        if (handle.hasPicture(imagePath)) {
             Log.d("hasPicture", "YES");
-            byte[] bytes = handle.getPicture(timelineItem.getImgName()).getPicture();
-            Bitmap b = ImageUtils.convertToBitmap(bytes);
-            timelineItem.setImage(b);
-            timelineItems.add(timelineItem);
-            sort();
-            return;
+            addtimelineToList(timelineItem, handle, imagePath);
+            sortTimelineItems();
+            return true;
         }
+        return false;
+    }
 
+    private void addtimelineToList(TimelineItem timelineItem, PictureDatabse handle, String imagePath) {
+        byte[] bytes = handle.getPicture(imagePath).getPicture();
+        Bitmap bitmap = ImageUtils.convertToBitmap(bytes);
+        timelineItem.setImage(bitmap);
+        timelineItems.add(timelineItem);
+    }
+
+    private void loadImageFromStorage(final TimelineItem timelineItem, final PictureDatabse handle, final String imagePath) {
         final long ONE_MEGABYTE = 1024 * 1024;
-        sRef.child(timelineItem.getImgName()).getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+        sRef.child(imagePath).getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
             public void onSuccess(byte[] bytes) {
-                handle.addPicture(new PictureItem(timelineItem.getImgName(), bytes));
+                handle.addPicture(new PictureItem(imagePath, bytes));
                 Bitmap bitmap = ImageUtils.convertToBitmap(bytes);
                 timelineItem.setImage(bitmap);
                 timelineItems.add(timelineItem);
-                sort();
+                sortTimelineItems();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -230,7 +243,8 @@ public class TimelineFragment extends Fragment implements View.OnClickListener{
         });
     }
 
-    private void sort() {
+
+    private void sortTimelineItems() {
         Collections.sort(timelineItems, new Comparator<TimelineItem>() {
             @Override
             public int compare(TimelineItem o1, TimelineItem o2) {
