@@ -31,8 +31,8 @@ import static com.darker.motorservice.utils.Constant.STATUS;
 
 public class MotorcycleFragment extends Fragment {
 
-    private List<ServicesItem> svList;
-    private MotorcycleAdapter adapter;
+    private List<ServicesItem> servicesItemList;
+    private MotorcycleAdapter motorcycleAdapter;
 
     public MotorcycleFragment() {
     }
@@ -57,18 +57,18 @@ public class MotorcycleFragment extends Fragment {
         edChat.commit();
 
         ServiceDatabase handle = new ServiceDatabase(getContext());
-        svList = new ArrayList<>();
+        servicesItemList = new ArrayList<>();
         try{
-            svList = handle.getAllSerivce();
+            servicesItemList = handle.getAllSerivce();
         }catch (Exception e){
-            Log.e("svList Except", e.getMessage());
+            Log.e("servicesItemList Except", e.getMessage());
         }
 
-        adapter = new MotorcycleAdapter(context, svList);
+        motorcycleAdapter = new MotorcycleAdapter(context, servicesItemList);
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        recyclerView.setAdapter(adapter);
+        recyclerView.setAdapter(motorcycleAdapter);
         update();
     }
 
@@ -80,11 +80,11 @@ public class MotorcycleFragment extends Fragment {
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     if ((boolean) ds.getValue()) {
                         String key = ds.getKey();
-                        for (ServicesItem s : svList){
+                        for (ServicesItem s : servicesItemList){
                             if (s.getId().equals(key)){
-                                svList.remove(s);
-                                svList.add(0,s);
-                                adapter.notifyDataSetChanged();
+                                servicesItemList.remove(s);
+                                servicesItemList.add(0,s);
+                                motorcycleAdapter.notifyDataSetChanged();
                                 break;
                             }
                         }
