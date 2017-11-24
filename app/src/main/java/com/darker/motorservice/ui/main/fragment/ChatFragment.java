@@ -198,23 +198,21 @@ public class ChatFragment extends Fragment {
         query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataLast) {
-                ChatMessageItem chatItem = new ChatMessageItem();
+                ChatMessageItem chatMessageItem = new ChatMessageItem();
                 for (DataSnapshot ds : dataLast.getChildren()) {
-                    chatItem = ds.getValue(ChatMessageItem.class);
+                    chatMessageItem = ds.getValue(ChatMessageItem.class);
                 }
 
                 String msg = "";
                 try {
-                    msg = chatItem.getMessage();
+                    msg = chatMessageItem.getMessage();
                 } catch (NullPointerException e) {
                     Log.d("Exception ChatFrag msg", e.getMessage());
                     return;
                 }
 
-                msg = getModifyMessage(chatItem, msg);
-
-                final ChatItem myChatItem = new ChatItem(keyChat, chatWithId, chatWithName, msg, chatItem.getDate(), chatItem.getRead(), chatItem.getStatus(), photo);
-                chatItemList.add(myChatItem);
+                msg = getModifyMessage(chatMessageItem, msg);
+                setChatItemToList(chatMessageItem, msg, keyChat, chatWithId, chatWithName, photo);
                 sortChatList();
                 removeDuplicate();
                 unVisbleView();
@@ -224,6 +222,19 @@ public class ChatFragment extends Fragment {
             public void onCancelled(DatabaseError databaseError) {
             }
         });
+    }
+
+    private void setChatItemToList(ChatMessageItem chatMessageItem, String msg, String keyChat, String chatWithId, String chatWithName, String photo) {
+        ChatItem chatItem = new ChatItem();
+        chatItem.setKeyChat(keyChat);
+        chatItem.setChatWithId(chatWithId);
+        chatItem.setChatWithName(chatWithName);
+        chatItem.setMessage(msg);
+        chatItem.setDate(chatMessageItem.getDate());
+        chatItem.setRead(chatMessageItem.getRead());
+        chatItem.setStatus(chatMessageItem.getStatus());
+        chatItem.setPhoto(photo);
+        chatItemList.add(chatItem);
     }
 
     @NonNull
