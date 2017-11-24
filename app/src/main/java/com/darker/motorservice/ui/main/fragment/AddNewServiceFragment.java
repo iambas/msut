@@ -164,17 +164,17 @@ public class AddNewServiceFragment extends Fragment {
 
     private void addNewDataService(String uid) {
         ServicesItem servicesItem = setServiceItem(uid);
-        setValueToFirebase(uid, servicesItem);
+        setValueInFirebase(uid, servicesItem);
         uploadImageToStorage(servicesItem);
         clearEditText();
     }
 
     private void uploadImageToStorage(ServicesItem servicesItem) {
-        uploadImg(servicesItem.getCover(), cover);
-        uploadImg(servicesItem.getPhoto(), R.drawable.pro);
+        uploadImage(servicesItem.getCover(), cover);
+        uploadImage(servicesItem.getPhoto(), R.drawable.pro);
     }
 
-    private void setValueToFirebase(String uid, ServicesItem servicesItem) {
+    private void setValueInFirebase(String uid, ServicesItem servicesItem) {
         DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
         dbRef.child(SERVICE).child(uid).setValue(servicesItem);
         dbRef.child(STATUS).child(uid).setValue(false);
@@ -205,27 +205,8 @@ public class AddNewServiceFragment extends Fragment {
         return servicesItem;
     }
 
-    private void uploadImg(final String image, int draw) {
+    private void uploadImage(final String image, int draw) {
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), draw);
-//        StorageReference mountainsRef = FirebaseStorage.getInstance().getReference().child(image);
-//        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-//        byte[] data = baos.toByteArray();
-//        UploadTask uploadTask = mountainsRef.putBytes(data);
-//        uploadTask.addOnFailureListener(new OnFailureListener() {
-//            @Override
-//            public void onFailure(@NonNull Exception exception) {
-//                progressBar.setVisibility(View.GONE);
-//                alert(image + " upload ไม่ได้!");
-//            }
-//        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-//            @Override
-//            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-//                progressBar.setVisibility(View.GONE);
-//                alert(image + " upload เรียบร้อย");
-//            }
-//        });
-
         ImageUtils.uploadImage(image, bitmap, getImageUploadCallback());
     }
 
