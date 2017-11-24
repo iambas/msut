@@ -55,7 +55,7 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
     private View mView;
     private ReviewAdapter adapter;
     private ArrayList<ReviewItem> reviewItems;
-    private String id, uid;
+    private String id, uid, status;
     private DatabaseReference dbRef;
     private ProgressBar progressBar;
     private TextView txtNull;
@@ -83,24 +83,17 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
         mView = view;
         context = getContext();
         bundle = savedInstanceState;
-        reviewItem = new ReviewItem();
-        reviewItem.setMsg("");
-        reviewItem.setRate(myRate);
-        reviewItem.setDate("");
-
-        SharedPreferences sh = context.getSharedPreferences(KEY_LOGIN_MOTOR_SERVICE, Context.MODE_PRIVATE);
-        uid = sh.getString(ID, "");
-        String status = sh.getString(STATUS, USER);
-        boolean isAdmin = new AdminDatabase(context).isAdmin(uid);
-
         dbRef = FirebaseDatabase.getInstance().getReference();
 
+        initReviewItem();
+        SharedPreferences();
         initListView(view);
+        bindView(view);
+        checkStatus(view);
+    }
 
-        progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
-        txtNull = (TextView) view.findViewById(R.id.txt_null);
-        ratingBar = (RatingBar) view.findViewById(R.id.rating);
-
+    private void checkStatus(View view) {
+        boolean isAdmin = new AdminDatabase(context).isAdmin(uid);
         if (isAdmin || status.equals(USER)){
             List<ServicesItem> svList = new ServiceDatabase(context).getAllSerivce();
             List<String> nameList = new ArrayList<String>();
@@ -133,6 +126,25 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
             view.findViewById(R.id.fab_edit).setVisibility(View.GONE);
             update();
         }
+    }
+
+    private void SharedPreferences() {
+        SharedPreferences sh = context.getSharedPreferences(KEY_LOGIN_MOTOR_SERVICE, Context.MODE_PRIVATE);
+        uid = sh.getString(ID, "");
+        status = sh.getString(STATUS, USER);
+    }
+
+    private void initReviewItem() {
+        reviewItem = new ReviewItem();
+        reviewItem.setMsg("");
+        reviewItem.setRate(myRate);
+        reviewItem.setDate("");
+    }
+
+    private void bindView(View view) {
+        progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
+        txtNull = (TextView) view.findViewById(R.id.txt_null);
+        ratingBar = (RatingBar) view.findViewById(R.id.rating);
     }
 
     private void startDetailActivity() {
