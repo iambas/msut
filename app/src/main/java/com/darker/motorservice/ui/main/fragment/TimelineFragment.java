@@ -16,14 +16,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.ui.post.PostActivity;
-import com.darker.motorservice.ui.main.adapter.TimelineAdapter;
-import com.darker.motorservice.utils.ImageUtils;
-import com.darker.motorservice.ui.main.model.PictureItem;
-import com.darker.motorservice.model.ServicesItem;
-import com.darker.motorservice.model.TimelineItem;
 import com.darker.motorservice.database.PictureDatabse;
 import com.darker.motorservice.database.ServiceDatabase;
+import com.darker.motorservice.model.ServicesItem;
+import com.darker.motorservice.model.TimelineItem;
+import com.darker.motorservice.ui.main.adapter.TimelineAdapter;
+import com.darker.motorservice.ui.main.model.PictureItem;
+import com.darker.motorservice.ui.post.PostActivity;
+import com.darker.motorservice.utils.ImageUtils;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
@@ -48,7 +48,6 @@ import static com.darker.motorservice.utils.Constant.IMG;
 import static com.darker.motorservice.utils.Constant.KEY;
 import static com.darker.motorservice.utils.Constant.KEY_LOGIN_MOTOR_SERVICE;
 import static com.darker.motorservice.utils.Constant.MESSAGE;
-import static com.darker.motorservice.utils.Constant.SERVICE;
 import static com.darker.motorservice.utils.Constant.STATUS;
 import static com.darker.motorservice.utils.Constant.TIMELINE;
 import static com.darker.motorservice.utils.Constant.USER;
@@ -57,7 +56,7 @@ public class TimelineFragment extends Fragment implements View.OnClickListener{
 
     private List<TimelineItem> timelineItems;
     private TimelineAdapter timelineAdapter;
-    private String id;
+    private String id, status;
     private DatabaseReference dbRef;
     private Context context;
     private StorageReference sRef;
@@ -81,9 +80,10 @@ public class TimelineFragment extends Fragment implements View.OnClickListener{
 
         bindContextAndFirebase(view);
         chatSharedPreference();
-        String status = getStatusSharedPreferences();
+        sharedPreferences();
         setRecycleView(view);
-        checkUserStatus(view, status);
+        unVisibleForUser(view);
+        queryTimeline();
     }
 
     @Override
@@ -96,11 +96,10 @@ public class TimelineFragment extends Fragment implements View.OnClickListener{
         }
     }
 
-    @NonNull
-    private String getStatusSharedPreferences() {
+    private void sharedPreferences() {
         SharedPreferences sh = context.getSharedPreferences(KEY_LOGIN_MOTOR_SERVICE, Context.MODE_PRIVATE);
         id = sh.getString(ID, "");
-        return sh.getString(STATUS, USER);
+        status = sh.getString(STATUS, USER);
     }
 
     private void bindContextAndFirebase(View view) {
@@ -134,88 +133,61 @@ public class TimelineFragment extends Fragment implements View.OnClickListener{
         startActivity(intent);
     }
 
-    private void checkUserStatus(View view, String status) {
-        if (status.equals(SERVICE)) {
-            updateService();
-        } else {
+    private void unVisibleForUser(View view) {
+        if (status.equals(USER))
             view.findViewById(R.id.fab_new_post).setVisibility(View.GONE);
-            updateUser();
-        }
     }
 
-    private void updateUser() {
-        final int m = Calendar.getInstance().get(Calendar.MONTH) + 1;
+    private void queryTimeline() {
         dbRef.child(TIMELINE).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 timelineItems.clear();
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                    TimelineItem timelineItem = ds.getValue(TimelineItem.class);
-                    int t = Integer.parseInt(timelineItem.getDate().split("/")[1]);
-                    if (t > 10){
-                        if (t - 10 == m) {
-                            if (!timelineItem.getImgName().isEmpty()){
-                                sRef.child(timelineItem.getImgName()).delete();
-                            }
-                            dbRef.child(TIMELINE).child(ds.getKey()).removeValue();
-                            continue;
-                        }
-                    } else if (t + 2 <= m) {
-                        if (!timelineItem.getImgName().isEmpty()){
-                            sRef.child(timelineItem.getImgName()).delete();
-                        }
-                        dbRef.child(TIMELINE).child(ds.getKey()).removeValue();
-                        continue;
-                    }
-                    timelineItem.setKey(ds.getKey());
-                    ServiceDatabase handle = new ServiceDatabase(getContext());
-                    ServicesItem servicesItem = handle.getService(timelineItem.getId());
-                    loadImg(timelineItem, servicesItem);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-        });
-    }
-
-    private void updateService() {
-        final int m = Calendar.getInstance().get(Calendar.MONTH) + 1;
-        dbRef.child(TIMELINE).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                timelineItems.clear();
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                    TimelineItem timelineItem = ds.getValue(TimelineItem.class);
-                    int t = Integer.parseInt(timelineItem.getDate().split("/")[1]);
-                    if (t > 10){
-                        if (t - 10 == m) {
-                            if (!timelineItem.getImgName().isEmpty()){
-                                sRef.child(timelineItem.getImgName()).delete();
-                            }
-                            dbRef.child(TIMELINE).child(ds.getKey()).removeValue();
-                            continue;
-                        }
-                    } else if (t + 2 <= m) {
-                        if (!timelineItem.getImgName().isEmpty()){
-                            sRef.child(timelineItem.getImgName()).delete();
-                        }
-                        dbRef.child(TIMELINE).child(ds.getKey()).removeValue();
-                        continue;
-                    }
-                    timelineItem.setKey(ds.getKey());
-                    if (timelineItem.getId().equals(id)) {
-                        ServiceDatabase handle = new ServiceDatabase(getContext());
-                        ServicesItem servicesItem = handle.getService(id);
-                        loadImg(timelineItem, servicesItem);
-                    }
-                }
+                checkTimelineToRemove(dataSnapshot);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {}
         });
+    }
+
+    private void checkTimelineToRemove(DataSnapshot dataSnapshot) {
+        int nowMonth = Calendar.getInstance().get(Calendar.MONTH) + 1;
+        for (DataSnapshot ds : dataSnapshot.getChildren()) {
+            TimelineItem timelineItem = ds.getValue(TimelineItem.class);
+            int timelineMonth = Integer.parseInt(timelineItem.getDate().split("/")[1]);
+            if (timelineMonth > 10) {
+                if (timelineMonth - 10 == nowMonth) {
+                    if (!timelineItem.getImgName().isEmpty()) {
+                        sRef.child(timelineItem.getImgName()).delete();
+                    }
+                    dbRef.child(TIMELINE).child(ds.getKey()).removeValue();
+                    continue;
+                }
+            } else if (timelineMonth + 2 <= nowMonth) {
+                if (!timelineItem.getImgName().isEmpty()) {
+                    sRef.child(timelineItem.getImgName()).delete();
+                }
+                dbRef.child(TIMELINE).child(ds.getKey()).removeValue();
+                continue;
+            }
+            timelineItem.setKey(ds.getKey());
+            loadImageByStatus(timelineItem);
+        }
+    }
+
+    private void loadImageByStatus(TimelineItem timelineItem) {
+        if (status.equals(USER)){
+            ServiceDatabase handle = new ServiceDatabase(getContext());
+            ServicesItem servicesItem = handle.getService(timelineItem.getId());
+            loadImg(timelineItem, servicesItem);
+        }else{
+            if (timelineItem.getId().equals(id)) {
+                ServiceDatabase handle = new ServiceDatabase(getContext());
+                ServicesItem servicesItem = handle.getService(id);
+                loadImg(timelineItem, servicesItem);
+            }
+        }
     }
 
     private void loadImg(final TimelineItem timelineItem, ServicesItem servicesItem) {
