@@ -95,37 +95,48 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
     private void checkStatus(View view) {
         boolean isAdmin = new AdminDatabase(context).isAdmin(uid);
         if (isAdmin || status.equals(USER)){
-            List<ServicesItem> svList = new ServiceDatabase(context).getAllSerivce();
-            List<String> nameList = new ArrayList<String>();
-            final List<String> idList = new ArrayList<String>();
-            id = svList.get(0).getId();
-            for (ServicesItem s : svList){
-                nameList.add(s.getName());
-                idList.add(s.getId());
+            setUpSpinner(view);
+        }else{
+            setUpViewService(view);
+        }
+    }
+
+    private void setUpViewService(View view) {
+        id = uid;
+        rating();
+        view.findViewById(R.id.sel_service).setVisibility(View.GONE);
+        view.findViewById(R.id.fab_edit).setVisibility(View.GONE);
+        update();
+    }
+
+    private void setUpSpinner(View view) {
+        List<ServicesItem> svList = new ServiceDatabase(context).getAllSerivce();
+        List<String> nameList = new ArrayList<String>();
+        final List<String> idList = new ArrayList<String>();
+        id = svList.get(0).getId();
+        for (ServicesItem s : svList){
+            nameList.add(s.getName());
+            idList.add(s.getId());
+        }
+        storeSpinner(view, nameList, idList);
+    }
+
+    private void storeSpinner(View view, List<String> nameList, final List<String> idList) {
+        Spinner spinner = (Spinner) view.findViewById(R.id.spinner);
+        ArrayAdapter<String> areasAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, nameList);
+        areasAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(areasAdapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View v, int position, long idd) {
+                id = idList.get(position);
+                rating();
+                update();
             }
 
-            Spinner spinner = (Spinner) view.findViewById(R.id.spinner);
-            ArrayAdapter<String> areasAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, nameList);
-            areasAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinner.setAdapter(areasAdapter);
-            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View v, int position, long idd) {
-                    id = idList.get(position);
-                    rating();
-                    update();
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {}
-            });
-        }else{
-            id = uid;
-            rating();
-            view.findViewById(R.id.sel_service).setVisibility(View.GONE);
-            view.findViewById(R.id.fab_edit).setVisibility(View.GONE);
-            update();
-        }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
     }
 
     private void SharedPreferences() {
