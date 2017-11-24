@@ -50,8 +50,7 @@ import static com.darker.motorservice.utils.Constant.REVIEW;
 import static com.darker.motorservice.utils.Constant.STATUS;
 import static com.darker.motorservice.utils.Constant.USER;
 
-public class ReviewFragment extends Fragment {
-
+public class ReviewFragment extends Fragment implements View.OnClickListener{
     private Context context;
     private View mView;
     private ReviewAdapter adapter;
@@ -95,10 +94,8 @@ public class ReviewFragment extends Fragment {
         boolean isAdmin = new AdminDatabase(context).isAdmin(uid);
 
         dbRef = FirebaseDatabase.getInstance().getReference();
-        reviewItems = new ArrayList<>();
-        adapter = new ReviewAdapter(context, R.layout.review_item, reviewItems);
-        ListView listView = (ListView) view.findViewById(R.id.list);
-        listView.setAdapter(adapter);
+
+        initListView(view);
 
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
         txtNull = (TextView) view.findViewById(R.id.txt_null);
@@ -113,21 +110,6 @@ public class ReviewFragment extends Fragment {
                 nameList.add(s.getName());
                 idList.add(s.getId());
             }
-            view.findViewById(R.id.fab_edit).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onEditClicked();
-                }
-            });
-
-            view.findViewById(R.id.go_service).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(context, DetailActivity.class);
-                    intent.putExtra(ID, id);
-                    context.startActivity(intent);
-                }
-            });
 
             Spinner spinner = (Spinner) view.findViewById(R.id.spinner);
             ArrayAdapter<String> areasAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, nameList);
@@ -151,6 +133,33 @@ public class ReviewFragment extends Fragment {
             view.findViewById(R.id.fab_edit).setVisibility(View.GONE);
             update();
         }
+    }
+
+    private void startDetailActivity() {
+        Intent intent = new Intent(context, DetailActivity.class);
+        intent.putExtra(ID, id);
+        context.startActivity(intent);
+    }
+
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.fab_edit:
+                onEditClicked();
+                break;
+            case R.id.go_service:
+                startDetailActivity();
+                break;
+            default: break;
+        }
+    }
+
+    private void initListView(View view) {
+        reviewItems = new ArrayList<>();
+        adapter = new ReviewAdapter(context, R.layout.review_item, reviewItems);
+        ListView listView = (ListView) view.findViewById(R.id.list);
+        listView.setAdapter(adapter);
     }
 
     private void rating(){
