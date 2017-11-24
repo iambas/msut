@@ -186,32 +186,38 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
     }
 
     private void rating(){
-        DatabaseReference db = dbRef.child(REVIEW).child(id);
-        db.addValueEventListener(new ValueEventListener() {
+        DatabaseReference dbReview = dbRef.child(REVIEW).child(id);
+        dbReview.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 rate = 0.0f;
-                if (dataSnapshot.hasChild(uid)){
-                    ReviewItem r = dataSnapshot.child(uid).getValue(ReviewItem.class);
-                    reviewItem.setDate(r.getDate());
-                    reviewItem.setRate(r.getRate());
-                    reviewItem.setMsg(r.getMsg());
-                }
-
-                for (DataSnapshot ds : dataSnapshot.getChildren()){
-                    ReviewItem myRev = ds.getValue(ReviewItem.class);
-                    rate += myRev.getRate();
-                }
-
-                if (dataSnapshot.getChildrenCount() > 0)
-                    rate = rate / dataSnapshot.getChildrenCount();
-
+                setReviewItem(dataSnapshot);
+                calculateRate(dataSnapshot);
                 ratingBar.setRating(rate);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {}
         });
+    }
+
+    public void calculateRate(DataSnapshot dataSnapshot) {
+        for (DataSnapshot ds : dataSnapshot.getChildren()){
+            ReviewItem myRev = ds.getValue(ReviewItem.class);
+            rate += myRev.getRate();
+        }
+
+        if (dataSnapshot.getChildrenCount() > 0)
+            rate = rate / dataSnapshot.getChildrenCount();
+    }
+
+    public void setReviewItem(DataSnapshot dataSnapshot) {
+        if (dataSnapshot.hasChild(uid)){
+            ReviewItem item = dataSnapshot.child(uid).getValue(ReviewItem.class);
+            reviewItem.setDate(item.getDate());
+            reviewItem.setRate(item.getRate());
+            reviewItem.setMsg(item.getMsg());
+        }
     }
 
     private void check() {
