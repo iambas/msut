@@ -214,7 +214,7 @@ public class ChatFragment extends Fragment {
                             }
                         });
                         chatAdapter.notifyDataSetChanged();
-                        list();
+                        removeDuplicate();
                         tvTextNull.setVisibility(View.GONE);
                         progressBar.setVisibility(View.GONE);
                     }
@@ -231,16 +231,16 @@ public class ChatFragment extends Fragment {
         });
     }
 
-    private void list() {
+    private void removeDuplicate() {
         Log.d("list", "OK");
-        int sr = chatItemList.size() - 1;
-        for (int i = 0; i < sr; i++) {
-            String s1 = chatItemList.get(i).getKeyChat();
-            String s2 = chatItemList.get(i + 1).getKeyChat();
-            if (s1.equals(s2)) {
+        int sizeLoop = chatItemList.size() - 1;
+        for (int i = 0; i < sizeLoop; i++) {
+            String keyChat1 = chatItemList.get(i).getKeyChat();
+            String keyChat2 = chatItemList.get(i + 1).getKeyChat();
+            if (keyChat1.equals(keyChat2)) {
                 chatItemList.remove(chatItemList.get(i));
                 i--;
-                sr--;
+                sizeLoop--;
             }
             chatAdapter.notifyDataSetChanged();
         }
