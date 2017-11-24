@@ -301,18 +301,34 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
 
     private void logout(){
         if (NetWorkUtils.disable(getContext())){
-            Toast.makeText(activity, "เครือข่ายมีปัญหา! ไม่สามารถออกจากระบบได้", Toast.LENGTH_LONG).show();
+            toastAlert("เครือข่ายมีปัญหา! ไม่สามารถออกจากระบบได้");
             return;
         }
 
+        clearSharedPreferenceLogin();
+        firebaseAndFacebookLogout();
+        startLoginActivity();
+    }
+
+    private void startLoginActivity() {
+        activity.finish();
+        startActivity(new Intent(activity, LoginActivity.class));
+        stopBackgroundService();
+    }
+
+    private void stopBackgroundService() {
+        activity.stopService(new Intent(activity, BackgroundService.class));
+    }
+
+    private void firebaseAndFacebookLogout() {
+        FirebaseAuth.getInstance().signOut();
+        LoginManager.getInstance().logOut();
+    }
+
+    private void clearSharedPreferenceLogin() {
         SharedPreferences sharedPref = activity.getSharedPreferences(KEY_LOGIN_MOTOR_SERVICE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.clear();
         editor.apply();
-        FirebaseAuth.getInstance().signOut();
-        LoginManager.getInstance().logOut();
-        activity.finish();
-        startActivity(new Intent(activity, LoginActivity.class));
-        activity.stopService(new Intent(activity, BackgroundService.class));
     }
 }
