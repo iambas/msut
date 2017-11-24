@@ -102,7 +102,7 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
                 startDetailActivity();
                 break;
             case R.id.txt_net_alert:
-                update();
+                updateReviewView();
                 break;
             default: break;
         }
@@ -122,7 +122,7 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
         rating();
         view.findViewById(R.id.sel_service).setVisibility(View.GONE);
         view.findViewById(R.id.fab_edit).setVisibility(View.GONE);
-        update();
+        updateReviewView();
     }
 
     private void setUpSpinner(View view) {
@@ -147,7 +147,7 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
             public void onItemSelected(AdapterView<?> parent, View v, int position, long idd) {
                 id = idList.get(position);
                 rating();
-                update();
+                updateReviewView();
             }
 
             @Override
@@ -285,38 +285,52 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
         builder.show();
     }
 
-    private void update() {
+    private void updateReviewView() {
         progressBar.setVisibility(View.VISIBLE);
         checkNetwork();
-        DatabaseReference db = dbRef.child(REVIEW).child(id);
-        db.addValueEventListener(new ValueEventListener() {
+        queryReview();
+    }
+
+    private void queryReview() {
+        DatabaseReference dbReview = dbRef.child(REVIEW).child(id);
+        dbReview.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 reviewItems.clear();
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                    ReviewItem reviewItem = ds.getValue(ReviewItem.class);
-                    reviewItems.add(reviewItem);
-                    Collections.sort(reviewItems, new Comparator<ReviewItem>() {
-                        @Override
-                        public int compare(ReviewItem r1, ReviewItem r2) {
-                            return r1.toString().compareToIgnoreCase(r2.toString());
-                        }
-                    });
-                    adapter.notifyDataSetChanged();
-                }
-                adapter.notifyDataSetChanged();
-                if (reviewItems.size() == 0) {
-                    txtNull.setVisibility(View.VISIBLE);
-                } else {
-                    txtNull.setVisibility(View.GONE);
-                }
-                progressBar.setVisibility(View.GONE);
+                addReviewToList(dataSnapshot);
+                setViewVisible();
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(DatabaseError databaseError) {}
+        });
+    }
 
+    public void addReviewToList(DataSnapshot dataSnapshot) {
+        for (DataSnapshot ds : dataSnapshot.getChildren()) {
+            ReviewItem reviewItem = ds.getValue(ReviewItem.class);
+            reviewItems.add(reviewItem);
+            sortReviewItems();
+        }
+        adapter.notifyDataSetChanged();
+    }
+
+    public void setViewVisible() {
+        if (reviewItems.size() == 0) {
+            txtNull.setVisibility(View.VISIBLE);
+        } else {
+            txtNull.setVisibility(View.GONE);
+        }
+        progressBar.setVisibility(View.GONE);
+    }
+
+    public void sortReviewItems() {
+        Collections.sort(reviewItems, new Comparator<ReviewItem>() {
+            @Override
+            public int compare(ReviewItem r1, ReviewItem r2) {
+                return r1.toString().compareToIgnoreCase(r2.toString());
             }
         });
+        adapter.notifyDataSetChanged();
     }
 }
