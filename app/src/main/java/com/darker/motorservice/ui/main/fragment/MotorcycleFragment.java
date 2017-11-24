@@ -51,11 +51,20 @@ public class MotorcycleFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        Context context = view.getContext();
-        SharedPreferences.Editor edChat = context.getSharedPreferences(CHAT, Context.MODE_PRIVATE).edit();
-        edChat.putBoolean(ALERT, false);
-        edChat.commit();
+        SharedPreferences(view);
+        setUpServicesItemList();
+        setRecycleView(view);
+        update();
+    }
 
+    private void SharedPreferences(View view) {
+        SharedPreferences preferences = view.getContext().getSharedPreferences(CHAT, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean(ALERT, false);
+        editor.apply();
+    }
+
+    private void setUpServicesItemList() {
         ServiceDatabase handle = new ServiceDatabase(getContext());
         servicesItemList = new ArrayList<>();
         try{
@@ -63,13 +72,14 @@ public class MotorcycleFragment extends Fragment {
         }catch (Exception e){
             Log.e("servicesItemList Except", e.getMessage());
         }
+    }
 
-        motorcycleAdapter = new MotorcycleAdapter(context, servicesItemList);
+    private void setRecycleView(View view) {
+        motorcycleAdapter = new MotorcycleAdapter(view.getContext(), servicesItemList);
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
         recyclerView.setAdapter(motorcycleAdapter);
-        update();
     }
 
     private void update() {
