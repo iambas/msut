@@ -49,7 +49,7 @@ public class ImageUtils {
         return bitmap;
     }
 
-    public Bitmap convertToBitmap(byte[] b) {
+    public static Bitmap convertToBitmap(byte[] b) {
         return BitmapFactory.decodeByteArray(b, 0, b.length);
     }
 
@@ -119,5 +119,15 @@ public class ImageUtils {
         imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
         byte[] data = baos.toByteArray();
         return mountainsRef.putBytes(data);
+    }
+
+    public static Bitmap getBitmap(Context context, byte[] bytes, int resource){
+        Bitmap bitmap;
+        try{
+            bitmap = convertToBitmap(bytes);
+        } catch (Exception e){
+            bitmap = BitmapFactory.decodeResource(context.getResources(), resource);
+        }
+        return bitmap;
     }
 }

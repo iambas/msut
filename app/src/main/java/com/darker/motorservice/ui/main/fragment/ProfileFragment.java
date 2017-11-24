@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -281,31 +280,10 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
     }
 
     private void setupImageView() {
-        ImageUtils image = new ImageUtils();
-        Bitmap cover = getCoverBitmap(image);
-        Bitmap profile = getProfileBitmap(image);
+        Bitmap cover = ImageUtils.getBitmap(getContext(), servicesItem.getImgCover(), R.drawable.pro);
+        Bitmap profile = ImageUtils.getBitmap(getContext(), servicesItem.getImgProfile(), R.drawable.cover);
         ((ImageView) view.findViewById(R.id.cover_service)).setImageBitmap(cover);
         ((ImageView) view.findViewById(R.id.profile_service)).setImageBitmap(profile);
-    }
-
-    private Bitmap getProfileBitmap(ImageUtils image) {
-        Bitmap profile;
-        try{
-            profile = image.convertToBitmap(servicesItem.getImgProfile());
-        }catch (Exception e){
-            profile = BitmapFactory.decodeResource(getResources(), R.drawable.pro);
-        }
-        return profile;
-    }
-
-    private Bitmap getCoverBitmap(ImageUtils image) {
-        Bitmap cover;
-        try{
-            cover = image.convertToBitmap(servicesItem.getImgCover());
-        } catch (Exception e){
-            cover = BitmapFactory.decodeResource(getResources(), R.drawable.cover);
-        }
-        return cover;
     }
 
     private void confirmDialog(){
