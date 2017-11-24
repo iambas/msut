@@ -3,6 +3,7 @@ package com.darker.motorservice.ui.main.fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -167,7 +168,7 @@ public class ChatFragment extends Fragment {
                 try {
                     String chatWithName = dataChatWith.child(NAME).getValue().toString();
                     String photo = dataChatWith.child(PHOTO).getValue().toString();
-                    addList(dsChild, keyChat, chatWithId, chatWithName, photo);
+                    queryChatData(dsChild, keyChat, chatWithId, chatWithName, photo);
                 } catch (NullPointerException e) {
                     Log.d("Exception ChatFrag name", e.getMessage());
                 }
@@ -179,63 +180,82 @@ public class ChatFragment extends Fragment {
         });
     }
 
-    private void addList(DataSnapshot data, final String keyChat, final String chatWithId, final String chatWithName, final String photo) {
+    private void queryChatData(DataSnapshot data, final String keyChat, final String chatWithId, final String chatWithName, final String photo) {
         dbChat.child(data.getKey()).child(DATA).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataData) {
-                final Query query = dbChat.child(keyChat).child(DATA).limitToLast(1);
-                query.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataLast) {
-                        ChatMessageItem chatItem = new ChatMessageItem();
-                        for (DataSnapshot ds : dataLast.getChildren()) {
-                            chatItem = ds.getValue(ChatMessageItem.class);
-                        }
-
-                        String msg = "";
-                        try {
-                            msg = chatItem.getMessage();
-                        } catch (NullPointerException e) {
-                            Log.d("Exception ChatFrag msg", e.getMessage());
-                            return;
-                        }
-                        final String[] arrMsg = msg.split(": ");
-                        if (arrMsg[0].equals("lat/lng")) {
-                            if (status.equals(chatItem.getStatus())) {
-                                msg = "คุณได้ส่งตำแหน่ง GPS";
-                            } else {
-                                msg = chatItem.getSender() + " ได้ส่งตำแหน่ง GPS";
-                            }
-                        } else if (chatItem.getMessage().contains(KEY_IMAGE)) {
-                            msg = status.equals(chatItem.getStatus()) ? "คุณได้ส่งรูปภาพ" : chatItem.getSender() + " ได้ส่งรูปภาพ";
-                        } else {
-                            msg = status.equals(chatItem.getStatus()) ? "คุณ: " + msg : msg;
-                        }
-
-                        final ChatItem myChatItem = new ChatItem(keyChat, chatWithId, chatWithName, msg, chatItem.getDate(), chatItem.getRead(), chatItem.getStatus(), photo);
-                        chatItemList.add(myChatItem);
-                        Collections.sort(chatItemList, new Comparator<ChatItem>() {
-                            @Override
-                            public int compare(ChatItem s1, ChatItem s2) {
-                                return s2.toString().compareToIgnoreCase(s1.toString());
-                            }
-                        });
-                        chatAdapter.notifyDataSetChanged();
-                        removeDuplicate();
-                        tvTextNull.setVisibility(View.GONE);
-                        progressBar.setVisibility(View.GONE);
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                    }
-                });
+                queryLastDataChat(keyChat, chatWithId, chatWithName, photo);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
             }
         });
+    }
+
+    private void queryLastDataChat(final String keyChat, final String chatWithId, final String chatWithName, final String photo) {
+        final Query query = dbChat.child(keyChat).child(DATA).limitToLast(1);
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataLast) {
+                ChatMessageItem chatItem = new ChatMessageItem();
+                for (DataSnapshot ds : dataLast.getChildren()) {
+                    chatItem = ds.getValue(ChatMessageItem.class);
+                }
+
+                String msg = "";
+                try {
+                    msg = chatItem.getMessage();
+                } catch (NullPointerException e) {
+                    Log.d("Exception ChatFrag msg", e.getMessage());
+                    return;
+                }
+
+                msg = getModifyMessage(chatItem, msg);
+
+                final ChatItem myChatItem = new ChatItem(keyChat, chatWithId, chatWithName, msg, chatItem.getDate(), chatItem.getRead(), chatItem.getStatus(), photo);
+                chatItemList.add(myChatItem);
+                sortChatList();
+                removeDuplicate();
+                unVisbleView();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+    }
+
+    @NonNull
+    private String getModifyMessage(ChatMessageItem chatItem, String msg) {
+        final String[] arrMsg = msg.split(": ");
+        if (arrMsg[0].equals("lat/lng")) {
+            if (status.equals(chatItem.getStatus())) {
+                msg = "คุณได้ส่งตำแหน่ง GPS";
+            } else {
+                msg = chatItem.getSender() + " ได้ส่งตำแหน่ง GPS";
+            }
+        } else if (chatItem.getMessage().contains(KEY_IMAGE)) {
+            msg = status.equals(chatItem.getStatus()) ? "คุณได้ส่งรูปภาพ" : chatItem.getSender() + " ได้ส่งรูปภาพ";
+        } else {
+            msg = status.equals(chatItem.getStatus()) ? "คุณ: " + msg : msg;
+        }
+        return msg;
+    }
+
+    private void sortChatList() {
+        Collections.sort(chatItemList, new Comparator<ChatItem>() {
+            @Override
+            public int compare(ChatItem s1, ChatItem s2) {
+                return s2.toString().compareToIgnoreCase(s1.toString());
+            }
+        });
+        chatAdapter.notifyDataSetChanged();
+    }
+
+    private void unVisbleView() {
+        tvTextNull.setVisibility(View.GONE);
+        progressBar.setVisibility(View.GONE);
     }
 
     private void removeDuplicate() {
