@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -62,7 +63,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
     private ServicesItem servicesItem;
     private FragmentActivity activity;
     private boolean mStatus;
-    private Switch sw;
+    private Switch mSwitch;
 
     public ProfileFragment() {}
 
@@ -131,11 +132,11 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
     }
 
     private void switchOnOff(View view) {
-        sw = (Switch) view.findViewById(R.id.status);
+        mSwitch = (Switch) view.findViewById(R.id.status);
         if (mStatus) {
-            sw.setBackgroundResource(R.color.openLight);
+            mSwitch.setBackgroundResource(R.color.openLight);
         } else {
-            sw.setBackgroundResource(R.color.closeLight);
+            mSwitch.setBackgroundResource(R.color.closeLight);
         }
     }
 
@@ -171,36 +172,30 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
         ServiceDatabase serviceDatabase = new ServiceDatabase(activity);
         servicesItem = serviceDatabase.getService(id);
 
-        view.findViewById(R.id.for_service).setVisibility(View.VISIBLE);
+        showUiForOwnerStore();
+        checkNetworkForSetBackGround();
+        DatabaseReference dbRef = getDatabaseReference();
+        checkOnlineStatus(dbRef);
+        onSwitchChange(dbRef);
+        setData();
+    }
+
+    private void checkNetworkForSetBackGround() {
         if (NetWorkUtils.disable(getContext()))
-            sw.setBackgroundResource(R.color.white);
-        final DatabaseReference db = FirebaseDatabase.getInstance().getReference().child(STATUS).child(servicesItem.getId());
-        db.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                mStatus = (boolean) dataSnapshot.getValue();
-                editor.putBoolean(ONLINE, mStatus);
-                editor.commit();
-                sw.setChecked(mStatus);
-                if (mStatus) {
-                    sw.setBackgroundResource(R.color.openLight);
-                } else {
-                    sw.setBackgroundResource(R.color.closeLight);
-                }
-            }
+            mSwitch.setBackgroundResource(R.color.white);
+    }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        });
+    private void showUiForOwnerStore() {
+        view.findViewById(R.id.for_service).setVisibility(View.VISIBLE);
+    }
 
-        // switch
-        sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-
+    private void onSwitchChange(final DatabaseReference db) {
+        mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (NetWorkUtils.disable(getContext())){
                     Toast.makeText(getContext(), "เครือข่ายมีปัญหา! ไม่สามารถเปลี่ยนสถานะร้านได้", Toast.LENGTH_LONG).show();
-                    sw.setChecked(!isChecked);
+                    mSwitch.setChecked(!isChecked);
                     return;
                 }
                 if (isChecked != mStatus) {
@@ -214,8 +209,33 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
                 }
             }
         });
+    }
 
-        setData();
+
+
+    @NonNull
+    private DatabaseReference checkOnlineStatus(DatabaseReference dbRef) {
+        dbRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mStatus = (boolean) dataSnapshot.getValue();
+                editor.putBoolean(ONLINE, mStatus);
+                editor.commit();
+                mSwitch.setChecked(mStatus);
+                if (mStatus) {
+                    mSwitch.setBackgroundResource(R.color.openLight);
+                } else {
+                    mSwitch.setBackgroundResource(R.color.closeLight);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
+    }
+
+    private DatabaseReference getDatabaseReference() {
+        return FirebaseDatabase.getInstance().getReference().child(STATUS).child(servicesItem.getId());
     }
 
     private void startUpdateDataServiceActivity() {
