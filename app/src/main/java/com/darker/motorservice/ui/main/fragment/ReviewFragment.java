@@ -24,24 +24,23 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.darker.motorservice.R;
+import com.darker.motorservice.database.AdminDatabase;
+import com.darker.motorservice.database.ServiceDatabase;
 import com.darker.motorservice.model.ServicesItem;
 import com.darker.motorservice.ui.details.DetailActivity;
 import com.darker.motorservice.ui.main.adapter.ReviewAdapter;
 import com.darker.motorservice.ui.main.model.ReviewItem;
 import com.darker.motorservice.utils.NetWorkUtils;
-import com.darker.motorservice.database.AdminDatabase;
-import com.darker.motorservice.database.ServiceDatabase;
+import com.darker.motorservice.utils.StringUtils;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 import static com.darker.motorservice.utils.Constant.ID;
@@ -238,34 +237,26 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
     }
 
     public void onEditClicked(){
-        final DatabaseReference db = dbRef.child(REVIEW).child(id);
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AlertDialogCustom);
         @SuppressLint("RestrictedApi")
         LayoutInflater inflater = onGetLayoutInflater(bundle);
         @SuppressLint("InflateParams")
-        View vb = inflater.inflate(R.layout.rating, null);
-        builder.setView(vb);
+        View inflateView = inflater.inflate(R.layout.rating, null);
+        builder.setView(inflateView);
 
-        final EditText editRev = (EditText) vb.findViewById(R.id.edit_rev);
-        final RatingBar myRatingBar = (RatingBar) vb.findViewById(R.id.rating);
-        myRatingBar.setRating(reviewItem.getRate());
+        final EditText editRev = (EditText) inflateView.findViewById(R.id.edit_rev);
         editRev.setText(reviewItem.getMsg());
+        ratingBar(inflateView);
+        setDataBuilder(builder, editRev);
+    }
 
-        myRatingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
-            @Override
-            public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                myRate = rating;
-                Log.d("rate", String.valueOf(rating));
-                Log.d("rate", String.valueOf(myRate));
-            }
-        });
-
+    public void setDataBuilder(AlertDialog.Builder builder, final EditText editRev) {
         builder.setTitle("เขียนรีวิวและให้ดาว");
         builder.setPositiveButton("บันทึก", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String msg = editRev.getText().toString();
-                if (msg.equals("")) {
+                if (!StringUtils.stringOk(msg)) {
                     Toast.makeText(context, "คุณยังไม่ได้เขียนรีวิว!", Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -275,14 +266,33 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
                     return;
                 }
 
-                String date = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date());
-                ReviewItem newRev = new ReviewItem(msg, date, myRate);
-                db.child(uid).setValue(newRev);
+                setValueReview(msg);
                 editRev.setText("");
             }
         });
         builder.setNegativeButton("ยกเลิก", null);
         builder.show();
+    }
+
+    public void setValueReview(String msg) {
+        String date = StringUtils.getDateFormate("dd/MM/yyyy HH:mm:ss");
+        ReviewItem newRev = new ReviewItem(msg, date, myRate);
+
+        DatabaseReference dbReview = dbRef.child(REVIEW).child(id);
+        dbReview.child(uid).setValue(newRev);
+    }
+
+    public void ratingBar(View inflateView) {
+        final RatingBar myRatingBar = (RatingBar) inflateView.findViewById(R.id.rating);
+        myRatingBar.setRating(reviewItem.getRate());
+        myRatingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+            @Override
+            public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
+                myRate = rating;
+                Log.d("rate", String.valueOf(rating));
+                Log.d("rate", String.valueOf(myRate));
+            }
+        });
     }
 
     private void updateReviewView() {
