@@ -240,7 +240,9 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
     public void onEditClicked(){
         final DatabaseReference db = dbRef.child(REVIEW).child(id);
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AlertDialogCustom);
-        @SuppressLint("RestrictedApi") LayoutInflater inflater = getLayoutInflater(bundle);
+        @SuppressLint("RestrictedApi")
+        LayoutInflater inflater = onGetLayoutInflater(bundle);
+        @SuppressLint("InflateParams")
         View vb = inflater.inflate(R.layout.rating, null);
         builder.setView(vb);
 
