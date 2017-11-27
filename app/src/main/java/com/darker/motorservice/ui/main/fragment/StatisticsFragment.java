@@ -61,13 +61,19 @@ public class StatisticsFragment extends Fragment{
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        initGlobal(view);
+        bindAdapter(view);
+        checkAdmin(view);
+    }
+
+    public void initGlobal(View view) {
         this.context = view.getContext();
         this.mView = view;
         statMonth = StringUtils.getDateFormate("yyyy-MM");
+    }
+
+    public void checkAdmin(View view) {
         String uid = FirebaseUtil.getUid();
-
-        bindAdapter(view);
-
         AdminDatabase admin = new AdminDatabase(view.getContext());
         if (admin.isAdmin(uid)){
             view.findViewById(R.id.for_admin).setVisibility(View.VISIBLE);
