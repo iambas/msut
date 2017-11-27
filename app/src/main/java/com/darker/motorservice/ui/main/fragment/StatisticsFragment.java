@@ -28,13 +28,14 @@ import com.darker.motorservice.utils.StringUtils;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import static com.darker.motorservice.utils.Constant.STAT;
 
 public class StatisticsFragment extends Fragment{
     private Context context;
@@ -64,6 +65,7 @@ public class StatisticsFragment extends Fragment{
 
         initGlobal(view);
         bindAdapter(view);
+        bindView();
         checkAdmin(view);
     }
 
@@ -79,7 +81,7 @@ public class StatisticsFragment extends Fragment{
         if (admin.isAdmin(uid)){
             setupSpinner(view);
         }else{
-            getMonth(uid);
+            checkNetwork(uid);
         }
     }
 
@@ -92,17 +94,17 @@ public class StatisticsFragment extends Fragment{
             nameList.add(item.getName());
             idList.add(item.getId());
         }
-        monthSpinner(view, nameList, idList);
+        storeSpinner(view, nameList, idList);
     }
 
-    public void monthSpinner(View view, List<String> nameList, final List<String> idList) {
+    public void storeSpinner(View view, List<String> nameList, final List<String> idList) {
         Spinner areaSpinner = SpinnerUtil.getSpinner(view, R.id.sel_service, nameList);
         areaSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {
                 String sid = idList.get(position);
                 Log.d("ST stmonth", statMonth);
-                getMonth(sid);
+                checkNetwork(sid);
             }
 
             @Override
@@ -117,74 +119,95 @@ public class StatisticsFragment extends Fragment{
         listView.setAdapter(adapter);
     }
 
-    private void getMonth(final String uid){
-        TextView tvNetworkAlert = (TextView) mView.findViewById(R.id.txt_net_alert);
-        tvTextNull = (TextView) mView.findViewById(R.id.txt_null);
-        progressBar = (ProgressBar) mView.findViewById(R.id.progressBar);
-        if (NetWorkUtils.disable(getContext())){
-            tvNetworkAlert.setVisibility(View.VISIBLE);
-            tvNetworkAlert.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    getMonth(uid);
-                }
-            });
-            return;
-        }else{
-            tvNetworkAlert.setClickable(false);
-            tvNetworkAlert.setVisibility(View.GONE);
-        }
+    private void checkNetwork(final String uid){
+        if (isNetworkDisable(uid)) return;
         progressBar.setVisibility(View.VISIBLE);
         tvTextNull.setVisibility(View.GONE);
+        queryStatsByUid(uid);
+    }
 
-        dbStat = FirebaseDatabase.getInstance().getReference().child("stat").child(uid);
+    private void bindView() {
+        tvTextNull = (TextView) mView.findViewById(R.id.txt_null);
+        progressBar = (ProgressBar) mView.findViewById(R.id.progressBar);
+    }
+
+    private void queryStatsByUid(String uid) {
+        dbStat = FirebaseUtil.getChild(STAT).child(uid);
         dbStat.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                final List<String> areas = new ArrayList<String>();
-                final List<String> spin = new ArrayList<String>();
-                String[] month = getResources().getStringArray(R.array.month);
-
+                final List<String> statKeys = new ArrayList<String>();
                 for (DataSnapshot areaSnapshot: dataSnapshot.getChildren()) {
-                    spin.add(areaSnapshot.getKey());
+                    statKeys.add(areaSnapshot.getKey());
                 }
-                Collections.sort(spin, new Comparator<String>(){
+                Collections.sort(statKeys, new Comparator<String>(){
                     @Override
                     public int compare(String s1, String s2) {
                         return s2.compareToIgnoreCase(s1);
                     }
                 });
 
-                for (String s : spin){
-                    String[] r = s.split("-");
-                    int m = Integer.parseInt(r[1]) - 1;
-                    areas.add(month[m] + " " + r[0]);
-                }
-
-                if (areas.size() == 0){
-                    progressBar.setVisibility(View.GONE);
-                    tvTextNull.setVisibility(View.VISIBLE);
-                }else{
-                    tvTextNull.setVisibility(View.GONE);
-                }
-
-                Spinner spinner = SpinnerUtil.getSpinner(mView, R.id.spinner, areas);
-                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        statMonth = spin.get(position);
-                        Log.d("ST stmonth", statMonth);
-                        readData();
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {}
-                });
+                List<String> monthList = getMonthList(statKeys);
+                checkMonthsSize(monthList);
+                monthSpinner(monthList, statKeys);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {}
         });
+    }
+
+    public void monthSpinner(List<String> monthList, final List<String> statKeys) {
+        Spinner spinner = SpinnerUtil.getSpinner(mView, R.id.spinner, monthList);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                statMonth = statKeys.get(position);
+                Log.d("ST stmonth", statMonth);
+                readData();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+    }
+
+    public List<String> getMonthList(List<String> list) {
+        List<String> monthList = new ArrayList<String>();
+        String[] months = getResources().getStringArray(R.array.month);
+        for (String date : list){
+            String[] dateSplit = date.split("-");
+            int indexMonth = Integer.parseInt(dateSplit[1]) - 1;
+            monthList.add(months[indexMonth] + " " + dateSplit[0]);
+        }
+        return monthList;
+    }
+
+    public void checkMonthsSize(List<String> areas) {
+        if (areas.size() == 0){
+            progressBar.setVisibility(View.GONE);
+            tvTextNull.setVisibility(View.VISIBLE);
+        }else{
+            tvTextNull.setVisibility(View.GONE);
+        }
+    }
+
+    private boolean isNetworkDisable(final String uid) {
+        TextView tvNetworkAlert = (TextView) mView.findViewById(R.id.txt_net_alert);
+        if (NetWorkUtils.disable(getContext())){
+            tvNetworkAlert.setVisibility(View.VISIBLE);
+            tvNetworkAlert.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    checkNetwork(uid);
+                }
+            });
+            return true;
+        }
+            tvNetworkAlert.setClickable(false);
+            tvNetworkAlert.setVisibility(View.GONE);
+
+        return false;
     }
 
     private void readData(){

@@ -129,9 +129,9 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
         List<String> nameList = new ArrayList<String>();
         final List<String> idList = new ArrayList<String>();
         id = svList.get(0).getId();
-        for (ServicesItem s : svList){
-            nameList.add(s.getName());
-            idList.add(s.getId());
+        for (ServicesItem item : svList){
+            nameList.add(item.getName());
+            idList.add(item.getId());
         }
         storeSpinner(view, nameList, idList);
     }
