@@ -16,28 +16,26 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.model.ServicesItem;
-import com.darker.motorservice.ui.main.adapter.StatAdapter;
-import com.darker.motorservice.utils.NetWorkUtils;
-import com.darker.motorservice.ui.main.model.StatItem;
 import com.darker.motorservice.database.AdminDatabase;
 import com.darker.motorservice.database.ServiceDatabase;
-import com.google.firebase.auth.FirebaseAuth;
+import com.darker.motorservice.firebase.FirebaseUtil;
+import com.darker.motorservice.model.ServicesItem;
+import com.darker.motorservice.ui.main.adapter.StatAdapter;
+import com.darker.motorservice.ui.main.model.StatItem;
+import com.darker.motorservice.utils.NetWorkUtils;
+import com.darker.motorservice.utils.StringUtils;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 public class StatisticsFragment extends Fragment{
-
     private Context context;
     private DatabaseReference dbStat;
     private ArrayList<StatItem> statItemList;
@@ -45,7 +43,7 @@ public class StatisticsFragment extends Fragment{
     private String statMonth;
     private View mView;
     private ProgressBar progressBar;
-    private TextView txtNull;
+    private TextView tvTextNull;
 
     public StatisticsFragment() {}
 
@@ -65,13 +63,10 @@ public class StatisticsFragment extends Fragment{
 
         this.context = view.getContext();
         this.mView = view;
-        statMonth = new SimpleDateFormat("yyyy-MM").format(new Date());
-        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        statMonth = StringUtils.getDateFormate("yyyy-MM");
+        String uid = FirebaseUtil.getUid();
 
-        statItemList = new ArrayList<StatItem>();
-        ListView listView = (ListView) view.findViewById(R.id.list);
-        adapter = new StatAdapter(context, R.layout.fragment_statistics_item, statItemList);
-        listView.setAdapter(adapter);
+        bindAdapter(view);
 
         AdminDatabase admin = new AdminDatabase(view.getContext());
         if (admin.isAdmin(uid)){
@@ -105,9 +100,16 @@ public class StatisticsFragment extends Fragment{
         }
     }
 
+    public void bindAdapter(View view) {
+        statItemList = new ArrayList<StatItem>();
+        ListView listView = (ListView) view.findViewById(R.id.list);
+        adapter = new StatAdapter(context, R.layout.fragment_statistics_item, statItemList);
+        listView.setAdapter(adapter);
+    }
+
     private void getMonth(final String uid){
         TextView txtNet = (TextView) mView.findViewById(R.id.txt_net_alert);
-        txtNull = (TextView) mView.findViewById(R.id.txt_null);
+        tvTextNull = (TextView) mView.findViewById(R.id.txt_null);
         progressBar = (ProgressBar) mView.findViewById(R.id.progressBar);
         if (NetWorkUtils.disable(getContext())){
             txtNet.setVisibility(View.VISIBLE);
@@ -123,7 +125,7 @@ public class StatisticsFragment extends Fragment{
             txtNet.setVisibility(View.GONE);
         }
         progressBar.setVisibility(View.VISIBLE);
-        txtNull.setVisibility(View.GONE);
+        tvTextNull.setVisibility(View.GONE);
 
         dbStat = FirebaseDatabase.getInstance().getReference().child("stat").child(uid);
         dbStat.addValueEventListener(new ValueEventListener() {
@@ -151,9 +153,9 @@ public class StatisticsFragment extends Fragment{
 
                 if (areas.size() == 0){
                     progressBar.setVisibility(View.GONE);
-                    txtNull.setVisibility(View.VISIBLE);
+                    tvTextNull.setVisibility(View.VISIBLE);
                 }else{
-                    txtNull.setVisibility(View.GONE);
+                    tvTextNull.setVisibility(View.GONE);
                 }
 
                 Spinner areaSpinner = (Spinner) mView.findViewById(R.id.spinner);
@@ -201,9 +203,9 @@ public class StatisticsFragment extends Fragment{
 
                 adapter.notifyDataSetChanged();
                 if (statItemList.size() == 0){
-                    txtNull.setVisibility(View.VISIBLE);
+                    tvTextNull.setVisibility(View.VISIBLE);
                 }else{
-                    txtNull.setVisibility(View.GONE);
+                    tvTextNull.setVisibility(View.GONE);
                 }
                 progressBar.setVisibility(View.GONE);
             }
