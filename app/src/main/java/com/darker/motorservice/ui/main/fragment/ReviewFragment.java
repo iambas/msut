@@ -14,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -29,6 +28,7 @@ import com.darker.motorservice.database.ServiceDatabase;
 import com.darker.motorservice.model.ServicesItem;
 import com.darker.motorservice.ui.details.DetailActivity;
 import com.darker.motorservice.ui.main.adapter.ReviewAdapter;
+import com.darker.motorservice.ui.main.fragment.spinner.SpinnerUtil;
 import com.darker.motorservice.ui.main.model.ReviewItem;
 import com.darker.motorservice.utils.NetWorkUtils;
 import com.darker.motorservice.utils.StringUtils;
@@ -137,10 +137,7 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
     }
 
     private void storeSpinner(View view, List<String> nameList, final List<String> idList) {
-        Spinner spinner = (Spinner) view.findViewById(R.id.spinner);
-        ArrayAdapter<String> areasAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, nameList);
-        areasAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(areasAdapter);
+        Spinner spinner = SpinnerUtil.getSpinner(view, R.id.spinner, nameList);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View v, int position, long idd) {

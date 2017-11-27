@@ -21,6 +21,7 @@ import com.darker.motorservice.database.ServiceDatabase;
 import com.darker.motorservice.firebase.FirebaseUtil;
 import com.darker.motorservice.model.ServicesItem;
 import com.darker.motorservice.ui.main.adapter.StatAdapter;
+import com.darker.motorservice.ui.main.fragment.spinner.SpinnerUtil;
 import com.darker.motorservice.ui.main.model.StatItem;
 import com.darker.motorservice.utils.NetWorkUtils;
 import com.darker.motorservice.utils.StringUtils;
@@ -95,11 +96,7 @@ public class StatisticsFragment extends Fragment{
     }
 
     public void monthSpinner(View view, List<String> nameList, final List<String> idList) {
-        Spinner areaSpinner = (Spinner) view.findViewById(R.id.sel_service);
-        ArrayAdapter<String> areasAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, nameList);
-        areasAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        areaSpinner.setAdapter(areasAdapter);
-
+        Spinner areaSpinner = SpinnerUtil.getSpinner(view, R.id.sel_service, nameList);
         areaSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {
@@ -121,12 +118,12 @@ public class StatisticsFragment extends Fragment{
     }
 
     private void getMonth(final String uid){
-        TextView txtNet = (TextView) mView.findViewById(R.id.txt_net_alert);
+        TextView tvNetworkAlert = (TextView) mView.findViewById(R.id.txt_net_alert);
         tvTextNull = (TextView) mView.findViewById(R.id.txt_null);
         progressBar = (ProgressBar) mView.findViewById(R.id.progressBar);
         if (NetWorkUtils.disable(getContext())){
-            txtNet.setVisibility(View.VISIBLE);
-            txtNet.setOnClickListener(new View.OnClickListener() {
+            tvNetworkAlert.setVisibility(View.VISIBLE);
+            tvNetworkAlert.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     getMonth(uid);
@@ -134,8 +131,8 @@ public class StatisticsFragment extends Fragment{
             });
             return;
         }else{
-            txtNet.setClickable(false);
-            txtNet.setVisibility(View.GONE);
+            tvNetworkAlert.setClickable(false);
+            tvNetworkAlert.setVisibility(View.GONE);
         }
         progressBar.setVisibility(View.VISIBLE);
         tvTextNull.setVisibility(View.GONE);
@@ -171,12 +168,8 @@ public class StatisticsFragment extends Fragment{
                     tvTextNull.setVisibility(View.GONE);
                 }
 
-                Spinner areaSpinner = (Spinner) mView.findViewById(R.id.spinner);
-                ArrayAdapter<String> areasAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, areas);
-                areasAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                areaSpinner.setAdapter(areasAdapter);
-
-                areaSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                Spinner spinner = SpinnerUtil.getSpinner(mView, R.id.spinner, areas);
+                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                         statMonth = spin.get(position);
