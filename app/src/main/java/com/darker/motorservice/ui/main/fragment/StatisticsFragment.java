@@ -76,34 +76,41 @@ public class StatisticsFragment extends Fragment{
         String uid = FirebaseUtil.getUid();
         AdminDatabase admin = new AdminDatabase(view.getContext());
         if (admin.isAdmin(uid)){
-            view.findViewById(R.id.for_admin).setVisibility(View.VISIBLE);
-            List<ServicesItem> list = new ServiceDatabase(context).getAllSerivce();
-            List<String> sName = new ArrayList<String>();
-            final List<String> sId = new ArrayList<String>();
-            for (ServicesItem s : list){
-                sName.add(s.getName());
-                sId.add(s.getId());
-            }
-
-            Spinner areaSpinner = (Spinner) view.findViewById(R.id.sel_service);
-            ArrayAdapter<String> areasAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, sName);
-            areasAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            areaSpinner.setAdapter(areasAdapter);
-
-            areaSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {
-                    String sid = sId.get(position);
-                    Log.d("ST stmonth", statMonth);
-                    getMonth(sid);
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {}
-            });
+            setupSpinner(view);
         }else{
             getMonth(uid);
         }
+    }
+
+    public void setupSpinner(View view) {
+        view.findViewById(R.id.for_admin).setVisibility(View.VISIBLE);
+        List<ServicesItem> servicesItems = new ServiceDatabase(context).getAllSerivce();
+        List<String> nameList = new ArrayList<String>();
+        final List<String> idList = new ArrayList<String>();
+        for (ServicesItem item : servicesItems){
+            nameList.add(item.getName());
+            idList.add(item.getId());
+        }
+        monthSpinner(view, nameList, idList);
+    }
+
+    public void monthSpinner(View view, List<String> nameList, final List<String> idList) {
+        Spinner areaSpinner = (Spinner) view.findViewById(R.id.sel_service);
+        ArrayAdapter<String> areasAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, nameList);
+        areasAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        areaSpinner.setAdapter(areasAdapter);
+
+        areaSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {
+                String sid = idList.get(position);
+                Log.d("ST stmonth", statMonth);
+                getMonth(sid);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
     }
 
     public void bindAdapter(View view) {
