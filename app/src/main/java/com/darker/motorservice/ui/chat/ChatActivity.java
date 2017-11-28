@@ -31,7 +31,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.darker.motorservice.R;
 import com.darker.motorservice.database.PictureDatabse;
@@ -46,6 +45,7 @@ import com.darker.motorservice.ui.main.model.PictureItem;
 import com.darker.motorservice.utility.ImageUtil;
 import com.darker.motorservice.utility.NetworkUtil;
 import com.darker.motorservice.utility.StringUtil;
+import com.darker.motorservice.utility.ToasAlert;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -164,11 +164,11 @@ public class ChatActivity extends AppCompatActivity implements
 
     @Override
     public void onClick(View view) {
-        if (view == imgBtnImage){
+        if (view == imgBtnImage) {
             showImageStoreSelect();
-        }else if(view == imgBtnSend){
+        } else if (view == imgBtnSend) {
             validateText();
-        }else if(view == tvNetAlert){
+        } else if (view == tvNetAlert) {
             refreshUI();
         }
     }
@@ -204,7 +204,7 @@ public class ChatActivity extends AppCompatActivity implements
         }
     }
 
-    private void bindView(){
+    private void bindView() {
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         imgBtnImage = (ImageButton) findViewById(R.id.btn_img);
         imgBtnSend = (ImageButton) findViewById(R.id.btn_send);
@@ -261,10 +261,12 @@ public class ChatActivity extends AppCompatActivity implements
     public void validateText() {
         String message = edInputMessage.getText().toString();
         if (!StringUtil.stringOk(message)) {
-            if (!NetworkUtil.isNetworkAvailable(this)) {
-                Toast.makeText(this, "ข้อผิดพลาดเครือข่าย! ไม่สามารถส่งข้อความได้", Toast.LENGTH_LONG).show();
-                return;
-            }
+            return;
+        }
+
+        if (!NetworkUtil.isNetworkAvailable(this)) {
+            ToasAlert.alert(this, R.string.fault_network_cannot_send_message);
+            return;
         }
 
         if (keyChat.isEmpty()) {
@@ -273,7 +275,7 @@ public class ChatActivity extends AppCompatActivity implements
 
         pushMessage(message);
 
-        if (AccountType.isCustomer(this)){
+        if (AccountType.isCustomer(this)) {
             pushStat(CHAT);
         }
     }
@@ -306,7 +308,7 @@ public class ChatActivity extends AppCompatActivity implements
 
     private void checkBeforeUploadImage(Bitmap bitmap) {
         if (!NetworkUtil.isNetworkAvailable(this)) {
-            Toast.makeText(this, "ข้อผิดพลาดเครือข่าย! ไม่สามารถส่งรูปภาพได้", Toast.LENGTH_LONG).show();
+            ToasAlert.alert(this, R.string.fault_network_cannot_send_image);
         } else {
             imageUpload(bitmap);
             progressBar.setVisibility(View.VISIBLE);
@@ -316,7 +318,7 @@ public class ChatActivity extends AppCompatActivity implements
     private void imageUpload(Bitmap bitmap) {
         String imageName = ImageUtil.getImageName(uid);
         ImageUtil.uploadImage(imageName, bitmap, getImageUploadCallback());
-        Toast.makeText(this, "กำลังส่งรูปภาพ กรุณารอสักครู่...", Toast.LENGTH_SHORT).show();
+        ToasAlert.alert(this, R.string.sending_image);
     }
 
     @NonNull
@@ -328,14 +330,14 @@ public class ChatActivity extends AppCompatActivity implements
                 Log.d("upload", "OK");
                 pushMessage(KEY_IMAGE + imageName);
                 progressBar.setVisibility(View.GONE);
-                Toast.makeText(ChatActivity.this, "ส่งรูปภาพเรียบร้อย", Toast.LENGTH_SHORT).show();
+                ToasAlert.alert(ChatActivity.this, R.string.send_image_complete);
                 pushStat("chat");
                 pushImageToDatabase(bitmap, imageName);
             }
 
             @Override
             public void onFailure(String imageName) {
-                Toast.makeText(ChatActivity.this, "การส่งรูปภาพมีปัญหา โปรดลองอีกครั้ง", Toast.LENGTH_SHORT).show();
+                ToasAlert.alert(ChatActivity.this, R.string.send_image_problem);
                 progressBar.setVisibility(View.GONE);
             }
         };
@@ -375,7 +377,8 @@ public class ChatActivity extends AppCompatActivity implements
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {}
+            public void onCancelled(DatabaseError databaseError) {
+            }
         });
     }
 
@@ -453,7 +456,8 @@ public class ChatActivity extends AppCompatActivity implements
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {}
+            public void onCancelled(DatabaseError databaseError) {
+            }
         });
     }
 

@@ -99,6 +99,11 @@
     <string name="tab_store">ร้านต่างๆ</string>
     <string name="default_latlng">14.8823047,102.0206782</string>
     <string name="default_time_work">วันจันทร์-ศุกร์ เวลา 08:00-12:00, 13:00-20:00 น. วันเสาร์-อาทิตย์ เวลา 08:00-12:00 น. ปิดเทอม เวลา 09:00-17:00 น.</string>
+    <string name="send_image_complete">ส่งรูปภาพเรียบร้อย</string>
+    <string name="send_image_problem">การส่งรูปภาพมีปัญหา! โปรดลองอีกครั้ง</string>
+    <string name="fault_network_cannot_send_message">ข้อผิดพลาดเครือข่าย! ไม่สามารถส่งข้อความได้</string>
+    <string name="fault_network_cannot_send_image">ข้อผิดพลาดเครือข่าย! ไม่สามารถส่งรูปภาพได้</string>
+    <string name="sending_image">กำลังส่งรูปภาพ กรุณารอสักครู่...</string>
 
     <string-array name="tab_store">
         <item>แชท</item>
