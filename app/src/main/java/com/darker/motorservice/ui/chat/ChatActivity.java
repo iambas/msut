@@ -14,7 +14,6 @@ import android.graphics.BitmapFactory;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -61,7 +60,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.IOException;
@@ -537,7 +535,7 @@ public class ChatActivity extends AppCompatActivity implements
     }
 
     private void loadImg(final ChatMessageItem chatMessageItem, final String path) {
-        StorageReference islandRef = FirebaseStorage.getInstance().getReference().child(path);
+        StorageReference islandRef = FirebaseUtil.getChildStorage(path);
         final long ONE_MEGABYTE = 1024 * 1024;
         islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
@@ -686,7 +684,7 @@ public class ChatActivity extends AppCompatActivity implements
         Uri imageUri = data.getData();
         if (imageUri != null) {
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                Bitmap bitmap = ImageUtil.getImageMediaStore(this, imageUri);
                 if (bitmap.getWidth() > 720)
                     bitmap = ImageUtil.scaleBitmap(bitmap, 720);
                 else

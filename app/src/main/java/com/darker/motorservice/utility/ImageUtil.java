@@ -6,6 +6,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 
 import com.darker.motorservice.R;
@@ -19,6 +21,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 public class ImageUtil {
 
@@ -129,5 +132,9 @@ public class ImageUtil {
             bitmap = BitmapFactory.decodeResource(context.getResources(), resource);
         }
         return bitmap;
+    }
+
+    public static Bitmap getImageMediaStore(Context context, Uri imageUri) throws IOException {
+        return MediaStore.Images.Media.getBitmap(context.getContentResolver(), imageUri);
     }
 }
