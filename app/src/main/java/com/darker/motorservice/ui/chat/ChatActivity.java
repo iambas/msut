@@ -55,11 +55,9 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -218,9 +216,9 @@ public class ChatActivity extends AppCompatActivity implements
     }
 
     private void initInstance() {
-        storageRef = FirebaseStorage.getInstance().getReference();
-        uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        mDatabase = FirebaseDatabase.getInstance().getReference().child(CHAT);
+        storageRef = FirebaseUtil.getStorageReference();
+        uid = FirebaseUtil.getUid();
+        mDatabase = FirebaseUtil.getChildData(CHAT);
         chatMessageItemList = new ArrayList<>();
         messageAdapter = new MessageAdapter(this, R.layout.message_item, chatMessageItemList);
     }
@@ -320,7 +318,7 @@ public class ChatActivity extends AppCompatActivity implements
     private void prepareImage(Bitmap bitmap) {
         String date = StringUtil.getDateFormate("-yyyy_MM_dd_HH_mm_ss");
         final String imgName = "image/" + uid.substring(0, 5) + date + ".png";
-        StorageReference mountainsRef = FirebaseStorage.getInstance().getReference().child(imgName);
+        StorageReference mountainsRef = FirebaseUtil.getChildStorage(imgName);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
         byte[] data = baos.toByteArray();
@@ -391,7 +389,7 @@ public class ChatActivity extends AppCompatActivity implements
     }
 
     private void pushStat(final String type) {
-        DatabaseReference dbStat = FirebaseUtil.getChild("stat");
+        DatabaseReference dbStat = FirebaseUtil.getChildData("stat");
         String my = StringUtil.getDateFormate("yyyy-MM");
         String day = StringUtil.getDateFormate("dd-MM-yyyy");
         final DatabaseReference db = dbStat.child(service).child(my).child(day);

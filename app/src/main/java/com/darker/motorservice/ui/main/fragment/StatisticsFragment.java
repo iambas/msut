@@ -133,7 +133,7 @@ public class StatisticsFragment extends Fragment{
     }
 
     private void queryStatsByUid(String uid) {
-        dbStat = FirebaseUtil.getChild(STAT).child(uid);
+        dbStat = FirebaseUtil.getChildData(STAT).child(uid);
         dbStat.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
