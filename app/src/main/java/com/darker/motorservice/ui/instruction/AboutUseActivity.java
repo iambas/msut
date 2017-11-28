@@ -5,7 +5,7 @@ import android.os.Bundle;
 
 import com.darker.motorservice.R;
 
-import static com.darker.motorservice.utils.Constant.TYPE;
+import static com.darker.motorservice.utility.Constant.TYPE;
 
 public class AboutUseActivity extends AppCompatActivity {
 

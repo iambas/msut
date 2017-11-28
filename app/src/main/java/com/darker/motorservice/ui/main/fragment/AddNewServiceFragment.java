@@ -18,9 +18,9 @@ import com.darker.motorservice.R;
 import com.darker.motorservice.database.ServiceDatabase;
 import com.darker.motorservice.model.ServicesItem;
 import com.darker.motorservice.ui.main.callback.ImageUploadCallback;
-import com.darker.motorservice.utils.ImageUtils;
-import com.darker.motorservice.utils.NetWorkUtils;
-import com.darker.motorservice.utils.StringUtils;
+import com.darker.motorservice.utility.ImageUtil;
+import com.darker.motorservice.utility.NetworkUtil;
+import com.darker.motorservice.utility.StringUtil;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -31,9 +31,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.List;
 
 import static com.darker.motorservice.R.drawable.cover;
-import static com.darker.motorservice.utils.Constant.NEW_PASSWORD;
-import static com.darker.motorservice.utils.Constant.SERVICE;
-import static com.darker.motorservice.utils.Constant.STATUS;
+import static com.darker.motorservice.utility.Constant.NEW_PASSWORD;
+import static com.darker.motorservice.utility.Constant.SERVICE;
+import static com.darker.motorservice.utility.Constant.STATUS;
 
 public class AddNewServiceFragment extends Fragment {
     private EditText edName, edPosition, edPhoneNumber, edEmail;
@@ -104,12 +104,12 @@ public class AddNewServiceFragment extends Fragment {
                     return;
                 }
 
-                if (!StringUtils.isPhoneNumber(phoneNumber)) {
+                if (!StringUtil.isPhoneNumber(phoneNumber)) {
                     alert("เบอร์โทรศัพท์ไม่ถูกต้อง!");
                     return;
                 }
 
-                if (!StringUtils.isEmail(email)) {
+                if (!StringUtil.isEmail(email)) {
                     alert("กรุณากรอกอีเมลที่ถูกต้อง!");
                     return;
                 }
@@ -119,7 +119,7 @@ public class AddNewServiceFragment extends Fragment {
                     return;
                 }
 
-                if (NetWorkUtils.disable(getContext())) {
+                if (NetworkUtil.disable(getContext())) {
                     alert("เครือข่ายมีปัญหา! ไม่สามารถเพิ่มร้านได้");
                     return;
                 }
@@ -130,10 +130,10 @@ public class AddNewServiceFragment extends Fragment {
     }
 
     private boolean validateText() {
-        if (StringUtils.stringOk(name) ||
-                StringUtils.stringOk(position) ||
-                StringUtils.stringOk(phoneNumber) ||
-                StringUtils.stringOk(email)) {
+        if (StringUtil.stringOk(name) ||
+                StringUtil.stringOk(position) ||
+                StringUtil.stringOk(phoneNumber) ||
+                StringUtil.stringOk(email)) {
             return false;
         }
         return true;
@@ -207,7 +207,7 @@ public class AddNewServiceFragment extends Fragment {
 
     private void uploadImage(final String image, int draw) {
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), draw);
-        ImageUtils.uploadImage(image, bitmap, getImageUploadCallback());
+        ImageUtil.uploadImage(image, bitmap, getImageUploadCallback());
     }
 
     @NonNull

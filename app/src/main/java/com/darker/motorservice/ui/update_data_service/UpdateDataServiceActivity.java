@@ -19,8 +19,8 @@ import android.widget.Toast;
 
 import com.darker.motorservice.R;
 import com.darker.motorservice.model.ServicesItem;
-import com.darker.motorservice.utils.LoadServiceUtils;
-import com.darker.motorservice.utils.NetWorkUtils;
+import com.darker.motorservice.utility.LoadServiceUtil;
+import com.darker.motorservice.utility.NetworkUtil;
 import com.darker.motorservice.database.ServiceDatabase;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -35,8 +35,8 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.List;
 
-import static com.darker.motorservice.utils.Constant.ID;
-import static com.darker.motorservice.utils.Constant.SERVICE;
+import static com.darker.motorservice.utility.Constant.ID;
+import static com.darker.motorservice.utility.Constant.SERVICE;
 
 public class UpdateDataServiceActivity extends AppCompatActivity {
 
@@ -152,7 +152,7 @@ public class UpdateDataServiceActivity extends AppCompatActivity {
 
         String work = formOne + "\n" + formTwo + "\n" + formThree;
 
-        if (NetWorkUtils.disable(this)){
+        if (NetworkUtil.disable(this)){
             alert("เครือข่ายมีปัญหา! ไม่สามารถบันทึกได้");
         }else{
             progressBar.setVisibility(View.VISIBLE);
@@ -197,7 +197,7 @@ public class UpdateDataServiceActivity extends AppCompatActivity {
     private void update(ServicesItem s){
         DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference().child(SERVICE).child(servicesItem.getId());
         dbRef.setValue(s);
-        new LoadServiceUtils(UpdateDataServiceActivity.this).loadData();
+        new LoadServiceUtil(UpdateDataServiceActivity.this).loadData();
         progressBar.setVisibility(View.GONE);
         s.setImgProfile(servicesItem.getImgProfile());
         s.setImgCover(servicesItem.getImgCover());
@@ -223,7 +223,7 @@ public class UpdateDataServiceActivity extends AppCompatActivity {
     }
 
     public void onEditLatlngClicked(View view){
-        if (NetWorkUtils.disable(this)) return;
+        if (NetworkUtil.disable(this)) return;
         checkGpsStatus();
         if (!GpsStatus) return;
 

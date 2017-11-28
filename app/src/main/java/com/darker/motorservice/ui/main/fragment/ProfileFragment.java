@@ -29,8 +29,8 @@ import com.darker.motorservice.ui.map.MapsActivity;
 import com.darker.motorservice.ui.update_data_service.UpdateDataServiceActivity;
 import com.darker.motorservice.ui.update_image.UpdateImageActivity;
 import com.darker.motorservice.ui.update_password.UpdatePasswordActivity;
-import com.darker.motorservice.utils.ImageUtils;
-import com.darker.motorservice.utils.NetWorkUtils;
+import com.darker.motorservice.utility.ImageUtil;
+import com.darker.motorservice.utility.NetworkUtil;
 import com.facebook.login.LoginManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -40,17 +40,17 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
-import static com.darker.motorservice.utils.Constant.COVER;
-import static com.darker.motorservice.utils.Constant.ID;
-import static com.darker.motorservice.utils.Constant.IMG;
-import static com.darker.motorservice.utils.Constant.KEY_LOGIN_MOTOR_SERVICE;
-import static com.darker.motorservice.utils.Constant.LATLNG;
-import static com.darker.motorservice.utils.Constant.NAME;
-import static com.darker.motorservice.utils.Constant.ONLINE;
-import static com.darker.motorservice.utils.Constant.PHOTO;
-import static com.darker.motorservice.utils.Constant.SERVICE;
-import static com.darker.motorservice.utils.Constant.STATUS;
-import static com.darker.motorservice.utils.Constant.USER;
+import static com.darker.motorservice.utility.Constant.COVER;
+import static com.darker.motorservice.utility.Constant.ID;
+import static com.darker.motorservice.utility.Constant.IMG;
+import static com.darker.motorservice.utility.Constant.KEY_LOGIN_MOTOR_SERVICE;
+import static com.darker.motorservice.utility.Constant.LATLNG;
+import static com.darker.motorservice.utility.Constant.NAME;
+import static com.darker.motorservice.utility.Constant.ONLINE;
+import static com.darker.motorservice.utility.Constant.PHOTO;
+import static com.darker.motorservice.utility.Constant.SERVICE;
+import static com.darker.motorservice.utility.Constant.STATUS;
+import static com.darker.motorservice.utility.Constant.USER;
 
 public class ProfileFragment extends Fragment implements View.OnClickListener{
 
@@ -175,7 +175,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
     }
 
     private void checkNetworkForSetBackGround() {
-        if (NetWorkUtils.disable(getContext()))
+        if (NetworkUtil.disable(getContext()))
             mSwitch.setBackgroundResource(R.color.white);
     }
 
@@ -206,7 +206,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
     }
 
     private boolean checkNetworkForSetSwitch(boolean isChecked) {
-        if (NetWorkUtils.disable(getContext())){
+        if (NetworkUtil.disable(getContext())){
             toastAlert("เครือข่ายมีปัญหา! ไม่สามารถเปลี่ยนสถานะร้านได้");
             mSwitch.setChecked(!isChecked);
             return true;
@@ -280,8 +280,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
     }
 
     private void setupImageView() {
-        Bitmap cover = ImageUtils.getBitmap(getContext(), servicesItem.getImgCover(), R.drawable.pro);
-        Bitmap profile = ImageUtils.getBitmap(getContext(), servicesItem.getImgProfile(), R.drawable.cover);
+        Bitmap cover = ImageUtil.getBitmap(getContext(), servicesItem.getImgCover(), R.drawable.pro);
+        Bitmap profile = ImageUtil.getBitmap(getContext(), servicesItem.getImgProfile(), R.drawable.cover);
         ((ImageView) view.findViewById(R.id.cover_service)).setImageBitmap(cover);
         ((ImageView) view.findViewById(R.id.profile_service)).setImageBitmap(profile);
     }
@@ -300,7 +300,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
     }
 
     private void logout(){
-        if (NetWorkUtils.disable(getContext())){
+        if (NetworkUtil.disable(getContext())){
             toastAlert("เครือข่ายมีปัญหา! ไม่สามารถออกจากระบบได้");
             return;
         }

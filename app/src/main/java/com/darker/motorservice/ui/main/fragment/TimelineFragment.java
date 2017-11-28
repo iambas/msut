@@ -23,7 +23,7 @@ import com.darker.motorservice.model.TimelineItem;
 import com.darker.motorservice.ui.main.adapter.TimelineAdapter;
 import com.darker.motorservice.ui.main.model.PictureItem;
 import com.darker.motorservice.ui.post.PostActivity;
-import com.darker.motorservice.utils.ImageUtils;
+import com.darker.motorservice.utility.ImageUtil;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
@@ -40,17 +40,17 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import static com.darker.motorservice.utils.Constant.ALERT;
-import static com.darker.motorservice.utils.Constant.CHAT;
-import static com.darker.motorservice.utils.Constant.DATE;
-import static com.darker.motorservice.utils.Constant.ID;
-import static com.darker.motorservice.utils.Constant.IMG;
-import static com.darker.motorservice.utils.Constant.KEY;
-import static com.darker.motorservice.utils.Constant.KEY_LOGIN_MOTOR_SERVICE;
-import static com.darker.motorservice.utils.Constant.MESSAGE;
-import static com.darker.motorservice.utils.Constant.STATUS;
-import static com.darker.motorservice.utils.Constant.TIMELINE;
-import static com.darker.motorservice.utils.Constant.USER;
+import static com.darker.motorservice.utility.Constant.ALERT;
+import static com.darker.motorservice.utility.Constant.CHAT;
+import static com.darker.motorservice.utility.Constant.DATE;
+import static com.darker.motorservice.utility.Constant.ID;
+import static com.darker.motorservice.utility.Constant.IMG;
+import static com.darker.motorservice.utility.Constant.KEY;
+import static com.darker.motorservice.utility.Constant.KEY_LOGIN_MOTOR_SERVICE;
+import static com.darker.motorservice.utility.Constant.MESSAGE;
+import static com.darker.motorservice.utility.Constant.STATUS;
+import static com.darker.motorservice.utility.Constant.TIMELINE;
+import static com.darker.motorservice.utility.Constant.USER;
 
 public class TimelineFragment extends Fragment implements View.OnClickListener{
 
@@ -191,7 +191,7 @@ public class TimelineFragment extends Fragment implements View.OnClickListener{
     }
 
     private void setUpLoadImage(final TimelineItem timelineItem, ServicesItem servicesItem) {
-        Bitmap bitmap = ImageUtils.convertToBitmap(servicesItem.getImgProfile());
+        Bitmap bitmap = ImageUtil.convertToBitmap(servicesItem.getImgProfile());
         timelineItem.setName(servicesItem.getName());
         timelineItem.setProfile(bitmap);
 
@@ -219,7 +219,7 @@ public class TimelineFragment extends Fragment implements View.OnClickListener{
 
     private void addtimelineToList(TimelineItem timelineItem, PictureDatabse handle, String imagePath) {
         byte[] bytes = handle.getPicture(imagePath).getPicture();
-        Bitmap bitmap = ImageUtils.convertToBitmap(bytes);
+        Bitmap bitmap = ImageUtil.convertToBitmap(bytes);
         timelineItem.setImage(bitmap);
         timelineItems.add(timelineItem);
     }
@@ -230,7 +230,7 @@ public class TimelineFragment extends Fragment implements View.OnClickListener{
             @Override
             public void onSuccess(byte[] bytes) {
                 handle.addPicture(new PictureItem(imagePath, bytes));
-                Bitmap bitmap = ImageUtils.convertToBitmap(bytes);
+                Bitmap bitmap = ImageUtil.convertToBitmap(bytes);
                 timelineItem.setImage(bitmap);
                 timelineItems.add(timelineItem);
                 sortTimelineItems();

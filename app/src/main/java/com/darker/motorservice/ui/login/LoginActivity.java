@@ -21,9 +21,9 @@ import com.darker.motorservice.R;
 import com.darker.motorservice.ui.instruction.AboutUseActivity;
 import com.darker.motorservice.ui.reset_password.ResetPasswordActivity;
 import com.darker.motorservice.ui.main.MainActivity;
-import com.darker.motorservice.utils.EncodedUtils;
-import com.darker.motorservice.utils.LoadServiceUtils;
-import com.darker.motorservice.utils.NetWorkUtils;
+import com.darker.motorservice.utility.EncodedUtil;
+import com.darker.motorservice.utility.LoadServiceUtil;
+import com.darker.motorservice.utility.NetworkUtil;
 import com.darker.motorservice.ui.login.model.UserItem;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -47,16 +47,16 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import static android.widget.Toast.LENGTH_LONG;
-import static com.darker.motorservice.utils.Constant.EMAIL;
-import static com.darker.motorservice.utils.Constant.ID;
-import static com.darker.motorservice.utils.Constant.KEY_LOGIN_MOTOR_SERVICE;
-import static com.darker.motorservice.utils.Constant.NAME;
-import static com.darker.motorservice.utils.Constant.PASSWORD;
-import static com.darker.motorservice.utils.Constant.PHOTO;
-import static com.darker.motorservice.utils.Constant.SERVICE;
-import static com.darker.motorservice.utils.Constant.STATUS;
-import static com.darker.motorservice.utils.Constant.TYPE;
-import static com.darker.motorservice.utils.Constant.USER;
+import static com.darker.motorservice.utility.Constant.EMAIL;
+import static com.darker.motorservice.utility.Constant.ID;
+import static com.darker.motorservice.utility.Constant.KEY_LOGIN_MOTOR_SERVICE;
+import static com.darker.motorservice.utility.Constant.NAME;
+import static com.darker.motorservice.utility.Constant.PASSWORD;
+import static com.darker.motorservice.utility.Constant.PHOTO;
+import static com.darker.motorservice.utility.Constant.SERVICE;
+import static com.darker.motorservice.utility.Constant.STATUS;
+import static com.darker.motorservice.utility.Constant.TYPE;
+import static com.darker.motorservice.utility.Constant.USER;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -137,7 +137,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void onFacebookClicked(View view){
-        if (NetWorkUtils.disable(this)){
+        if (NetworkUtil.disable(this)){
             Toast.makeText(view.getContext(), "ข้อผิดพลาดเครือข่าย! ไม่สามารถเข้าสู่ระบบได้", LENGTH_LONG).show();
             return;
         }
@@ -190,8 +190,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void loadDB(){
-        new LoadServiceUtils(this).loadData();
-        new LoadServiceUtils(this).loadAdmin();
+        new LoadServiceUtil(this).loadData();
+        new LoadServiceUtil(this).loadAdmin();
     }
 
     private void on(){
@@ -260,7 +260,7 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        if (NetWorkUtils.disable(this)){
+        if (NetworkUtil.disable(this)){
             alert("ข้อผิดพลาดเครือข่าย! ไม่สามารถเข้าสู่ระบบได้");
             inputPass.setText("");
             return;
@@ -289,7 +289,7 @@ public class LoginActivity extends AppCompatActivity {
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     String id = mAuth.getCurrentUser().getUid();
                                     editor.putString(EMAIL, mAuth.getCurrentUser().getEmail());
-                                    editor.putString(PASSWORD, (new EncodedUtils(password)).getResult());
+                                    editor.putString(PASSWORD, (new EncodedUtil(password)).getResult());
                                     editor.putString(STATUS, SERVICE);
                                     editor.putString(ID, id);
                                     editor.commit();

@@ -25,9 +25,9 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.darker.motorservice.utils.Constant.ALERT;
-import static com.darker.motorservice.utils.Constant.CHAT;
-import static com.darker.motorservice.utils.Constant.STATUS;
+import static com.darker.motorservice.utility.Constant.ALERT;
+import static com.darker.motorservice.utility.Constant.CHAT;
+import static com.darker.motorservice.utility.Constant.STATUS;
 
 public class MotorcycleFragment extends Fragment {
 

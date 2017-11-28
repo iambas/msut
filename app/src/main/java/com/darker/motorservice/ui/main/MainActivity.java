@@ -30,17 +30,17 @@ import com.darker.motorservice.ui.main.fragment.ReviewFragment;
 import com.darker.motorservice.ui.main.fragment.StatisticsFragment;
 import com.darker.motorservice.ui.main.fragment.TimelineFragment;
 import com.darker.motorservice.ui.main.model.ViewItem;
-import com.darker.motorservice.utils.ImageUtils;
+import com.darker.motorservice.utility.ImageUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.darker.motorservice.utils.Constant.ALERT;
-import static com.darker.motorservice.utils.Constant.CHAT;
-import static com.darker.motorservice.utils.Constant.ID;
-import static com.darker.motorservice.utils.Constant.KEY_LOGIN_MOTOR_SERVICE;
-import static com.darker.motorservice.utils.Constant.STATUS;
-import static com.darker.motorservice.utils.Constant.USER;
+import static com.darker.motorservice.utility.Constant.ALERT;
+import static com.darker.motorservice.utility.Constant.CHAT;
+import static com.darker.motorservice.utility.Constant.ID;
+import static com.darker.motorservice.utility.Constant.KEY_LOGIN_MOTOR_SERVICE;
+import static com.darker.motorservice.utility.Constant.STATUS;
+import static com.darker.motorservice.utility.Constant.USER;
 
 public class MainActivity extends AppCompatActivity {
     private TabLayout tabLayout;
@@ -199,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setTextAndIconStoreTab() {
-        int[] iconStores = ImageUtils.getStoreIcon();
+        int[] iconStores = ImageUtil.getStoreIcon();
         String[] tabStores = getResources().getStringArray(R.array.tab_store);
 
         for (int i = 0; i < iconStores.length; i++){
@@ -250,7 +250,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setTextAndIconUserTab() {
-        int[] iconUsers = ImageUtils.getUserIcon();
+        int[] iconUsers = ImageUtil.getUserIcon();
         String[] tabTexts = getResources().getStringArray(R.array.tab_user);
 
         for (int i = 0; i < iconUsers.length; i++){

@@ -1,12 +1,12 @@
-package com.darker.motorservice.utils;
+package com.darker.motorservice.utility;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-public class NetWorkUtils {
+public class NetworkUtil {
 
-    public NetWorkUtils(){}
+    public NetworkUtil(){}
 
     public static boolean isNetworkAvailiable(Context context){
         ConnectivityManager connectivity = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);

@@ -1,4 +1,4 @@
-package com.darker.motorservice.utils;
+package com.darker.motorservice.utility;
 
 import android.annotation.SuppressLint;
 
@@ -9,11 +9,11 @@ import java.util.Date;
  * Created by Darker on 15/11/60.
  */
 
-public class StringUtils {
+public class StringUtil {
     private static final String PHONE_PATTERN = "\\d{9,10}";
     private static final String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
 
-    public StringUtils() {
+    public StringUtil() {
     }
 
     @SuppressLint("SimpleDateFormat")

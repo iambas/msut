@@ -1,4 +1,4 @@
-package com.darker.motorservice.utils;
+package com.darker.motorservice.utility;
 
 import android.util.Base64;
 import android.util.Log;
@@ -6,11 +6,11 @@ import android.util.Log;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class EncodedUtils {
+public class EncodedUtil {
 
     private String result;
 
-    public EncodedUtils(String password) {
+    public EncodedUtil(String password) {
         MessageDigest md = null;
         try {
             md = MessageDigest.getInstance("SHA");

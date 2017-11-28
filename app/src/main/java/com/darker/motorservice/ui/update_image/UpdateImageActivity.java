@@ -15,8 +15,8 @@ import android.widget.ProgressBar;
 
 import com.darker.motorservice.R;
 import com.darker.motorservice.model.ServicesItem;
-import com.darker.motorservice.utils.LoadServiceUtils;
-import com.darker.motorservice.utils.ImageUtils;
+import com.darker.motorservice.utility.LoadServiceUtil;
+import com.darker.motorservice.utility.ImageUtil;
 import com.darker.motorservice.database.ServiceDatabase;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -27,9 +27,9 @@ import com.google.firebase.storage.UploadTask;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import static com.darker.motorservice.utils.Constant.COVER;
-import static com.darker.motorservice.utils.Constant.ID;
-import static com.darker.motorservice.utils.Constant.IMG;
+import static com.darker.motorservice.utility.Constant.COVER;
+import static com.darker.motorservice.utility.Constant.ID;
+import static com.darker.motorservice.utility.Constant.IMG;
 
 public class UpdateImageActivity extends AppCompatActivity {
     private String id, image;
@@ -74,14 +74,14 @@ public class UpdateImageActivity extends AppCompatActivity {
     }
 
     private void imgCover() {
-        Bitmap cover = new ImageUtils().getImgCover(this, id);
+        Bitmap cover = new ImageUtil().getImgCover(this, id);
         imageView = (ImageView) findViewById(R.id.img_cover);
         imageView.setVisibility(View.VISIBLE);
         imageView.setImageBitmap(cover);
     }
 
     private void imgProfile() {
-        Bitmap profile = new ImageUtils().getImgProfile(this, id);
+        Bitmap profile = new ImageUtil().getImgProfile(this, id);
         imageView = (ImageView) findViewById(R.id.img_profile);
         imageView.setVisibility(View.VISIBLE);
         imageView.setImageBitmap(profile);
@@ -102,9 +102,9 @@ public class UpdateImageActivity extends AppCompatActivity {
                 try {
                     bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(),imageUri);
                     if (bitmap.getWidth() > size)
-                        bitmap = new ImageUtils().scaleBitmap(bitmap, size);
+                        bitmap = new ImageUtil().scaleBitmap(bitmap, size);
                     else
-                        bitmap = new ImageUtils().scaleBitmap(bitmap, bitmap.getWidth());
+                        bitmap = new ImageUtil().scaleBitmap(bitmap, bitmap.getWidth());
                     imageView.setImageBitmap(bitmap);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -138,7 +138,7 @@ public class UpdateImageActivity extends AppCompatActivity {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 Log.d("upload", "OK");
-                new LoadServiceUtils(UpdateImageActivity.this).loadData();
+                new LoadServiceUtil(UpdateImageActivity.this).loadData();
                 updateDB();
                 progressBar.setVisibility(View.GONE);
                 finish();
@@ -147,7 +147,7 @@ public class UpdateImageActivity extends AppCompatActivity {
     }
 
     private void updateDB(){
-        ImageUtils image = new ImageUtils();
+        ImageUtil image = new ImageUtil();
         ServiceDatabase handle = new ServiceDatabase(this);
         ServicesItem s = handle.getService(id);
         if (isCover) {

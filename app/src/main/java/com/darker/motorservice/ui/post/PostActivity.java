@@ -18,8 +18,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.utils.ImageUtils;
-import com.darker.motorservice.utils.NetWorkUtils;
+import com.darker.motorservice.utility.ImageUtil;
+import com.darker.motorservice.utility.NetworkUtil;
 import com.darker.motorservice.ui.main.model.PictureItem;
 import com.darker.motorservice.model.TimelineItem;
 import com.darker.motorservice.database.PictureDatabse;
@@ -36,13 +36,13 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static com.darker.motorservice.utils.Constant.DATE;
-import static com.darker.motorservice.utils.Constant.ID;
-import static com.darker.motorservice.utils.Constant.IMG;
-import static com.darker.motorservice.utils.Constant.KEY;
-import static com.darker.motorservice.utils.Constant.KEY_LOGIN_MOTOR_SERVICE;
-import static com.darker.motorservice.utils.Constant.MESSAGE;
-import static com.darker.motorservice.utils.Constant.TIMELINE;
+import static com.darker.motorservice.utility.Constant.DATE;
+import static com.darker.motorservice.utility.Constant.ID;
+import static com.darker.motorservice.utility.Constant.IMG;
+import static com.darker.motorservice.utility.Constant.KEY;
+import static com.darker.motorservice.utility.Constant.KEY_LOGIN_MOTOR_SERVICE;
+import static com.darker.motorservice.utility.Constant.MESSAGE;
+import static com.darker.motorservice.utility.Constant.TIMELINE;
 
 public class PostActivity extends AppCompatActivity {
 
@@ -93,7 +93,7 @@ public class PostActivity extends AppCompatActivity {
 
         if (!imgName.isEmpty()){
             PictureDatabse handle = new PictureDatabse(this);
-            Bitmap bitmap = new ImageUtils().convertToBitmap(handle.getPicture(imgName).getPicture());
+            Bitmap bitmap = new ImageUtil().convertToBitmap(handle.getPicture(imgName).getPicture());
             imageView.setImageBitmap(bitmap);
             imageView.setVisibility(View.VISIBLE);
         }
@@ -108,7 +108,7 @@ public class PostActivity extends AppCompatActivity {
 
         btnPost.setClickable(false);
         btnImg.setClickable(false);
-        if (NetWorkUtils.disable(this)) {
+        if (NetworkUtil.disable(this)) {
             alert("เครือข่ายมีปัญหา! ไม่สามารถโพสต์ได้");
             return;
         }
@@ -202,9 +202,9 @@ public class PostActivity extends AppCompatActivity {
                 try {
                     bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
                     if (bitmap.getWidth() > 800)
-                        bitmap = new ImageUtils().scaleBitmap(bitmap, 800);
+                        bitmap = new ImageUtil().scaleBitmap(bitmap, 800);
                     else
-                        bitmap = new ImageUtils().scaleBitmap(bitmap, bitmap.getWidth());
+                        bitmap = new ImageUtil().scaleBitmap(bitmap, bitmap.getWidth());
                     imageView.setImageBitmap(bitmap);
                     imageView.setVisibility(View.VISIBLE);
                 } catch (IOException e) {

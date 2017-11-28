@@ -18,7 +18,7 @@ import android.widget.TextView;
 import com.darker.motorservice.R;
 import com.darker.motorservice.ui.chat.ChatActivity;
 import com.darker.motorservice.ui.main.model.ChatItem;
-import com.darker.motorservice.utils.ImageUtils;
+import com.darker.motorservice.utility.ImageUtil;
 import com.darker.motorservice.database.ServiceDatabase;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -34,15 +34,15 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import static com.darker.motorservice.utils.Constant.CHAT_WITH_ID;
-import static com.darker.motorservice.utils.Constant.CHAT_WITH_NAME;
-import static com.darker.motorservice.utils.Constant.KEY_CHAT;
-import static com.darker.motorservice.utils.Constant.KEY_LOGIN_MOTOR_SERVICE;
-import static com.darker.motorservice.utils.Constant.PHOTO;
-import static com.darker.motorservice.utils.Constant.SERVICE;
-import static com.darker.motorservice.utils.Constant.STATUS;
-import static com.darker.motorservice.utils.Constant.TEL_NUM;
-import static com.darker.motorservice.utils.Constant.USER;
+import static com.darker.motorservice.utility.Constant.CHAT_WITH_ID;
+import static com.darker.motorservice.utility.Constant.CHAT_WITH_NAME;
+import static com.darker.motorservice.utility.Constant.KEY_CHAT;
+import static com.darker.motorservice.utility.Constant.KEY_LOGIN_MOTOR_SERVICE;
+import static com.darker.motorservice.utility.Constant.PHOTO;
+import static com.darker.motorservice.utility.Constant.SERVICE;
+import static com.darker.motorservice.utility.Constant.STATUS;
+import static com.darker.motorservice.utility.Constant.TEL_NUM;
+import static com.darker.motorservice.utility.Constant.USER;
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     private List<ChatItem> items;
@@ -85,7 +85,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         if (isUser) {
             Bitmap bitmap;
             try {
-                bitmap = new ImageUtils().getImgProfile(context, chatItem.getChatWithId());
+                bitmap = new ImageUtil().getImgProfile(context, chatItem.getChatWithId());
             } catch (Exception e) {
                 bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.pro);
             }

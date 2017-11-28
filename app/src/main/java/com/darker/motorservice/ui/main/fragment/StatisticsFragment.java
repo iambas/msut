@@ -23,8 +23,8 @@ import com.darker.motorservice.model.ServicesItem;
 import com.darker.motorservice.ui.main.adapter.StatAdapter;
 import com.darker.motorservice.ui.main.fragment.spinner.SpinnerUtil;
 import com.darker.motorservice.ui.main.model.StatItem;
-import com.darker.motorservice.utils.NetWorkUtils;
-import com.darker.motorservice.utils.StringUtils;
+import com.darker.motorservice.utility.NetworkUtil;
+import com.darker.motorservice.utility.StringUtil;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -35,8 +35,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import static com.darker.motorservice.utils.Constant.CHAT;
-import static com.darker.motorservice.utils.Constant.STAT;
+import static com.darker.motorservice.utility.Constant.CHAT;
+import static com.darker.motorservice.utility.Constant.STAT;
 
 public class StatisticsFragment extends Fragment{
     private Context context;
@@ -73,7 +73,7 @@ public class StatisticsFragment extends Fragment{
     public void initGlobal(View view) {
         this.context = view.getContext();
         this.mView = view;
-        statMonth = StringUtils.getDateFormate("yyyy-MM");
+        statMonth = StringUtil.getDateFormate("yyyy-MM");
     }
 
     public void checkAdmin(View view) {
@@ -199,7 +199,7 @@ public class StatisticsFragment extends Fragment{
 
     private boolean isNetworkDisable(final String uid) {
         TextView tvNetworkAlert = (TextView) mView.findViewById(R.id.txt_net_alert);
-        if (NetWorkUtils.disable(getContext())){
+        if (NetworkUtil.disable(getContext())){
             tvNetworkAlert.setVisibility(View.VISIBLE);
             tvNetworkAlert.setOnClickListener(new View.OnClickListener() {
                 @Override

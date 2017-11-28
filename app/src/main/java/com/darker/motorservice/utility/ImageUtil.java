@@ -1,4 +1,4 @@
-package com.darker.motorservice.utils;
+package com.darker.motorservice.utility;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -20,11 +20,11 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 
-public class ImageUtils {
+public class ImageUtil {
 
     private int size = 100;
 
-    public ImageUtils() {
+    public ImageUtil() {
     }
 
     public Bitmap getImgCover(Context context, String id) {

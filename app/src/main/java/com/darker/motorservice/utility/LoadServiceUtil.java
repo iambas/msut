@@ -1,4 +1,4 @@
-package com.darker.motorservice.utils;
+package com.darker.motorservice.utility;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -23,18 +23,18 @@ import com.google.firebase.storage.StorageReference;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 
-import static com.darker.motorservice.utils.Constant.ADMIN;
-import static com.darker.motorservice.utils.Constant.SERVICE;
+import static com.darker.motorservice.utility.Constant.ADMIN;
+import static com.darker.motorservice.utility.Constant.SERVICE;
 
-public class LoadServiceUtils {
+public class LoadServiceUtil {
 
     private Context context;
     private ServiceDatabase handle;
     private StorageReference storageRef;
 
-    public LoadServiceUtils(){}
+    public LoadServiceUtil(){}
 
-    public LoadServiceUtils(Context context){
+    public LoadServiceUtil(Context context){
         this.context = context;
         storageRef = FirebaseStorage.getInstance().getReference();
         handle = new ServiceDatabase(context);

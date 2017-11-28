@@ -41,8 +41,8 @@ import com.darker.motorservice.ui.chat.model.NewChatItem;
 import com.darker.motorservice.ui.main.MainActivity;
 import com.darker.motorservice.ui.main.callback.ImageUploadCallback;
 import com.darker.motorservice.ui.main.model.PictureItem;
-import com.darker.motorservice.utils.ImageUtils;
-import com.darker.motorservice.utils.NetWorkUtils;
+import com.darker.motorservice.utility.ImageUtil;
+import com.darker.motorservice.utility.NetworkUtil;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -70,21 +70,21 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import static com.darker.motorservice.utils.Constant.CHAT;
-import static com.darker.motorservice.utils.Constant.CHAT_WITH_ID;
-import static com.darker.motorservice.utils.Constant.CHAT_WITH_NAME;
-import static com.darker.motorservice.utils.Constant.DATA;
-import static com.darker.motorservice.utils.Constant.IMG;
-import static com.darker.motorservice.utils.Constant.KEY_CHAT;
-import static com.darker.motorservice.utils.Constant.KEY_IMAGE;
-import static com.darker.motorservice.utils.Constant.NAME;
-import static com.darker.motorservice.utils.Constant.PHOTO;
-import static com.darker.motorservice.utils.Constant.SERVICE;
-import static com.darker.motorservice.utils.Constant.STATUS;
-import static com.darker.motorservice.utils.Constant.TEL_NUM;
-import static com.darker.motorservice.utils.Constant.USER;
-import static com.darker.motorservice.utils.StringUtils.getDateFormate;
-import static com.darker.motorservice.utils.StringUtils.stringOk;
+import static com.darker.motorservice.utility.Constant.CHAT;
+import static com.darker.motorservice.utility.Constant.CHAT_WITH_ID;
+import static com.darker.motorservice.utility.Constant.CHAT_WITH_NAME;
+import static com.darker.motorservice.utility.Constant.DATA;
+import static com.darker.motorservice.utility.Constant.IMG;
+import static com.darker.motorservice.utility.Constant.KEY_CHAT;
+import static com.darker.motorservice.utility.Constant.KEY_IMAGE;
+import static com.darker.motorservice.utility.Constant.NAME;
+import static com.darker.motorservice.utility.Constant.PHOTO;
+import static com.darker.motorservice.utility.Constant.SERVICE;
+import static com.darker.motorservice.utility.Constant.STATUS;
+import static com.darker.motorservice.utility.Constant.TEL_NUM;
+import static com.darker.motorservice.utility.Constant.USER;
+import static com.darker.motorservice.utility.StringUtil.getDateFormate;
+import static com.darker.motorservice.utility.StringUtil.stringOk;
 
 public class ChatActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -267,7 +267,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     private void googleAPI() {
-        GoogleApiClient mGoogleApiClient = new GoogleApiClient
+        new GoogleApiClient
                 .Builder(this)
                 .addApi(Places.GEO_DATA_API)
                 .addApi(Places.PLACE_DETECTION_API)
@@ -278,7 +278,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     public void onSendClicked() {
         String msg = edInputMessage.getText().toString();
         if (stringOk(msg))
-            if (NetWorkUtils.disable(this)) {
+            if (NetworkUtil.disable(this)) {
                 Toast.makeText(this, "ข้อผิดพลาดเครือข่าย! ไม่สามารถส่งข้อความได้", Toast.LENGTH_LONG).show();
                 return;
             }
@@ -315,7 +315,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     private void checkBeforeUploadImage(Bitmap bitmap) {
-        if (NetWorkUtils.disable(this)) {
+        if (NetworkUtil.disable(this)) {
             Toast.makeText(this, "ข้อผิดพลาดเครือข่าย! ไม่สามารถส่งรูปภาพได้", Toast.LENGTH_LONG).show();
         } else {
             prepareImage(bitmap);
@@ -355,7 +355,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
             }
         });
 
-        ImageUtils.uploadImage(imgName, bitmap, getImageUploadCallback());
+        ImageUtil.uploadImage(imgName, bitmap, getImageUploadCallback());
     }
 
     @NonNull
@@ -382,7 +382,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private void pushImageToDatabase(Bitmap bitmap, String imgName) {
         PictureDatabse handle = new PictureDatabse(ChatActivity.this);
-        byte[] bytes = new ImageUtils().toByte(bitmap);
+        byte[] bytes = new ImageUtil().toByte(bitmap);
         handle.addPicture(new PictureItem(imgName, bytes));
     }
 
@@ -421,7 +421,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private void refreshUI() {
         progressBar.setVisibility(View.VISIBLE);
-        if (NetWorkUtils.disable(this)) {
+        if (NetworkUtil.disable(this)) {
             tvNetAlert.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.GONE);
         } else {
@@ -559,7 +559,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         if (handle.hasPicture(path)) {
             Log.d("hasPicture", "YES");
             byte[] bytes = handle.getPicture(path).getPicture();
-            Bitmap bitmap = new ImageUtils().convertToBitmap(bytes);
+            Bitmap bitmap = new ImageUtil().convertToBitmap(bytes);
             chatMessageItem.setBitmap(bitmap);
             addChatMessageToList(chatMessageItem);
             return true;
@@ -573,7 +573,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
             public void onSuccess(byte[] bytes) {
-                Bitmap bitmap = new ImageUtils().convertToBitmap(bytes);
+                Bitmap bitmap = new ImageUtil().convertToBitmap(bytes);
                 addPictureToDatabaseWithBytes(bytes, path);
                 removeThenAddChatMessage(chatMessageItem, bitmap);
                 Log.d("load Picture", "OK");
@@ -607,7 +607,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         if (status.equals(USER)) {
-            if (NetWorkUtils.disable(this))
+            if (NetworkUtil.disable(this))
                 getMenuInflater().inflate(R.menu.menu_chat_no_net, menu);
             else
                 getMenuInflater().inflate(R.menu.menu_chat_net, menu);
@@ -668,7 +668,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     public void myGps() {
-        if (NetWorkUtils.disable(this)) return;
+        if (NetworkUtil.disable(this)) return;
         checkGpsStatus();
         if (!gpsStatus) return;
         startSelectPlace();
@@ -719,9 +719,9 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
                 if (bitmap.getWidth() > 720)
-                    bitmap = new ImageUtils().scaleBitmap(bitmap, 720);
+                    bitmap = new ImageUtil().scaleBitmap(bitmap, 720);
                 else
-                    bitmap = new ImageUtils().scaleBitmap(bitmap, bitmap.getWidth());
+                    bitmap = new ImageUtil().scaleBitmap(bitmap, bitmap.getWidth());
                 dialogImg(bitmap);
             } catch (IOException e) {
                 e.printStackTrace();

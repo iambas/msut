@@ -30,8 +30,8 @@ import com.darker.motorservice.ui.details.DetailActivity;
 import com.darker.motorservice.ui.main.adapter.ReviewAdapter;
 import com.darker.motorservice.ui.main.fragment.spinner.SpinnerUtil;
 import com.darker.motorservice.ui.main.model.ReviewItem;
-import com.darker.motorservice.utils.NetWorkUtils;
-import com.darker.motorservice.utils.StringUtils;
+import com.darker.motorservice.utility.NetworkUtil;
+import com.darker.motorservice.utility.StringUtil;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -43,11 +43,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import static com.darker.motorservice.utils.Constant.ID;
-import static com.darker.motorservice.utils.Constant.KEY_LOGIN_MOTOR_SERVICE;
-import static com.darker.motorservice.utils.Constant.REVIEW;
-import static com.darker.motorservice.utils.Constant.STATUS;
-import static com.darker.motorservice.utils.Constant.USER;
+import static com.darker.motorservice.utility.Constant.ID;
+import static com.darker.motorservice.utility.Constant.KEY_LOGIN_MOTOR_SERVICE;
+import static com.darker.motorservice.utility.Constant.REVIEW;
+import static com.darker.motorservice.utility.Constant.STATUS;
+import static com.darker.motorservice.utility.Constant.USER;
 
 public class ReviewFragment extends Fragment implements View.OnClickListener{
     private Context context;
@@ -219,7 +219,7 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
     }
 
     private void checkNetwork() {
-        if (NetWorkUtils.disable(getContext())) {
+        if (NetworkUtil.disable(getContext())) {
             setViewNetworkDisable();
         } else {
             mView.findViewById(R.id.txt_net_alert).setVisibility(View.GONE);
@@ -253,12 +253,12 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String msg = editRev.getText().toString();
-                if (!StringUtils.stringOk(msg)) {
+                if (!StringUtil.stringOk(msg)) {
                     Toast.makeText(context, "คุณยังไม่ได้เขียนรีวิว!", Toast.LENGTH_LONG).show();
                     return;
                 }
 
-                if (NetWorkUtils.disable(getContext())) {
+                if (NetworkUtil.disable(getContext())) {
                     Toast.makeText(context, "ข้อผิดพลาดเครือข่าย! ไม่สามารถบันทึกได้", Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -272,7 +272,7 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
     }
 
     public void setValueReview(String msg) {
-        String date = StringUtils.getDateFormate("dd/MM/yyyy HH:mm:ss");
+        String date = StringUtil.getDateFormate("dd/MM/yyyy HH:mm:ss");
         ReviewItem newRev = new ReviewItem(msg, date, myRate);
 
         DatabaseReference dbReview = dbRef.child(REVIEW).child(id);

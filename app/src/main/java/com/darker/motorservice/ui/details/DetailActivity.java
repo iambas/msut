@@ -21,7 +21,7 @@ import android.widget.TextView;
 import com.darker.motorservice.R;
 import com.darker.motorservice.ui.chat.ChatActivity;
 import com.darker.motorservice.ui.map.MapsActivity;
-import com.darker.motorservice.utils.ImageUtils;
+import com.darker.motorservice.utility.ImageUtil;
 import com.darker.motorservice.model.ServicesItem;
 import com.darker.motorservice.database.ServiceDatabase;
 import com.google.firebase.database.DataSnapshot;
@@ -33,16 +33,16 @@ import com.google.firebase.database.ValueEventListener;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static com.darker.motorservice.utils.Constant.CHAT_WITH_ID;
-import static com.darker.motorservice.utils.Constant.CHAT_WITH_NAME;
-import static com.darker.motorservice.utils.Constant.ID;
-import static com.darker.motorservice.utils.Constant.KEY_CHAT;
-import static com.darker.motorservice.utils.Constant.LATLNG;
-import static com.darker.motorservice.utils.Constant.NAME;
-import static com.darker.motorservice.utils.Constant.PHOTO;
-import static com.darker.motorservice.utils.Constant.STATUS;
-import static com.darker.motorservice.utils.Constant.TEL_NUM;
-import static com.darker.motorservice.utils.Constant.USER;
+import static com.darker.motorservice.utility.Constant.CHAT_WITH_ID;
+import static com.darker.motorservice.utility.Constant.CHAT_WITH_NAME;
+import static com.darker.motorservice.utility.Constant.ID;
+import static com.darker.motorservice.utility.Constant.KEY_CHAT;
+import static com.darker.motorservice.utility.Constant.LATLNG;
+import static com.darker.motorservice.utility.Constant.NAME;
+import static com.darker.motorservice.utility.Constant.PHOTO;
+import static com.darker.motorservice.utility.Constant.STATUS;
+import static com.darker.motorservice.utility.Constant.TEL_NUM;
+import static com.darker.motorservice.utility.Constant.USER;
 
 public class DetailActivity extends AppCompatActivity {
 
@@ -145,7 +145,7 @@ public class DetailActivity extends AppCompatActivity {
     private void setImage() {
         ImageView imageCover = (ImageView) findViewById(R.id.image);
         ImageView imageProfile = (ImageView) findViewById(R.id.profile_service);
-        ImageUtils image = new ImageUtils();
+        ImageUtil image = new ImageUtil();
 
         Bitmap cover, profile;
         try{
