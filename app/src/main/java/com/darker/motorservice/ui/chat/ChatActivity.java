@@ -35,11 +35,12 @@ import android.widget.Toast;
 
 import com.darker.motorservice.R;
 import com.darker.motorservice.database.PictureDatabse;
-import com.darker.motorservice.ui.main.callback.ImageUploadCallback;
-import com.darker.motorservice.ui.main.model.PictureItem;
+import com.darker.motorservice.sharedpreferences.SharedPreferencesUtil;
 import com.darker.motorservice.ui.chat.model.ChatMessageItem;
 import com.darker.motorservice.ui.chat.model.NewChatItem;
 import com.darker.motorservice.ui.main.MainActivity;
+import com.darker.motorservice.ui.main.callback.ImageUploadCallback;
+import com.darker.motorservice.ui.main.model.PictureItem;
 import com.darker.motorservice.utils.ImageUtils;
 import com.darker.motorservice.utils.NetWorkUtils;
 import com.google.android.gms.common.ConnectionResult;
@@ -69,7 +70,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import static com.darker.motorservice.utils.Constant.ALERT;
 import static com.darker.motorservice.utils.Constant.CHAT;
 import static com.darker.motorservice.utils.Constant.CHAT_WITH_ID;
 import static com.darker.motorservice.utils.Constant.CHAT_WITH_NAME;
@@ -77,7 +77,6 @@ import static com.darker.motorservice.utils.Constant.DATA;
 import static com.darker.motorservice.utils.Constant.IMG;
 import static com.darker.motorservice.utils.Constant.KEY_CHAT;
 import static com.darker.motorservice.utils.Constant.KEY_IMAGE;
-import static com.darker.motorservice.utils.Constant.KEY_LOGIN_MOTOR_SERVICE;
 import static com.darker.motorservice.utils.Constant.NAME;
 import static com.darker.motorservice.utils.Constant.PHOTO;
 import static com.darker.motorservice.utils.Constant.SERVICE;
@@ -96,13 +95,20 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     private TextView tvNetAlert;
     private EditText edInputMessage;
     private ProgressBar progressBar;
+    private ImageButton imgBtnImage;
+    private ImageButton imgBtnSend;
+    private ListView chatListView;
 
     private String keyChat;
     private String chatWithName;
     private String telNum;
     private String status;
     private String uid;
-    private String service, user, myName;
+    private String service;
+    private String user;
+    private String myName;
+    private String chatWithId;
+    private String photo;
 
     private boolean gpsStatus;
     private boolean found = false;
@@ -111,13 +117,9 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     private StorageReference storageRef;
     private MessageAdapter messageAdapter;
     private List<ChatMessageItem> chatMessageItemList;
-    private SharedPreferences.Editor spedChat, spedLogin;
-    private String chatWithId;
-    private String photo;
-    private ImageButton imgBtnImage;
-    private ImageButton imgBtnSend;
+
     private SharedPreferences spLogin;
-    private ListView chatListView;
+    private SharedPreferences.Editor spedChat, spedLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,9 +131,9 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         LogDataIntent();
         supportActionBar();
         bindView();
+        sharedPreferencesLogin();
         initInstance();
         checkKeyChat();
-        sharedPreChat();
         setVisibility();
         setOnClicked();
         setServiceAndUser();
@@ -152,39 +154,15 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        spedChat.putBoolean(ALERT, false);
-        spedChat.commit();
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
-        spedChat.putBoolean(ALERT, false);
-        spedChat.commit();
-        Log.d("ServicesItem check", "onResume");
+        SharedPreferencesUtil.disableChatAlert(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        spedChat.putBoolean(ALERT, true);
-        spedChat.commit();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        spedChat.putBoolean(ALERT, true);
-        spedChat.commit();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        spedChat.putBoolean(ALERT, true);
-        spedChat.commit();
+        SharedPreferencesUtil.enableChatAlert(this);
     }
 
     private void supportActionBar() {
@@ -209,12 +187,6 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     private void setVisibility() {
         imgBtnImage.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.VISIBLE);
-    }
-
-    private void sharedPreChat() {
-        spedChat = getSharedPreferences(CHAT, Context.MODE_PRIVATE).edit();
-        spedChat.putBoolean(ALERT, false);
-        spedChat.apply();
     }
 
     private void checkKeyChat() {
@@ -255,8 +227,6 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     private void initInstance() {
-        spLogin = sharedPreferencesLogin();
-        myName = spLogin.getString(NAME, "");
         storageRef = FirebaseStorage.getInstance().getReference();
         uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         mDatabase = FirebaseDatabase.getInstance().getReference().child(CHAT);
@@ -266,11 +236,14 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
 
     @NonNull
     private SharedPreferences sharedPreferencesLogin() {
-        SharedPreferences shLogin = getSharedPreferences(KEY_LOGIN_MOTOR_SERVICE, Context.MODE_PRIVATE);
+        SharedPreferences shLogin = SharedPreferencesUtil.getLoginPreferences(this);
         spedLogin = shLogin.edit();
         spedLogin.putString(IMG, photo);
         spedLogin.putString(CHAT_WITH_ID, chatWithId);
         spedLogin.apply();
+
+        myName = spLogin.getString(NAME, "");
+
         return shLogin;
     }
 
@@ -777,8 +750,6 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         ActivityManager mngr = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
         List<ActivityManager.RunningTaskInfo> taskList = mngr.getRunningTasks(10);
 
-        spedChat.putBoolean(ALERT, true);
-        spedChat.commit();
         if (taskList.get(0).numActivities == 1 &&
                 taskList.get(0).topActivity.getClassName().equals(this.getClass().getName())) {
             startActivity(new Intent(this, MainActivity.class));
