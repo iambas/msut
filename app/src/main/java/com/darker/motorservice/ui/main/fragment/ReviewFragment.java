@@ -219,7 +219,7 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
     }
 
     private void checkNetwork() {
-        if (NetworkUtil.disable(getContext())) {
+        if (!NetworkUtil.isNetworkAvailable(getContext())) {
             setViewNetworkDisable();
         } else {
             mView.findViewById(R.id.txt_net_alert).setVisibility(View.GONE);
@@ -258,7 +258,7 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
                     return;
                 }
 
-                if (NetworkUtil.disable(getContext())) {
+                if (!NetworkUtil.isNetworkAvailable(getContext())) {
                     Toast.makeText(context, "ข้อผิดพลาดเครือข่าย! ไม่สามารถบันทึกได้", Toast.LENGTH_LONG).show();
                     return;
                 }

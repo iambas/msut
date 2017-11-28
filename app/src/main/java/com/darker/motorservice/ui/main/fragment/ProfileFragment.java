@@ -175,7 +175,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
     }
 
     private void checkNetworkForSetBackGround() {
-        if (NetworkUtil.disable(getContext()))
+        if (!NetworkUtil.isNetworkAvailable(getContext()))
             mSwitch.setBackgroundResource(R.color.white);
     }
 
@@ -206,7 +206,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
     }
 
     private boolean checkNetworkForSetSwitch(boolean isChecked) {
-        if (NetworkUtil.disable(getContext())){
+        if (!NetworkUtil.isNetworkAvailable(getContext())){
             toastAlert("เครือข่ายมีปัญหา! ไม่สามารถเปลี่ยนสถานะร้านได้");
             mSwitch.setChecked(!isChecked);
             return true;
@@ -300,7 +300,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
     }
 
     private void logout(){
-        if (NetworkUtil.disable(getContext())){
+        if (!NetworkUtil.isNetworkAvailable(getContext())){
             toastAlert("เครือข่ายมีปัญหา! ไม่สามารถออกจากระบบได้");
             return;
         }

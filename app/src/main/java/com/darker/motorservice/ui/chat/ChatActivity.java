@@ -278,7 +278,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     public void onSendClicked() {
         String msg = edInputMessage.getText().toString();
         if (stringOk(msg))
-            if (NetworkUtil.disable(this)) {
+            if (!NetworkUtil.isNetworkAvailable(this)) {
                 Toast.makeText(this, "ข้อผิดพลาดเครือข่าย! ไม่สามารถส่งข้อความได้", Toast.LENGTH_LONG).show();
                 return;
             }
@@ -315,7 +315,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     private void checkBeforeUploadImage(Bitmap bitmap) {
-        if (NetworkUtil.disable(this)) {
+        if (!NetworkUtil.isNetworkAvailable(this)) {
             Toast.makeText(this, "ข้อผิดพลาดเครือข่าย! ไม่สามารถส่งรูปภาพได้", Toast.LENGTH_LONG).show();
         } else {
             prepareImage(bitmap);
@@ -421,7 +421,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private void refreshUI() {
         progressBar.setVisibility(View.VISIBLE);
-        if (NetworkUtil.disable(this)) {
+        if (!NetworkUtil.isNetworkAvailable(this)) {
             tvNetAlert.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.GONE);
         } else {
@@ -607,7 +607,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         if (status.equals(USER)) {
-            if (NetworkUtil.disable(this))
+            if (!NetworkUtil.isNetworkAvailable(this))
                 getMenuInflater().inflate(R.menu.menu_chat_no_net, menu);
             else
                 getMenuInflater().inflate(R.menu.menu_chat_net, menu);
@@ -668,7 +668,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     public void myGps() {
-        if (NetworkUtil.disable(this)) return;
+        if (!NetworkUtil.isNetworkAvailable(this)) return;
         checkGpsStatus();
         if (!gpsStatus) return;
         startSelectPlace();

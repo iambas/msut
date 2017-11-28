@@ -199,7 +199,7 @@ public class StatisticsFragment extends Fragment{
 
     private boolean isNetworkDisable(final String uid) {
         TextView tvNetworkAlert = (TextView) mView.findViewById(R.id.txt_net_alert);
-        if (NetworkUtil.disable(getContext())){
+        if (!NetworkUtil.isNetworkAvailable(getContext())){
             tvNetworkAlert.setVisibility(View.VISIBLE);
             tvNetworkAlert.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -114,7 +114,7 @@ public class ChatFragment extends Fragment {
 
     private void checkRefreshOrReadData() {
         progressBar.setVisibility(View.VISIBLE);
-        if (NetworkUtil.disable(context)) {
+        if (!NetworkUtil.isNetworkAvailable(context)) {
             tvNetworkAlert.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.GONE);
             tvNetworkAlert.setOnClickListener(new View.OnClickListener() {
