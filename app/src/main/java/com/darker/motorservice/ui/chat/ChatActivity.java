@@ -35,6 +35,7 @@ import android.widget.Toast;
 
 import com.darker.motorservice.R;
 import com.darker.motorservice.database.PictureDatabse;
+import com.darker.motorservice.firebase.FirebaseUtil;
 import com.darker.motorservice.sharedpreferences.SharedPreferencesUtil;
 import com.darker.motorservice.ui.chat.model.ChatMessageItem;
 import com.darker.motorservice.ui.chat.model.NewChatItem;
@@ -43,6 +44,7 @@ import com.darker.motorservice.ui.main.callback.ImageUploadCallback;
 import com.darker.motorservice.ui.main.model.PictureItem;
 import com.darker.motorservice.utility.ImageUtil;
 import com.darker.motorservice.utility.NetworkUtil;
+import com.darker.motorservice.utility.StringUtil;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -83,10 +85,10 @@ import static com.darker.motorservice.utility.Constant.SERVICE;
 import static com.darker.motorservice.utility.Constant.STATUS;
 import static com.darker.motorservice.utility.Constant.TEL_NUM;
 import static com.darker.motorservice.utility.Constant.USER;
-import static com.darker.motorservice.utility.StringUtil.getDateFormate;
-import static com.darker.motorservice.utility.StringUtil.stringOk;
 
-public class ChatActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
+public class ChatActivity extends AppCompatActivity implements
+        GoogleApiClient.OnConnectionFailedListener,
+        View.OnClickListener {
 
     public static final String TAG = "ChatActivity";
     private static final int PLACE_PICKER_REQUEST = 1;
@@ -118,8 +120,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     private MessageAdapter messageAdapter;
     private List<ChatMessageItem> chatMessageItemList;
 
-    private SharedPreferences spLogin;
-    private SharedPreferences.Editor spedChat, spedLogin;
+    private SharedPreferences.Editor spedLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,7 +136,6 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         initInstance();
         checkKeyChat();
         setVisibility();
-        setOnClicked();
         setServiceAndUser();
         setAdapter();
         refreshUI();
@@ -163,6 +163,17 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     protected void onPause() {
         super.onPause();
         SharedPreferencesUtil.enableChatAlert(this);
+    }
+
+    @Override
+    public void onClick(View view) {
+        if (view == imgBtnImage){
+            showImageStoreSelect();
+        }else if(view == imgBtnSend){
+            validateText();
+        }else if(view == tvNetAlert){
+            refreshUI();
+        }
     }
 
     private void supportActionBar() {
@@ -196,27 +207,6 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         }
     }
 
-    private void setOnClicked() {
-        imgBtnImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBtnImageClicked();
-            }
-        });
-        imgBtnSend.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onSendClicked();
-            }
-        });
-        tvNetAlert.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                refreshUI();
-            }
-        });
-    }
-
     private void bindView(){
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         imgBtnImage = (ImageButton) findViewById(R.id.btn_img);
@@ -230,21 +220,17 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         storageRef = FirebaseStorage.getInstance().getReference();
         uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         mDatabase = FirebaseDatabase.getInstance().getReference().child(CHAT);
-        chatMessageItemList = new ArrayList<ChatMessageItem>();
+        chatMessageItemList = new ArrayList<>();
         messageAdapter = new MessageAdapter(this, R.layout.message_item, chatMessageItemList);
     }
 
-    @NonNull
-    private SharedPreferences sharedPreferencesLogin() {
+    private void sharedPreferencesLogin() {
         SharedPreferences shLogin = SharedPreferencesUtil.getLoginPreferences(this);
         spedLogin = shLogin.edit();
         spedLogin.putString(IMG, photo);
         spedLogin.putString(CHAT_WITH_ID, chatWithId);
         spedLogin.apply();
-
-        myName = spLogin.getString(NAME, "");
-
-        return shLogin;
+        myName = shLogin.getString(NAME, "");
     }
 
     private void LogDataIntent() {
@@ -275,20 +261,27 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
                 .build();
     }
 
-    public void onSendClicked() {
+    public void validateText() {
         String msg = edInputMessage.getText().toString();
-        if (stringOk(msg))
+        if (!StringUtil.stringOk(msg)) {
             if (!NetworkUtil.isNetworkAvailable(this)) {
                 Toast.makeText(this, "ข้อผิดพลาดเครือข่าย! ไม่สามารถส่งข้อความได้", Toast.LENGTH_LONG).show();
                 return;
             }
+        }
 
-        if (keyChat.isEmpty()) find();
+        if (keyChat.isEmpty()) {
+            find();
+        }
+
         pushMsg(msg);
-        if (status.equals(USER)) pushStat(CHAT);
+
+        if (status.equals(USER)){
+            pushStat(CHAT);
+        }
     }
 
-    public void onBtnImageClicked() {
+    public void showImageStoreSelect() {
         Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
         photoPickerIntent.setType("image/*");
         startActivityForResult(photoPickerIntent, IMAGE_REQUEST);
@@ -324,7 +317,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     private void prepareImage(Bitmap bitmap) {
-        String date = getDateFormate("-yyyy_MM_dd_HH_mm_ss");
+        String date = StringUtil.getDateFormate("-yyyy_MM_dd_HH_mm_ss");
         final String imgName = "image/" + uid.substring(0, 5) + date + ".png";
         StorageReference mountainsRef = FirebaseStorage.getInstance().getReference().child(imgName);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -387,7 +380,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     private void pushMsg(String msg) {
-        String time = getDateFormate("yyyy-MM-dd HH:mm:ss");
+        String time = StringUtil.getDateFormate("yyyy-MM-dd HH:mm:ss");
         mDatabase
                 .child(keyChat)
                 .child(DATA)
@@ -397,9 +390,9 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     private void pushStat(final String type) {
-        DatabaseReference dbStat = FirebaseDatabase.getInstance().getReference().child("stat");
-        String my = getDateFormate("yyyy-MM");
-        String day = getDateFormate("dd-MM-yyyy");
+        DatabaseReference dbStat = FirebaseUtil.getChild("stat");
+        String my = StringUtil.getDateFormate("yyyy-MM");
+        String day = StringUtil.getDateFormate("dd-MM-yyyy");
         final DatabaseReference db = dbStat.child(service).child(my).child(day);
         db.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -541,11 +534,10 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         if (chatMessageItem.getMessage() == null) return null;
 
         if (chatMessageItem.getMessage().contains(KEY_IMAGE)) {
-            String path = chatMessageItem.getMessage().replace(KEY_IMAGE, "");
-            return path;
+            return chatMessageItem.getMessage().replace(KEY_IMAGE, "");
         } else {
             addChatMessageToList(chatMessageItem);
-            return null;
+            return "";
         }
     }
 
@@ -559,7 +551,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         if (handle.hasPicture(path)) {
             Log.d("hasPicture", "YES");
             byte[] bytes = handle.getPicture(path).getPicture();
-            Bitmap bitmap = new ImageUtil().convertToBitmap(bytes);
+            Bitmap bitmap = ImageUtil.convertToBitmap(bytes);
             chatMessageItem.setBitmap(bitmap);
             addChatMessageToList(chatMessageItem);
             return true;
@@ -573,7 +565,7 @@ public class ChatActivity extends AppCompatActivity implements GoogleApiClient.O
         islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
             public void onSuccess(byte[] bytes) {
-                Bitmap bitmap = new ImageUtil().convertToBitmap(bytes);
+                Bitmap bitmap = ImageUtil.convertToBitmap(bytes);
                 addPictureToDatabaseWithBytes(bytes, path);
                 removeThenAddChatMessage(chatMessageItem, bitmap);
                 Log.d("load Picture", "OK");
