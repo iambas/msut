@@ -22,10 +22,7 @@ import java.io.ByteArrayOutputStream;
 
 public class ImageUtil {
 
-    private int size = 100;
-
-    public ImageUtil() {
-    }
+    public ImageUtil() {}
 
     public Bitmap getImgCover(Context context, String id) {
         ServicesItem servicesItem = new ServiceDatabase(context).getService(id);
@@ -115,10 +112,15 @@ public class ImageUtil {
         StorageReference storageReference = FirebaseStorage.getInstance().getReference();
         StorageReference mountainsRef = storageReference.child(imageName);
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-        byte[] data = baos.toByteArray();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+        byte[] data = outputStream.toByteArray();
         return mountainsRef.putBytes(data);
+    }
+
+    public static String getImageName(String uid){
+        String date = StringUtil.getDateFormate("-yyyy_MM_dd_HH_mm_ss");
+        return  "image/" + uid.substring(0, 5) + date + ".png";
     }
 
     public static Bitmap getBitmap(Context context, byte[] bytes, int resource){

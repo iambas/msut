@@ -61,9 +61,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -310,44 +308,15 @@ public class ChatActivity extends AppCompatActivity implements
         if (!NetworkUtil.isNetworkAvailable(this)) {
             Toast.makeText(this, "ข้อผิดพลาดเครือข่าย! ไม่สามารถส่งรูปภาพได้", Toast.LENGTH_LONG).show();
         } else {
-            prepareImage(bitmap);
+            imageUpload(bitmap);
             progressBar.setVisibility(View.VISIBLE);
         }
     }
 
-    private void prepareImage(Bitmap bitmap) {
-        String date = StringUtil.getDateFormate("-yyyy_MM_dd_HH_mm_ss");
-        final String imgName = "image/" + uid.substring(0, 5) + date + ".png";
-        StorageReference mountainsRef = FirebaseUtil.getChildStorage(imgName);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-        byte[] data = baos.toByteArray();
-        UploadTask uploadTask = mountainsRef.putBytes(data);
-        uploadImg(uploadTask, imgName, bitmap);
-    }
-
-    private void uploadImg(UploadTask uploadTask, final String imgName, final Bitmap bitmap) {
+    private void imageUpload(Bitmap bitmap) {
+        String imageName = ImageUtil.getImageName(uid);
+        ImageUtil.uploadImage(imageName, bitmap, getImageUploadCallback());
         Toast.makeText(this, "กำลังส่งรูปภาพ กรุณารอสักครู่...", Toast.LENGTH_SHORT).show();
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                Log.d("upload", exception.getMessage());
-                Toast.makeText(ChatActivity.this, "การส่งรูปภาพมีปัญหา โปรดลองอีกครั้ง", Toast.LENGTH_SHORT).show();
-                progressBar.setVisibility(View.GONE);
-            }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Log.d("upload", "OK");
-                pushMessage(KEY_IMAGE + imgName);
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(ChatActivity.this, "ส่งรูปภาพเรียบร้อย", Toast.LENGTH_SHORT).show();
-                pushStat("chat");
-                pushImageToDatabase(bitmap, imgName);
-            }
-        });
-
-        ImageUtil.uploadImage(imgName, bitmap, getImageUploadCallback());
     }
 
     @NonNull
@@ -380,8 +349,7 @@ public class ChatActivity extends AppCompatActivity implements
 
     private void pushMessage(String msg) {
         String time = StringUtil.getDateFormate("yyyy-MM-dd HH:mm:ss");
-        mDatabase
-                .child(keyChat)
+        mDatabase.child(keyChat)
                 .child(DATA)
                 .push()
                 .setValue(new ChatMessageItem(time, myName, msg, status, ""));
