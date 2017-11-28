@@ -36,6 +36,7 @@ import android.widget.Toast;
 import com.darker.motorservice.R;
 import com.darker.motorservice.database.PictureDatabse;
 import com.darker.motorservice.firebase.FirebaseUtil;
+import com.darker.motorservice.sharedpreferences.AccountType;
 import com.darker.motorservice.sharedpreferences.SharedPreferencesUtil;
 import com.darker.motorservice.ui.chat.model.ChatMessageItem;
 import com.darker.motorservice.ui.chat.model.NewChatItem;
@@ -186,7 +187,7 @@ public class ChatActivity extends AppCompatActivity implements
     }
 
     private void setServiceAndUser() {
-        if (status.equals(USER)) {
+        if (AccountType.isCustomer(this)) {
             service = chatWithId;
             user = uid;
         } else {
@@ -234,12 +235,12 @@ public class ChatActivity extends AppCompatActivity implements
     }
 
     private void LogDataIntent() {
-        Log.d("chat", "." + keyChat);
-        Log.d("chat", "." + chatWithId);
-        Log.d("chat", "." + chatWithName);
-        Log.d("chat", "." + telNum);
-        Log.d("chat", "." + status);
-        Log.d("chat", "." + photo);
+        Log.d(TAG, "." + keyChat);
+        Log.d(TAG, "." + chatWithId);
+        Log.d(TAG, "." + chatWithName);
+        Log.d(TAG, "." + telNum);
+        Log.d(TAG, "." + status);
+        Log.d(TAG, "." + photo);
     }
 
     private void getDataIntent() {
@@ -262,8 +263,8 @@ public class ChatActivity extends AppCompatActivity implements
     }
 
     public void validateText() {
-        String msg = edInputMessage.getText().toString();
-        if (!StringUtil.stringOk(msg)) {
+        String message = edInputMessage.getText().toString();
+        if (!StringUtil.stringOk(message)) {
             if (!NetworkUtil.isNetworkAvailable(this)) {
                 Toast.makeText(this, "ข้อผิดพลาดเครือข่าย! ไม่สามารถส่งข้อความได้", Toast.LENGTH_LONG).show();
                 return;
@@ -274,9 +275,9 @@ public class ChatActivity extends AppCompatActivity implements
             find();
         }
 
-        pushMsg(msg);
+        pushMessage(message);
 
-        if (status.equals(USER)){
+        if (AccountType.isCustomer(this)){
             pushStat(CHAT);
         }
     }
@@ -340,7 +341,7 @@ public class ChatActivity extends AppCompatActivity implements
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 Log.d("upload", "OK");
-                pushMsg(KEY_IMAGE + imgName);
+                pushMessage(KEY_IMAGE + imgName);
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(ChatActivity.this, "ส่งรูปภาพเรียบร้อย", Toast.LENGTH_SHORT).show();
                 pushStat("chat");
@@ -358,7 +359,7 @@ public class ChatActivity extends AppCompatActivity implements
             @Override
             public void onSuccess(String imageName, Bitmap bitmap) {
                 Log.d("upload", "OK");
-                pushMsg(KEY_IMAGE + imageName);
+                pushMessage(KEY_IMAGE + imageName);
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(ChatActivity.this, "ส่งรูปภาพเรียบร้อย", Toast.LENGTH_SHORT).show();
                 pushStat("chat");
@@ -379,7 +380,7 @@ public class ChatActivity extends AppCompatActivity implements
         handle.addPicture(new PictureItem(imgName, bytes));
     }
 
-    private void pushMsg(String msg) {
+    private void pushMessage(String msg) {
         String time = StringUtil.getDateFormate("yyyy-MM-dd HH:mm:ss");
         mDatabase
                 .child(keyChat)
@@ -701,7 +702,7 @@ public class ChatActivity extends AppCompatActivity implements
 
     private void pushMessageWithLatLng(Intent data) {
         Place place = PlacePicker.getPlace(this, data);
-        pushMsg(place.getLatLng().toString());
+        pushMessage(place.getLatLng().toString());
         pushStat("chat");
     }
 
