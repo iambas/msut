@@ -4,17 +4,14 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -43,6 +40,7 @@ import com.darker.motorservice.ui.main.MainActivity;
 import com.darker.motorservice.ui.main.callback.ImageUploadCallback;
 import com.darker.motorservice.ui.main.model.PictureItem;
 import com.darker.motorservice.utility.DateUtil;
+import com.darker.motorservice.utility.GPSUtil;
 import com.darker.motorservice.utility.ImageUtil;
 import com.darker.motorservice.utility.NetworkUtil;
 import com.darker.motorservice.utility.StringUtil;
@@ -170,6 +168,37 @@ public class ChatActivity extends AppCompatActivity implements
         } else if (view == tvNetAlert) {
             refreshUI();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (status.equals(USER)) {
+            if (!NetworkUtil.isNetworkAvailable(this))
+                getMenuInflater().inflate(R.menu.menu_chat_no_net, menu);
+            else
+                getMenuInflater().inflate(R.menu.menu_chat_net, menu);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_tel:
+                dialogCall();
+                return true;
+            case R.id.menu_gps:
+                myGps();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        System.out.println(connectionResult.getErrorMessage());
+        Log.d("onConnectionFailed", connectionResult.getErrorMessage());
     }
 
     private void supportActionBar() {
@@ -571,31 +600,6 @@ public class ChatActivity extends AppCompatActivity implements
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        if (status.equals(USER)) {
-            if (!NetworkUtil.isNetworkAvailable(this))
-                getMenuInflater().inflate(R.menu.menu_chat_no_net, menu);
-            else
-                getMenuInflater().inflate(R.menu.menu_chat_net, menu);
-        }
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_tel:
-                dialogCall();
-                return true;
-            case R.id.menu_gps:
-                myGps();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
     public void dialogCall() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = getLayoutInflater();
@@ -626,12 +630,6 @@ public class ChatActivity extends AppCompatActivity implements
         startActivity(intent);
         pushStat("dialogCall");
         alertDialog.dismiss();
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        System.out.println(connectionResult.getErrorMessage());
-        Log.d("onConnectionFailed", connectionResult.getErrorMessage());
     }
 
     public void myGps() {
@@ -697,15 +695,14 @@ public class ChatActivity extends AppCompatActivity implements
     }
 
     public void checkGpsStatus() {
-        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        gpsStatus = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        gpsStatus = GPSUtil.isGPSEnable(this);
         if (!gpsStatus) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
             builder.setMessage("ในการดำเนินการต่อ ให้อุปกรณ์เปิดตำแหน่ง (GPS)");
             builder.setPositiveButton("ตกลง", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
-                    startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    GPSUtil.gpsSettings(ChatActivity.this);
                 }
             });
             builder.setNegativeButton("ยกเลิก", null);
