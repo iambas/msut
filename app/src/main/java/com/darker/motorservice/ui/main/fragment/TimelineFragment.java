@@ -191,7 +191,7 @@ public class TimelineFragment extends Fragment implements View.OnClickListener{
     }
 
     private void setUpLoadImage(final TimelineItem timelineItem, ServicesItem servicesItem) {
-        Bitmap bitmap = ImageUtil.convertToBitmap(servicesItem.getImgProfile());
+        Bitmap bitmap = ImageUtil.convertByteToBitmap(servicesItem.getImgProfile());
         timelineItem.setName(servicesItem.getName());
         timelineItem.setProfile(bitmap);
 
@@ -219,7 +219,7 @@ public class TimelineFragment extends Fragment implements View.OnClickListener{
 
     private void addtimelineToList(TimelineItem timelineItem, PictureDatabase handle, String imagePath) {
         byte[] bytes = handle.getPicture(imagePath).getPicture();
-        Bitmap bitmap = ImageUtil.convertToBitmap(bytes);
+        Bitmap bitmap = ImageUtil.convertByteToBitmap(bytes);
         timelineItem.setImage(bitmap);
         timelineItems.add(timelineItem);
     }
@@ -230,7 +230,7 @@ public class TimelineFragment extends Fragment implements View.OnClickListener{
             @Override
             public void onSuccess(byte[] bytes) {
                 handle.addPicture(new PictureItem(imagePath, bytes));
-                Bitmap bitmap = ImageUtil.convertToBitmap(bytes);
+                Bitmap bitmap = ImageUtil.convertByteToBitmap(bytes);
                 timelineItem.setImage(bitmap);
                 timelineItems.add(timelineItem);
                 sortTimelineItems();

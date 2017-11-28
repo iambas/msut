@@ -145,16 +145,15 @@ public class DetailActivity extends AppCompatActivity {
     private void setImage() {
         ImageView imageCover = (ImageView) findViewById(R.id.image);
         ImageView imageProfile = (ImageView) findViewById(R.id.profile_service);
-        ImageUtil image = new ImageUtil();
 
         Bitmap cover, profile;
         try{
-            cover = image.convertToBitmap(servicesItem.getImgCover());
+            cover = ImageUtil.convertByteToBitmap(servicesItem.getImgCover());
         } catch (Exception e){
             cover = BitmapFactory.decodeResource(getResources(), R.drawable.cover);
         }
         try{
-            profile = image.convertToBitmap(servicesItem.getImgProfile());
+            profile = ImageUtil.convertByteToBitmap(servicesItem.getImgProfile());
         }catch (Exception e){
             profile = BitmapFactory.decodeResource(getResources(), R.drawable.pro);
         }

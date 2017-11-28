@@ -29,7 +29,7 @@ public class ShowPictureActivity extends AppCompatActivity {
         final ImageView imageView = (ImageView) findViewById(R.id.img);
         try {
             byte[] bytes = handle.getPicture(name).getPicture();
-            Bitmap bitmap = new ImageUtil().convertToBitmap(bytes);
+            Bitmap bitmap = ImageUtil.convertByteToBitmap(bytes);
             imageView.setImageBitmap(bitmap);
         } catch (Exception e) {
             Log.d("excep showAct", e.getMessage());

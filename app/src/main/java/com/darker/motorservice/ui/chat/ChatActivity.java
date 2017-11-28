@@ -1,6 +1,7 @@
 package com.darker.motorservice.ui.chat;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -286,13 +287,14 @@ public class ChatActivity extends AppCompatActivity implements
         startActivityForResult(photoPickerIntent, IMAGE_REQUEST);
     }
 
-    private void dialogImg(final Bitmap bitmap) {
+    private void confirmSendImageDialog(final Bitmap bitmap) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
         LayoutInflater inflater = getLayoutInflater();
-        final View vb = inflater.inflate(R.layout.image, null);
-        builder.setView(vb);
+        @SuppressLint("InflateParams")
+        View viewInflate = inflater.inflate(R.layout.image, null);
+        builder.setView(viewInflate);
 
-        ImageView imageView = (ImageView) vb.findViewById(R.id.img);
+        ImageView imageView = (ImageView) viewInflate.findViewById(R.id.img);
         imageView.setImageBitmap(bitmap);
 
         builder.setTitle("ส่งรูปภาพ");
@@ -329,10 +331,10 @@ public class ChatActivity extends AppCompatActivity implements
             public void onSuccess(String imageName, Bitmap bitmap) {
                 Log.d("upload", "OK");
                 pushMessage(KEY_IMAGE + imageName);
-                progressBar.setVisibility(View.GONE);
                 ToasAlert.alert(ChatActivity.this, R.string.send_image_complete);
                 pushStat("chat");
                 pushImageToDatabase(bitmap, imageName);
+                progressBar.setVisibility(View.GONE);
             }
 
             @Override
@@ -345,7 +347,7 @@ public class ChatActivity extends AppCompatActivity implements
 
     private void pushImageToDatabase(Bitmap bitmap, String imgName) {
         PictureDatabase handle = new PictureDatabase(ChatActivity.this);
-        byte[] bytes = new ImageUtil().toByte(bitmap);
+        byte[] bytes = ImageUtil.convertBitmapToByte(bitmap);
         handle.addPicture(new PictureItem(imgName, bytes));
     }
 
@@ -526,7 +528,7 @@ public class ChatActivity extends AppCompatActivity implements
         if (handle.hasPicture(path)) {
             Log.d("hasPicture", "YES");
             byte[] bytes = handle.getPicture(path).getPicture();
-            Bitmap bitmap = ImageUtil.convertToBitmap(bytes);
+            Bitmap bitmap = ImageUtil.convertByteToBitmap(bytes);
             chatMessageItem.setBitmap(bitmap);
             addChatMessageToList(chatMessageItem);
             return true;
@@ -540,7 +542,7 @@ public class ChatActivity extends AppCompatActivity implements
         islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
             public void onSuccess(byte[] bytes) {
-                Bitmap bitmap = ImageUtil.convertToBitmap(bytes);
+                Bitmap bitmap = ImageUtil.convertByteToBitmap(bytes);
                 addPictureToDatabaseWithBytes(bytes, path);
                 removeThenAddChatMessage(chatMessageItem, bitmap);
                 Log.d("load Picture", "OK");
@@ -686,10 +688,10 @@ public class ChatActivity extends AppCompatActivity implements
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
                 if (bitmap.getWidth() > 720)
-                    bitmap = new ImageUtil().scaleBitmap(bitmap, 720);
+                    bitmap = ImageUtil.scaleBitmap(bitmap, 720);
                 else
-                    bitmap = new ImageUtil().scaleBitmap(bitmap, bitmap.getWidth());
-                dialogImg(bitmap);
+                    bitmap = ImageUtil.scaleBitmap(bitmap, bitmap.getWidth());
+                confirmSendImageDialog(bitmap);
             } catch (IOException e) {
                 e.printStackTrace();
             }

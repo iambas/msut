@@ -72,7 +72,7 @@ public class MotorcycleAdapter extends RecyclerView.Adapter<MotorcycleAdapter.Vi
         holder.txtMessage.setText(servicesItem.getPos());
         Bitmap bitmap;
         try{
-            bitmap = new ImageUtil().convertToBitmap(servicesItem.getImgProfile());
+            bitmap = ImageUtil.convertByteToBitmap(servicesItem.getImgProfile());
         }catch (Exception e){
             bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.pro);
         }

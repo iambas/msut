@@ -85,7 +85,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         if (isUser) {
             Bitmap bitmap;
             try {
-                bitmap = new ImageUtil().getImgProfile(context, chatItem.getChatWithId());
+                bitmap = ImageUtil.getImgProfile(context, chatItem.getChatWithId());
             } catch (Exception e) {
                 bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.pro);
             }

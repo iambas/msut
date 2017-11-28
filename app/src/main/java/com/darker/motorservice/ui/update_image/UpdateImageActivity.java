@@ -74,14 +74,14 @@ public class UpdateImageActivity extends AppCompatActivity {
     }
 
     private void imgCover() {
-        Bitmap cover = new ImageUtil().getImgCover(this, id);
+        Bitmap cover = ImageUtil.getImgCover(this, id);
         imageView = (ImageView) findViewById(R.id.img_cover);
         imageView.setVisibility(View.VISIBLE);
         imageView.setImageBitmap(cover);
     }
 
     private void imgProfile() {
-        Bitmap profile = new ImageUtil().getImgProfile(this, id);
+        Bitmap profile = ImageUtil.getImgProfile(this, id);
         imageView = (ImageView) findViewById(R.id.img_profile);
         imageView.setVisibility(View.VISIBLE);
         imageView.setImageBitmap(profile);
@@ -102,9 +102,9 @@ public class UpdateImageActivity extends AppCompatActivity {
                 try {
                     bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(),imageUri);
                     if (bitmap.getWidth() > size)
-                        bitmap = new ImageUtil().scaleBitmap(bitmap, size);
+                        bitmap = ImageUtil.scaleBitmap(bitmap, size);
                     else
-                        bitmap = new ImageUtil().scaleBitmap(bitmap, bitmap.getWidth());
+                        bitmap = ImageUtil.scaleBitmap(bitmap, bitmap.getWidth());
                     imageView.setImageBitmap(bitmap);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -147,13 +147,12 @@ public class UpdateImageActivity extends AppCompatActivity {
     }
 
     private void updateDB(){
-        ImageUtil image = new ImageUtil();
         ServiceDatabase handle = new ServiceDatabase(this);
         ServicesItem s = handle.getService(id);
         if (isCover) {
-            s.setImgCover(image.toByte(bitmap));
+            s.setImgCover(ImageUtil.convertBitmapToByte(bitmap));
         }else{
-            s.setImgProfile(image.toByte(bitmap));
+            s.setImgProfile(ImageUtil.convertBitmapToByte(bitmap));
         }
         handle.updateService(s);
     }

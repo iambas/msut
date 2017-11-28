@@ -93,7 +93,7 @@ public class PostActivity extends AppCompatActivity {
 
         if (!imgName.isEmpty()){
             PictureDatabase handle = new PictureDatabase(this);
-            Bitmap bitmap = new ImageUtil().convertToBitmap(handle.getPicture(imgName).getPicture());
+            Bitmap bitmap = ImageUtil.convertByteToBitmap(handle.getPicture(imgName).getPicture());
             imageView.setImageBitmap(bitmap);
             imageView.setVisibility(View.VISIBLE);
         }
@@ -202,9 +202,9 @@ public class PostActivity extends AppCompatActivity {
                 try {
                     bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
                     if (bitmap.getWidth() > 800)
-                        bitmap = new ImageUtil().scaleBitmap(bitmap, 800);
+                        bitmap = ImageUtil.scaleBitmap(bitmap, 800);
                     else
-                        bitmap = new ImageUtil().scaleBitmap(bitmap, bitmap.getWidth());
+                        bitmap = ImageUtil.scaleBitmap(bitmap, bitmap.getWidth());
                     imageView.setImageBitmap(bitmap);
                     imageView.setVisibility(View.VISIBLE);
                 } catch (IOException e) {

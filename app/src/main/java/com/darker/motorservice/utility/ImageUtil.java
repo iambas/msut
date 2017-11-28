@@ -22,41 +22,39 @@ import java.io.ByteArrayOutputStream;
 
 public class ImageUtil {
 
-    public ImageUtil() {}
-
-    public Bitmap getImgCover(Context context, String id) {
+    public static Bitmap getImgCover(Context context, String id) {
         ServicesItem servicesItem = new ServiceDatabase(context).getService(id);
         Bitmap bitmap;
         try {
-            bitmap = convertToBitmap(servicesItem.getImgCover());
+            bitmap = convertByteToBitmap(servicesItem.getImgCover());
         } catch (Exception e) {
             bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.cover);
         }
         return bitmap;
     }
 
-    public Bitmap getImgProfile(Context context, String id) {
+    public static Bitmap getImgProfile(Context context, String id) {
         ServicesItem servicesItem = new ServiceDatabase(context).getService(id);
         Bitmap bitmap;
         try {
-            bitmap = convertToBitmap(servicesItem.getImgProfile());
+            bitmap = convertByteToBitmap(servicesItem.getImgProfile());
         } catch (Exception e) {
             bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.pro);
         }
         return bitmap;
     }
 
-    public static Bitmap convertToBitmap(byte[] b) {
+    public static Bitmap convertByteToBitmap(byte[] b) {
         return BitmapFactory.decodeByteArray(b, 0, b.length);
     }
 
-    public byte[] toByte(Bitmap bitmap) {
+    public static byte[] convertBitmapToByte(Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
         return stream.toByteArray();
     }
 
-    public Bitmap scaleBitmap(Bitmap bitmap, int wantedWidth) {
+    public static Bitmap scaleBitmap(Bitmap bitmap, int wantedWidth) {
         float rate = (float) bitmap.getHeight() / bitmap.getWidth();
         int wantedHeight = (int) (wantedWidth * rate);
         Bitmap output = Bitmap.createBitmap(wantedWidth, wantedHeight, Bitmap.Config.ARGB_8888);
@@ -65,8 +63,8 @@ public class ImageUtil {
         m.setScale((float) wantedWidth / bitmap.getWidth(), (float) wantedHeight / bitmap.getHeight());
         canvas.drawBitmap(bitmap, m, new Paint());
 
-        //Log.d("size", "" + toByte(output).length / 1024);
-        if (toByte(output).length / 1024 > 800 && wantedWidth > 50) {
+        //Log.d("size", "" + convertBitmapToByte(output).length / 1024);
+        if (convertBitmapToByte(output).length / 1024 > 800 && wantedWidth > 50) {
             return scaleBitmap(bitmap, wantedWidth - 100);
         }
 
@@ -126,7 +124,7 @@ public class ImageUtil {
     public static Bitmap getBitmap(Context context, byte[] bytes, int resource){
         Bitmap bitmap;
         try{
-            bitmap = convertToBitmap(bytes);
+            bitmap = convertByteToBitmap(bytes);
         } catch (Exception e){
             bitmap = BitmapFactory.decodeResource(context.getResources(), resource);
         }

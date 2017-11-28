@@ -244,7 +244,7 @@ public class MessageAdapter extends ArrayAdapter {
     private void setImg(ImageView imageView) {
         // set image each store
         if (sh.getString(STATUS, "").equals(USER)) {
-            Bitmap bitmap = new ImageUtil().getImgProfile(context, sh.getString(CHAT_WITH_ID, ""));
+            Bitmap bitmap = ImageUtil.getImgProfile(context, sh.getString(CHAT_WITH_ID, ""));
             imageView.setImageBitmap(bitmap);
         } else {
             String img = sh.getString(IMG, "");
