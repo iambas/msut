@@ -33,7 +33,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.database.PictureDatabse;
+import com.darker.motorservice.database.PictureDatabase;
 import com.darker.motorservice.firebase.FirebaseUtil;
 import com.darker.motorservice.sharedpreferences.AccountType;
 import com.darker.motorservice.sharedpreferences.SharedPreferencesUtil;
@@ -344,7 +344,7 @@ public class ChatActivity extends AppCompatActivity implements
     }
 
     private void pushImageToDatabase(Bitmap bitmap, String imgName) {
-        PictureDatabse handle = new PictureDatabse(ChatActivity.this);
+        PictureDatabase handle = new PictureDatabase(ChatActivity.this);
         byte[] bytes = new ImageUtil().toByte(bitmap);
         handle.addPicture(new PictureItem(imgName, bytes));
     }
@@ -522,7 +522,7 @@ public class ChatActivity extends AppCompatActivity implements
     }
 
     private boolean setBitmap(String path, ChatMessageItem chatMessageItem) {
-        final PictureDatabse handle = new PictureDatabse(this);
+        final PictureDatabase handle = new PictureDatabase(this);
         if (handle.hasPicture(path)) {
             Log.d("hasPicture", "YES");
             byte[] bytes = handle.getPicture(path).getPicture();
@@ -554,7 +554,7 @@ public class ChatActivity extends AppCompatActivity implements
     }
 
     private void addPictureToDatabaseWithBytes(byte[] bytes, String path) {
-        PictureDatabse handle = new PictureDatabse(this);
+        PictureDatabase handle = new PictureDatabase(this);
         handle.addPicture(new PictureItem(path, bytes));
     }
 

@@ -9,7 +9,7 @@ import android.widget.ImageView;
 
 import com.darker.motorservice.R;
 import com.darker.motorservice.utility.ImageUtil;
-import com.darker.motorservice.database.PictureDatabse;
+import com.darker.motorservice.database.PictureDatabase;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -25,7 +25,7 @@ public class ShowPictureActivity extends AppCompatActivity {
         setContentView(R.layout.activity_show_picture);
 
         String name = getIntent().getStringExtra(KEY_IMAGE);
-        PictureDatabse handle = new PictureDatabse(this);
+        PictureDatabase handle = new PictureDatabase(this);
         final ImageView imageView = (ImageView) findViewById(R.id.img);
         try {
             byte[] bytes = handle.getPicture(name).getPicture();

@@ -16,7 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.database.PictureDatabse;
+import com.darker.motorservice.database.PictureDatabase;
 import com.darker.motorservice.database.ServiceDatabase;
 import com.darker.motorservice.model.ServicesItem;
 import com.darker.motorservice.model.TimelineItem;
@@ -201,13 +201,13 @@ public class TimelineFragment extends Fragment implements View.OnClickListener{
             return;
         }
 
-        PictureDatabse handle = new PictureDatabse(context);
+        PictureDatabase handle = new PictureDatabase(context);
         String imagePath = timelineItem.getImgName();
         if (checkHasImage(timelineItem, handle, imagePath)) return;
         loadImageFromStorage(timelineItem, handle, imagePath);
     }
 
-    private boolean checkHasImage(TimelineItem timelineItem, PictureDatabse handle, String imagePath) {
+    private boolean checkHasImage(TimelineItem timelineItem, PictureDatabase handle, String imagePath) {
         if (handle.hasPicture(imagePath)) {
             Log.d("hasPicture", "YES");
             addtimelineToList(timelineItem, handle, imagePath);
@@ -217,14 +217,14 @@ public class TimelineFragment extends Fragment implements View.OnClickListener{
         return false;
     }
 
-    private void addtimelineToList(TimelineItem timelineItem, PictureDatabse handle, String imagePath) {
+    private void addtimelineToList(TimelineItem timelineItem, PictureDatabase handle, String imagePath) {
         byte[] bytes = handle.getPicture(imagePath).getPicture();
         Bitmap bitmap = ImageUtil.convertToBitmap(bytes);
         timelineItem.setImage(bitmap);
         timelineItems.add(timelineItem);
     }
 
-    private void loadImageFromStorage(final TimelineItem timelineItem, final PictureDatabse handle, final String imagePath) {
+    private void loadImageFromStorage(final TimelineItem timelineItem, final PictureDatabase handle, final String imagePath) {
         final long ONE_MEGABYTE = 1024 * 1024;
         sRef.child(imagePath).getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override

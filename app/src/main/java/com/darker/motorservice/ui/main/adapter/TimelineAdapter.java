@@ -18,7 +18,7 @@ import android.widget.TextView;
 import com.darker.motorservice.R;
 import com.darker.motorservice.ui.post.PostActivity;
 import com.darker.motorservice.model.TimelineItem;
-import com.darker.motorservice.database.PictureDatabse;
+import com.darker.motorservice.database.PictureDatabase;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -101,7 +101,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.ViewHo
                             }else if(position == 1){
                                 if (!timelineItem.getImgName().isEmpty()) {
                                     stRef.child(timelineItem.getImgName()).delete();
-                                    new PictureDatabse(context).deletePicture(timelineItem.getImgName());
+                                    new PictureDatabase(context).deletePicture(timelineItem.getImgName());
                                 }
                                 dbRef.child(TIMELINE).child(timelineItem.getKey()).removeValue();
                             }

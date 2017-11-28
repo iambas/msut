@@ -22,7 +22,7 @@ import com.darker.motorservice.utility.ImageUtil;
 import com.darker.motorservice.utility.NetworkUtil;
 import com.darker.motorservice.ui.main.model.PictureItem;
 import com.darker.motorservice.model.TimelineItem;
-import com.darker.motorservice.database.PictureDatabse;
+import com.darker.motorservice.database.PictureDatabase;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
@@ -92,7 +92,7 @@ public class PostActivity extends AppCompatActivity {
         editMsg.setText(message);
 
         if (!imgName.isEmpty()){
-            PictureDatabse handle = new PictureDatabse(this);
+            PictureDatabase handle = new PictureDatabase(this);
             Bitmap bitmap = new ImageUtil().convertToBitmap(handle.getPicture(imgName).getPicture());
             imageView.setImageBitmap(bitmap);
             imageView.setVisibility(View.VISIBLE);
@@ -169,7 +169,7 @@ public class PostActivity extends AppCompatActivity {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 Log.d("upload", "OK");
-                PictureDatabse handle = new PictureDatabse(PostActivity.this);
+                PictureDatabase handle = new PictureDatabase(PostActivity.this);
                 if (edit) {
                     if (handle.hasPicture(image)){
                         handle.updatePicture(new PictureItem(image, data));
