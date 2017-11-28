@@ -30,6 +30,7 @@ import com.darker.motorservice.ui.details.DetailActivity;
 import com.darker.motorservice.ui.main.adapter.ReviewAdapter;
 import com.darker.motorservice.ui.main.fragment.spinner.SpinnerUtil;
 import com.darker.motorservice.ui.main.model.ReviewItem;
+import com.darker.motorservice.utility.DateUtil;
 import com.darker.motorservice.utility.NetworkUtil;
 import com.darker.motorservice.utility.StringUtil;
 import com.google.firebase.database.DataSnapshot;
@@ -272,7 +273,7 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
     }
 
     public void setValueReview(String msg) {
-        String date = StringUtil.getDateFormate("dd/MM/yyyy HH:mm:ss");
+        String date = DateUtil.getDateFormat("dd/MM/yyyy HH:mm:ss");
         ReviewItem newRev = new ReviewItem(msg, date, myRate);
 
         DatabaseReference dbReview = dbRef.child(REVIEW).child(id);

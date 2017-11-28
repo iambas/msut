@@ -23,8 +23,8 @@ import com.darker.motorservice.model.ServicesItem;
 import com.darker.motorservice.ui.main.adapter.StatAdapter;
 import com.darker.motorservice.ui.main.fragment.spinner.SpinnerUtil;
 import com.darker.motorservice.ui.main.model.StatItem;
+import com.darker.motorservice.utility.DateUtil;
 import com.darker.motorservice.utility.NetworkUtil;
-import com.darker.motorservice.utility.StringUtil;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -73,7 +73,7 @@ public class StatisticsFragment extends Fragment{
     public void initGlobal(View view) {
         this.context = view.getContext();
         this.mView = view;
-        statMonth = StringUtil.getDateFormate("yyyy-MM");
+        statMonth = DateUtil.getDateFormat("yyyy-MM");
     }
 
     public void checkAdmin(View view) {

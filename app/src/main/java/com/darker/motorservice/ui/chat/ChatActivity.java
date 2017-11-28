@@ -42,6 +42,7 @@ import com.darker.motorservice.ui.chat.model.NewChatItem;
 import com.darker.motorservice.ui.main.MainActivity;
 import com.darker.motorservice.ui.main.callback.ImageUploadCallback;
 import com.darker.motorservice.ui.main.model.PictureItem;
+import com.darker.motorservice.utility.DateUtil;
 import com.darker.motorservice.utility.ImageUtil;
 import com.darker.motorservice.utility.NetworkUtil;
 import com.darker.motorservice.utility.StringUtil;
@@ -64,7 +65,6 @@ import com.google.firebase.storage.StorageReference;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -349,36 +349,36 @@ public class ChatActivity extends AppCompatActivity implements
         handle.addPicture(new PictureItem(imgName, bytes));
     }
 
-    private void pushMessage(String msg) {
-        String time = StringUtil.getDateFormate("yyyy-MM-dd HH:mm:ss");
+    private void pushMessage(String message) {
+        String time = DateUtil.getDateFormat("yyyy-MM-dd HH:mm:ss");
         mDatabase.child(keyChat)
                 .child(DATA)
                 .push()
-                .setValue(new ChatMessageItem(time, myName, msg, status, ""));
+                .setValue(new ChatMessageItem(time, myName, message, status, ""));
         edInputMessage.setText("");
     }
 
     private void pushStat(final String type) {
         DatabaseReference dbStat = FirebaseUtil.getChildData("stat");
-        String my = StringUtil.getDateFormate("yyyy-MM");
-        String day = StringUtil.getDateFormate("dd-MM-yyyy");
-        final DatabaseReference db = dbStat.child(service).child(my).child(day);
-        db.addListenerForSingleValueEvent(new ValueEventListener() {
+        String yearAndMonth = DateUtil.getDateFormat("yyyy-MM");
+        String date = DateUtil.getDateFormat("dd-MM-yyyy");
+
+        final DatabaseReference dbStatDate = dbStat.child(service).child(yearAndMonth).child(date);
+        dbStatDate.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.hasChild("dialogCall")) {
-                    db.child("dialogCall").setValue("1");
+                    dbStatDate.child("dialogCall").setValue("1");
                 }
 
                 if (!dataSnapshot.hasChild("chat")) {
-                    db.child("chat").setValue("1");
+                    dbStatDate.child("chat").setValue("1");
                 }
-                db.child(type).child(uid).setValue("1");
+                dbStatDate.child(type).child(uid).setValue("1");
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
+            public void onCancelled(DatabaseError databaseError) {}
         });
     }
 
@@ -402,8 +402,10 @@ public class ChatActivity extends AppCompatActivity implements
                 for (DataSnapshot data : dataSnapshot.getChildren()) {
                     if (!eachForloop(data)) break;
                 }
-                if (!found) mDatabase.push().setValue(new NewChatItem(service, user));
-                checkKeyChatEmpty();
+                if (!found){
+                    mDatabase.push().setValue(new NewChatItem(service, user));
+                }
+                findOrQuery();
             }
 
             @Override
@@ -432,24 +434,25 @@ public class ChatActivity extends AppCompatActivity implements
         return true;
     }
 
-    private void checkKeyChatEmpty() {
+    private void findOrQuery() {
         if (keyChat.isEmpty()) {
             find();
             progressBar.setVisibility(View.GONE);
         } else {
-            query();
+            queryDataByKeyChat();
         }
     }
 
-    private void query() {
-        final int m = Calendar.getInstance().get(Calendar.MONTH) + 1;
-        mDatabase.child(keyChat).child(DATA).addValueEventListener(new ValueEventListener() {
+    private void queryDataByKeyChat() {
+        final int currentMonth = DateUtil.getCurrentMonth();
+        mDatabase.child(keyChat).child(DATA)
+                .addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 chatMessageItemList.clear();
                 for (DataSnapshot data : dataSnapshot.getChildren()) {
                     ChatMessageItem chatMessageItem = data.getValue(ChatMessageItem.class);
-                    removeChat(chatMessageItem, data, m);
+                    removeChat(chatMessageItem, data, currentMonth);
                     prepareLoadImage(chatMessageItem);
                 }
                 sortChatList();
@@ -457,21 +460,22 @@ public class ChatActivity extends AppCompatActivity implements
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
+                ToasAlert.alert(ChatActivity.this, R.string.cannot_load_data);
             }
         });
     }
 
-    private void removeChat(ChatMessageItem chatMessageItem, DataSnapshot data, int m) {
-        int t = Integer.parseInt(chatMessageItem.getDate().split("-")[1]);
-        Log.d("ChatItem", m + " : " + t);
-        if (t > 10) {
-            if (t - 10 == m) {
+    private void removeChat(ChatMessageItem chatMessageItem, DataSnapshot data, int currentMonth) {
+        int monthChat = DateUtil.getMonthFromChat(chatMessageItem.getDate());
+        Log.d("ChatItem", currentMonth + " : " + monthChat);
+        if (monthChat > 10) {
+            if (monthChat - 10 == currentMonth) {
                 if (chatMessageItem.getMessage().contains(KEY_IMAGE)) {
                     storageRef.child(chatMessageItem.getMessage().replace(KEY_IMAGE, "")).delete();
                 }
                 mDatabase.child(keyChat).child(DATA).child(data.getKey()).removeValue();
             }
-        } else if (t + 2 <= m) {
+        } else if (monthChat + 2 <= currentMonth) {
             if (chatMessageItem.getMessage().contains(KEY_IMAGE)) {
                 storageRef.child(chatMessageItem.getMessage().replace(KEY_IMAGE, "")).delete();
             }

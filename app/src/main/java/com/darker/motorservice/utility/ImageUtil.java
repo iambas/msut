@@ -119,7 +119,7 @@ public class ImageUtil {
     }
 
     public static String getImageName(String uid){
-        String date = StringUtil.getDateFormate("-yyyy_MM_dd_HH_mm_ss");
+        String date = DateUtil.getDateFormat("-yyyy_MM_dd_HH_mm_ss");
         return  "image/" + uid.substring(0, 5) + date + ".png";
     }
 
