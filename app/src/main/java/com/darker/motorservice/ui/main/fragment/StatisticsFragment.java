@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import static com.darker.motorservice.utils.Constant.CHAT;
 import static com.darker.motorservice.utils.Constant.STAT;
 
 public class StatisticsFragment extends Fragment{
@@ -122,7 +123,7 @@ public class StatisticsFragment extends Fragment{
     private void checkNetwork(final String uid){
         if (isNetworkDisable(uid)) return;
         progressBar.setVisibility(View.VISIBLE);
-        tvTextNull.setVisibility(View.GONE);
+        hideTextNotList();
         queryStatsByUid(uid);
     }
 
@@ -185,11 +186,15 @@ public class StatisticsFragment extends Fragment{
 
     public void checkMonthsSize(List<String> areas) {
         if (areas.size() == 0){
-            progressBar.setVisibility(View.GONE);
-            tvTextNull.setVisibility(View.VISIBLE);
+            hideProgressBar();
+            showTextNoList();
         }else{
-            tvTextNull.setVisibility(View.GONE);
+            hideTextNotList();
         }
+    }
+
+    public void hideTextNotList() {
+        tvTextNull.setVisibility(View.GONE);
     }
 
     private boolean isNetworkDisable(final String uid) {
@@ -218,29 +223,44 @@ public class StatisticsFragment extends Fragment{
                 for (DataSnapshot dataDay : dataMonth.getChildren()){
                     String date = dataDay.getKey();
                     String numCall = String.valueOf(dataDay.child("dialogCall").getChildrenCount());
-                    String numChat = String.valueOf(dataDay.child("chat").getChildrenCount());
+                    String numChat = String.valueOf(dataDay.child(CHAT).getChildrenCount());
                     StatItem statItem = new StatItem(date, numCall, numChat);
                     statItemList.add(statItem);
-                    Collections.sort(statItemList, new Comparator<StatItem>(){
-                        @Override
-                        public int compare(StatItem s1, StatItem s2) {
-                            return s1.toString().compareToIgnoreCase(s2.toString());
-                        }
-                    });
+                    sortStatItemList();
                     adapter.notifyDataSetChanged();
                 }
 
-                adapter.notifyDataSetChanged();
-                if (statItemList.size() == 0){
-                    tvTextNull.setVisibility(View.VISIBLE);
-                }else{
-                    tvTextNull.setVisibility(View.GONE);
-                }
-                progressBar.setVisibility(View.GONE);
+                checkStatItemListSize();
+                hideProgressBar();
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {}
+        });
+    }
+
+    public void checkStatItemListSize() {
+        if (statItemList.size() == 0){
+            showTextNoList();
+        }else{
+            hideTextNotList();
+        }
+    }
+
+    public void showTextNoList() {
+        tvTextNull.setVisibility(View.VISIBLE);
+    }
+
+    public void hideProgressBar() {
+        progressBar.setVisibility(View.GONE);
+    }
+
+    public void sortStatItemList() {
+        Collections.sort(statItemList, new Comparator<StatItem>(){
+            @Override
+            public int compare(StatItem s1, StatItem s2) {
+                return s1.toString().compareToIgnoreCase(s2.toString());
+            }
         });
     }
 }
