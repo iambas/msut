@@ -1,20 +1,16 @@
 package com.darker.motorservice.ui.chat;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -39,6 +35,7 @@ import com.darker.motorservice.ui.chat.model.NewChatItem;
 import com.darker.motorservice.ui.main.MainActivity;
 import com.darker.motorservice.ui.main.callback.ImageUploadCallback;
 import com.darker.motorservice.ui.main.model.PictureItem;
+import com.darker.motorservice.utility.CallPhoneUtil;
 import com.darker.motorservice.utility.DateUtil;
 import com.darker.motorservice.utility.GPSUtil;
 import com.darker.motorservice.utility.ImageUtil;
@@ -97,7 +94,7 @@ public class ChatActivity extends AppCompatActivity implements
 
     private String keyChat;
     private String chatWithName;
-    private String telNum;
+    private String phoneNumber;
     private String status;
     private String uid;
     private String service;
@@ -262,7 +259,7 @@ public class ChatActivity extends AppCompatActivity implements
         Log.d(TAG, "." + keyChat);
         Log.d(TAG, "." + chatWithId);
         Log.d(TAG, "." + chatWithName);
-        Log.d(TAG, "." + telNum);
+        Log.d(TAG, "." + phoneNumber);
         Log.d(TAG, "." + status);
         Log.d(TAG, "." + photo);
     }
@@ -272,7 +269,7 @@ public class ChatActivity extends AppCompatActivity implements
         keyChat = intent.getStringExtra(KEY_CHAT);
         chatWithId = intent.getStringExtra(CHAT_WITH_ID);
         chatWithName = intent.getStringExtra(CHAT_WITH_NAME);
-        telNum = intent.getStringExtra(TEL_NUM);
+        phoneNumber = intent.getStringExtra(TEL_NUM);
         status = intent.getStringExtra(STATUS);
         photo = intent.getStringExtra(PHOTO);
     }
@@ -613,23 +610,15 @@ public class ChatActivity extends AppCompatActivity implements
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                callPhone(view, alertDialog);
+                callPhone();
+                pushStat("dialogCall");
+                alertDialog.dismiss();
             }
         });
     }
 
-    private void callPhone(View view, AlertDialog alertDialog) {
-        Intent intent = new Intent(Intent.ACTION_CALL);
-        intent.setData(Uri.parse("tel:" + telNum));
-
-        if (ActivityCompat.checkSelfPermission(view.getContext(),
-                Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions((Activity) view.getContext(),
-                    new String[]{Manifest.permission.CALL_PHONE}, 10);
-        }
-        startActivity(intent);
-        pushStat("dialogCall");
-        alertDialog.dismiss();
+    private void callPhone() {
+        CallPhoneUtil.callPhoneByNumber(this, phoneNumber);
     }
 
     public void myGps() {

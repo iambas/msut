@@ -105,6 +105,7 @@
     <string name="fault_network_cannot_send_image">ข้อผิดพลาดเครือข่าย! ไม่สามารถส่งรูปภาพได้</string>
     <string name="sending_image">กำลังส่งรูปภาพ กรุณารอสักครู่...</string>
     <string name="cannot_load_data">โหลดข้อมูลไม่ได้! โปรดลองอีกครั้ง</string>
+    <string name="push_btn_to_call_phone">กดปุ่มด้านล่างเพื่อโทรหา</string>
 
     <string-array name="tab_store">
         <item>แชท</item>
