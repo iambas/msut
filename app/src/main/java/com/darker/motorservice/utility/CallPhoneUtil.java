@@ -15,6 +15,8 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.darker.motorservice.R;
+import com.darker.motorservice.firebase.FirebaseUtil;
+import com.darker.motorservice.firebase.StatsConstant;
 
 /**
  * Created by Darker on 29/11/60.
@@ -23,7 +25,12 @@ import com.darker.motorservice.R;
 public class CallPhoneUtil {
 
     @SuppressLint("SetTextI18n")
-    public static void callPhoneDialog(final Context context, String contactName, final String phoneNumber){
+    public static void callPhoneDialog(
+            final Context context,
+            final String traderId,
+            String contactName,
+            final String phoneNumber){
+
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         LayoutInflater inflater = ((Activity) context).getLayoutInflater();
 
@@ -38,8 +45,8 @@ public class CallPhoneUtil {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                callPhoneByNumber(context, phoneNumber);
-//                pushStat("dialogCall");
+                CallPhoneUtil.callPhoneByNumber(context, phoneNumber);
+                FirebaseUtil.setValueStats(traderId, StatsConstant.CALL);
                 alertDialog.dismiss();
             }
         });

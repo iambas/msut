@@ -27,6 +27,7 @@ import android.widget.TextView;
 import com.darker.motorservice.R;
 import com.darker.motorservice.database.PictureDatabase;
 import com.darker.motorservice.firebase.FirebaseUtil;
+import com.darker.motorservice.firebase.StatsConstant;
 import com.darker.motorservice.sharedpreferences.AccountType;
 import com.darker.motorservice.sharedpreferences.SharedPreferencesUtil;
 import com.darker.motorservice.ui.chat.model.ChatMessageItem;
@@ -181,7 +182,7 @@ public class ChatActivity extends AppCompatActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_tel:
-                CallPhoneUtil.callPhoneDialog(this, chatWithName, phoneNumber);
+                CallPhoneUtil.callPhoneDialog(this, chatWithId, chatWithName, phoneNumber);
                 return true;
             case R.id.menu_gps:
                 myGps();
@@ -300,7 +301,7 @@ public class ChatActivity extends AppCompatActivity implements
         pushMessage(message);
 
         if (AccountType.isCustomer(this)) {
-            pushStat(CHAT);
+            setStatsChat();
         }
     }
 
@@ -355,7 +356,7 @@ public class ChatActivity extends AppCompatActivity implements
                 Log.d("upload", "OK");
                 pushMessage(KEY_IMAGE + imageName);
                 ToasAlert.alert(ChatActivity.this, R.string.send_image_complete);
-                pushStat("chat");
+                setStatsChat();
                 pushImageToDatabase(bitmap, imageName);
                 progressBar.setVisibility(View.GONE);
             }
@@ -381,30 +382,6 @@ public class ChatActivity extends AppCompatActivity implements
                 .push()
                 .setValue(new ChatMessageItem(time, myName, message, status, ""));
         edInputMessage.setText("");
-    }
-
-    private void pushStat(final String type) {
-        DatabaseReference dbStat = FirebaseUtil.getChildData("stat");
-        String yearAndMonth = DateUtil.getDateFormat("yyyy-MM");
-        String date = DateUtil.getDateFormat("dd-MM-yyyy");
-
-        final DatabaseReference dbStatDate = dbStat.child(service).child(yearAndMonth).child(date);
-        dbStatDate.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (!dataSnapshot.hasChild("call")) {
-                    dbStatDate.child("call").setValue("1");
-                }
-
-                if (!dataSnapshot.hasChild("chat")) {
-                    dbStatDate.child("chat").setValue("1");
-                }
-                dbStatDate.child(type).child(uid).setValue("1");
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        });
     }
 
     private void refreshUI() {
@@ -639,7 +616,11 @@ public class ChatActivity extends AppCompatActivity implements
     private void pushMessageWithLatLng(Intent data) {
         Place place = PlacePicker.getPlace(this, data);
         pushMessage(place.getLatLng().toString());
-        pushStat("chat");
+        setStatsChat();
+    }
+
+    private void setStatsChat(){
+        FirebaseUtil.setValueStats(chatWithId, StatsConstant.CHAT);
     }
 
     private void setBitmapForDialog(Intent data) {

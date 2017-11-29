@@ -13,12 +13,10 @@ import android.widget.TextView;
 
 import com.darker.motorservice.R;
 import com.darker.motorservice.database.ServiceDatabase;
-import com.darker.motorservice.firebase.FirebaseUtil;
 import com.darker.motorservice.model.ServicesItem;
 import com.darker.motorservice.ui.chat.ChatActivity;
 import com.darker.motorservice.ui.map.MapsActivity;
 import com.darker.motorservice.utility.CallPhoneUtil;
-import com.darker.motorservice.utility.DateUtil;
 import com.darker.motorservice.utility.ImageUtil;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -39,7 +37,7 @@ import static com.darker.motorservice.utility.Constant.USER;
 
 public class DetailActivity extends AppCompatActivity {
 
-    private String id;
+    private String traderId;
     private String contactName;
     private String phoneNumber;
     private String photo;
@@ -52,9 +50,9 @@ public class DetailActivity extends AppCompatActivity {
 
         initToolbar();
 
-        id = getIntent().getStringExtra(ID);
+        traderId = getIntent().getStringExtra(ID);
         ServiceDatabase serviceDatabase = new ServiceDatabase(this);
-        servicesItem = serviceDatabase.getService(id);
+        servicesItem = serviceDatabase.getService(traderId);
         contactName = servicesItem.getName();
         phoneNumber = servicesItem.getTel();
         photo = servicesItem.getPhoto();
@@ -116,7 +114,7 @@ public class DetailActivity extends AppCompatActivity {
         callFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                CallPhoneUtil.callPhoneDialog(DetailActivity.this, contactName, phoneNumber);
+                CallPhoneUtil.callPhoneDialog(DetailActivity.this, traderId, contactName, phoneNumber);
             }
         });
 
@@ -135,7 +133,7 @@ public class DetailActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(DetailActivity.this, ChatActivity.class);
                 intent.putExtra(KEY_CHAT, "");
-                intent.putExtra(CHAT_WITH_ID, id);
+                intent.putExtra(CHAT_WITH_ID, traderId);
                 intent.putExtra(CHAT_WITH_NAME, contactName);
                 intent.putExtra(STATUS, USER);
                 intent.putExtra(TEL_NUM, phoneNumber);
@@ -162,25 +160,5 @@ public class DetailActivity extends AppCompatActivity {
         }
         imageCover.setImageBitmap(cover);
         imageProfile.setImageBitmap(profile);
-    }
-
-    private void pushStat(){
-        DatabaseReference dbStat = FirebaseUtil.getChildData("stat");
-        String yearAndMonth = DateUtil.getDateFormat("yyyy-MM");
-        String dateFormat = DateUtil.getDateFormat("dd-MM-yyyy");
-
-        final DatabaseReference dbStatsSetValue = dbStat.child(id).child(yearAndMonth).child(dateFormat);
-        dbStatsSetValue.child("call").child(id).setValue("1");
-        dbStatsSetValue.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(!dataSnapshot.hasChild("chat")){
-                    dbStatsSetValue.child("chat").setValue("1");
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        });
     }
 }
