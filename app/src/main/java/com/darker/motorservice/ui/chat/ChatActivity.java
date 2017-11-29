@@ -10,7 +10,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -182,7 +181,7 @@ public class ChatActivity extends AppCompatActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_tel:
-                dialogCall();
+                CallPhoneUtil.callPhoneDialog(this, chatWithName, phoneNumber);
                 return true;
             case R.id.menu_gps:
                 myGps();
@@ -393,8 +392,8 @@ public class ChatActivity extends AppCompatActivity implements
         dbStatDate.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (!dataSnapshot.hasChild("dialogCall")) {
-                    dbStatDate.child("dialogCall").setValue("1");
+                if (!dataSnapshot.hasChild("call")) {
+                    dbStatDate.child("call").setValue("1");
                 }
 
                 if (!dataSnapshot.hasChild("chat")) {
@@ -595,30 +594,6 @@ public class ChatActivity extends AppCompatActivity implements
         } catch (Exception e) {
             Log.d("Excep chatact", e.getMessage());
         }
-    }
-
-    public void dialogCall() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        LayoutInflater inflater = getLayoutInflater();
-        View vb = inflater.inflate(R.layout.contact_service, null);
-        builder.setView(vb);
-        final AlertDialog alertDialog = builder.show();
-        TextView txtName = (TextView) vb.findViewById(R.id.txt_name);
-        txtName.setText("กดปุ่มด้านล่างเพื่อโทรหา " + chatWithName);
-
-        FloatingActionButton fab = (FloatingActionButton) vb.findViewById(R.id.fab_call);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                callPhone();
-                pushStat("dialogCall");
-                alertDialog.dismiss();
-            }
-        });
-    }
-
-    private void callPhone() {
-        CallPhoneUtil.callPhoneByNumber(this, phoneNumber);
     }
 
     public void myGps() {

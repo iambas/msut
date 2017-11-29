@@ -1,15 +1,12 @@
 package com.darker.motorservice.ui.details;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -43,7 +40,7 @@ import static com.darker.motorservice.utility.Constant.USER;
 public class DetailActivity extends AppCompatActivity {
 
     private String id;
-    private String name;
+    private String contactName;
     private String phoneNumber;
     private String photo;
     private ServicesItem servicesItem;
@@ -58,7 +55,7 @@ public class DetailActivity extends AppCompatActivity {
         id = getIntent().getStringExtra(ID);
         ServiceDatabase serviceDatabase = new ServiceDatabase(this);
         servicesItem = serviceDatabase.getService(id);
-        name = servicesItem.getName();
+        contactName = servicesItem.getName();
         phoneNumber = servicesItem.getTel();
         photo = servicesItem.getPhoto();
 
@@ -85,7 +82,7 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     private void setData() {
-        ((TextView) findViewById(R.id.store_name)).setText(name);
+        ((TextView) findViewById(R.id.store_name)).setText(contactName);
         ((TextView) findViewById(R.id.store_pos)).setText(servicesItem.getPos());
         ((TextView) findViewById(R.id.work_time)).setText(servicesItem.getWorkTime());
         ((TextView) findViewById(R.id.service)).setText(servicesItem.getService());
@@ -119,7 +116,7 @@ public class DetailActivity extends AppCompatActivity {
         callFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                call();
+                CallPhoneUtil.callPhoneDialog(DetailActivity.this, contactName, phoneNumber);
             }
         });
 
@@ -127,7 +124,7 @@ public class DetailActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(DetailActivity.this, MapsActivity.class);
-                intent.putExtra(NAME, name);
+                intent.putExtra(NAME, contactName);
                 intent.putExtra(LATLNG, servicesItem.getLatlng());
                 startActivity(intent);
             }
@@ -139,7 +136,7 @@ public class DetailActivity extends AppCompatActivity {
                 Intent intent = new Intent(DetailActivity.this, ChatActivity.class);
                 intent.putExtra(KEY_CHAT, "");
                 intent.putExtra(CHAT_WITH_ID, id);
-                intent.putExtra(CHAT_WITH_NAME, name);
+                intent.putExtra(CHAT_WITH_NAME, contactName);
                 intent.putExtra(STATUS, USER);
                 intent.putExtra(TEL_NUM, phoneNumber);
                 intent.putExtra(PHOTO, photo);
@@ -167,38 +164,13 @@ public class DetailActivity extends AppCompatActivity {
         imageProfile.setImageBitmap(profile);
     }
 
-    public void call() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        LayoutInflater inflater = getLayoutInflater();
-        @SuppressLint("InflateParams")
-        View viewInflate = inflater.inflate(R.layout.contact_service, null);
-        builder.setView(viewInflate);
-        final AlertDialog alertDialog = builder.show();
-        TextView txtName = (TextView) viewInflate.findViewById(R.id.txt_name);
-        txtName.setText(getString(R.string.push_btn_to_call_phone) + name);
-
-        FloatingActionButton fab = (FloatingActionButton) viewInflate.findViewById(R.id.fab_call);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                callPhone();
-                pushStat();
-                alertDialog.dismiss();
-            }
-        });
-    }
-
-    private void callPhone() {
-        CallPhoneUtil.callPhoneByNumber(this, phoneNumber);
-    }
-
     private void pushStat(){
         DatabaseReference dbStat = FirebaseUtil.getChildData("stat");
         String yearAndMonth = DateUtil.getDateFormat("yyyy-MM");
         String dateFormat = DateUtil.getDateFormat("dd-MM-yyyy");
 
         final DatabaseReference dbStatsSetValue = dbStat.child(id).child(yearAndMonth).child(dateFormat);
-        dbStatsSetValue.child("dialogCall").child(id).setValue("1");
+        dbStatsSetValue.child("call").child(id).setValue("1");
         dbStatsSetValue.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
