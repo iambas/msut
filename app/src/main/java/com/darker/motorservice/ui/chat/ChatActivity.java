@@ -1,7 +1,6 @@
 package com.darker.motorservice.ui.chat;
 
 import android.annotation.SuppressLint;
-import android.app.ActivityManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -134,14 +133,14 @@ public class ChatActivity extends AppCompatActivity implements
 
     @Override
     public boolean onSupportNavigateUp() {
-        back();
+        startMainActivityOrOnlyFinish();
         return true;
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        back();
+        startMainActivityOrOnlyFinish();
     }
 
     @Override
@@ -655,14 +654,9 @@ public class ChatActivity extends AppCompatActivity implements
         }
     }
 
-    private void back() {
-        ActivityManager mngr = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-        List<ActivityManager.RunningTaskInfo> taskList = mngr.getRunningTasks(10);
-
-        if (taskList.get(0).numActivities == 1 &&
-                taskList.get(0).topActivity.getClassName().equals(this.getClass().getName())) {
+    private void startMainActivityOrOnlyFinish() {
+        if (ClassRunningManager.isOneActivityRunning(this)) {
             startActivity(new Intent(this, MainActivity.class));
-            Log.i("Current", "This is last activity in the stack");
         }
         finish();
     }
