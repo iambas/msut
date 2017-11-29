@@ -106,6 +106,10 @@
     <string name="sending_image">กำลังส่งรูปภาพ กรุณารอสักครู่...</string>
     <string name="cannot_load_data">โหลดข้อมูลไม่ได้! โปรดลองอีกครั้ง</string>
     <string name="push_btn_to_call_phone">กดปุ่มด้านล่างเพื่อโทรหา</string>
+    <string name="suggest_open_gps">ในการดำเนินการต่อ ให้อุปกรณ์เปิดตำแหน่ง (GPS)</string>
+    <string name="text_ok">ตกลง</string>
+    <string name="text_cancel">ยกเลิก</string>
+    <string name="device_not_support_gps">อุปกรณ์ไม่รองรับระบบ GPS</string>
 
     <string-array name="tab_store">
         <item>แชท</item>

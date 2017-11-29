@@ -184,7 +184,7 @@ public class ChatActivity extends AppCompatActivity implements
                 CallPhoneUtil.callPhoneDialog(this, chatWithId, chatWithName, phoneNumber);
                 return true;
             case R.id.menu_gps:
-                myGps();
+                validateGPSStatus();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -572,10 +572,12 @@ public class ChatActivity extends AppCompatActivity implements
         }
     }
 
-    public void myGps() {
+    public void validateGPSStatus() {
         if (!NetworkUtil.isNetworkAvailable(this)) return;
-        checkGpsStatus();
-        if (!gpsStatus) return;
+        if (GPSUtil.isGPSEnable(this)){
+            confirmGPSSettingsDialog();
+            return;
+        }
         startSelectPlace();
     }
 
@@ -587,6 +589,7 @@ public class ChatActivity extends AppCompatActivity implements
         } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
             e.printStackTrace();
             Log.e("place", e.getMessage());
+            ToasAlert.alert(this, R.string.device_not_support_gps);
         }
     }
 
@@ -638,20 +641,17 @@ public class ChatActivity extends AppCompatActivity implements
         }
     }
 
-    public void checkGpsStatus() {
-        gpsStatus = GPSUtil.isGPSEnable(this);
-        if (!gpsStatus) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
-            builder.setMessage("ในการดำเนินการต่อ ให้อุปกรณ์เปิดตำแหน่ง (GPS)");
-            builder.setPositiveButton("ตกลง", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    GPSUtil.gpsSettings(ChatActivity.this);
-                }
-            });
-            builder.setNegativeButton("ยกเลิก", null);
-            builder.show();
-        }
+    public void confirmGPSSettingsDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
+        builder.setMessage(R.string.suggest_open_gps);
+        builder.setPositiveButton(R.string.text_ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                GPSUtil.gpsSettings(ChatActivity.this);
+            }
+        });
+        builder.setNegativeButton(R.string.text_cancel, null);
+        builder.show();
     }
 
     private void startMainActivityOrOnlyFinish() {
