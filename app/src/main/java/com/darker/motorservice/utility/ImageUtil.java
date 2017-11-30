@@ -25,6 +25,9 @@ import java.io.IOException;
 
 public class ImageUtil {
 
+    public static final String URL_GRAPH_FACEBOOK = "https://graph.facebook.com/";
+    public static final String PICTURE_SIZE = "/picture?height=50&width=50";
+
     public static Bitmap getImgCover(Context context, String id) {
         ServicesItem servicesItem = new ServiceDatabase(context).getService(id);
         Bitmap bitmap;
@@ -136,5 +139,9 @@ public class ImageUtil {
 
     public static Bitmap getImageMediaStore(Context context, Uri imageUri) throws IOException {
         return MediaStore.Images.Media.getBitmap(context.getContentResolver(), imageUri);
+    }
+
+    public static String getUrlPictureFacebook(String path){
+        return URL_GRAPH_FACEBOOK + path + PICTURE_SIZE;
     }
 }

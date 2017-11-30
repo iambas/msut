@@ -454,7 +454,8 @@ public class ChatActivity extends AppCompatActivity implements
                 for (DataSnapshot data : dataSnapshot.getChildren()) {
                     ChatMessageItem chatMessageItem = data.getValue(ChatMessageItem.class);
                     removeChat(chatMessageItem, data, currentMonth);
-                    prepareLoadImage(chatMessageItem);
+                    chatMessageItemList.add(chatMessageItem);
+//                    prepareLoadImage(chatMessageItem);
                 }
                 sortChatList();
             }
@@ -644,13 +645,13 @@ public class ChatActivity extends AppCompatActivity implements
     public void confirmGPSSettingsDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
         builder.setMessage(R.string.suggest_open_gps);
-        builder.setPositiveButton(R.string.text_ok, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 GPSUtil.gpsSettings(ChatActivity.this);
             }
         });
-        builder.setNegativeButton(R.string.text_cancel, null);
+        builder.setNegativeButton(R.string.cancel, null);
         builder.show();
     }
 

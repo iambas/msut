@@ -1,15 +1,15 @@
 <resources>
     <string name="app_name">"MSUT"</string>
     <string name="app_extends">ร้านซ่อมรถจักรยานยนต์ มทส.</string>
-    <string name="fname">ชื่อ</string>
-    <string name="lname">นามสกุล</string>
-    <string name="name">ชื่อ-สกุล</string>
+    <string name="first_name">ชื่อ</string>
+    <string name="last_name">นามสกุล</string>
+    <string name="full_name">ชื่อ-สกุล</string>
     <string name="email">อีเมล</string>
     <string name="password">รหัสผ่าน (อย่างน้อย 6 ตัว)</string>
     <string name="password2">ยืนยันรหัสผ่าน</string>
     <string name="min">อย่างน้อย 6 ตัว</string>
-    <string name="fill_fname">กรอกชื่อ</string>
-    <string name="fill_lname">กรอกนามสกุล</string>
+    <string name="fill_first_name">กรอกชื่อ</string>
+    <string name="fill_last_name">กรอกนามสกุล</string>
     <string name="fill_email">กรอกอีเมล</string>
     <string name="fill_password">กรอกรหัสผ่าน</string>
     <string name="fill_old_pass">กรอกรหัสผ่านเดิม</string>
@@ -88,7 +88,21 @@
         <item>ธันวาคม</item>
     </string-array>
 
-    <!-- TODO: Remove or change this placeholder text -->
+    <string-array name="short_month">
+        <item>ม.ค.</item>
+        <item>ก.พ.</item>
+        <item>มี.ค.</item>
+        <item>เม.ย.</item>
+        <item>พ.ค.</item>
+        <item>มิ.ย.</item>
+        <item>ก.ค.</item>
+        <item>ส.ค.</item>
+        <item>ก.ย.</item>
+        <item>ต.ค.</item>
+        <item>พ.ย.</item>
+        <item>ธ.ค.</item>
+    </string-array>
+
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="tab_profile">โปรไฟล์</string>
     <string name="tab_chat">แชท</string>
@@ -98,17 +112,15 @@
     <string name="tab_review">รีวิว</string>
     <string name="tab_store">ร้านต่างๆ</string>
     <string name="default_latlng">14.8823047,102.0206782</string>
-    <string name="default_time_work">วันจันทร์-ศุกร์ เวลา 08:00-12:00, 13:00-20:00 น. วันเสาร์-อาทิตย์ เวลา 08:00-12:00 น. ปิดเทอม เวลา 09:00-17:00 น.</string>
+    <string name="default_time_work">วันจันทร์–ศุกร์ เวลา 08:00–12:00, 13:00–20:00 น. วันเสาร์–อาทิตย์ เวลา 08:00–12:00 น. ปิดเทอม เวลา 09:00-17:00 น.</string>
     <string name="send_image_complete">ส่งรูปภาพเรียบร้อย</string>
     <string name="send_image_problem">การส่งรูปภาพมีปัญหา! โปรดลองอีกครั้ง</string>
     <string name="fault_network_cannot_send_message">ข้อผิดพลาดเครือข่าย! ไม่สามารถส่งข้อความได้</string>
     <string name="fault_network_cannot_send_image">ข้อผิดพลาดเครือข่าย! ไม่สามารถส่งรูปภาพได้</string>
-    <string name="sending_image">กำลังส่งรูปภาพ กรุณารอสักครู่...</string>
+    <string name="sending_image">กำลังส่งรูปภาพ กรุณารอสักครู่…</string>
     <string name="cannot_load_data">โหลดข้อมูลไม่ได้! โปรดลองอีกครั้ง</string>
     <string name="push_btn_to_call_phone">กดปุ่มด้านล่างเพื่อโทรหา</string>
     <string name="suggest_open_gps">ในการดำเนินการต่อ ให้อุปกรณ์เปิดตำแหน่ง (GPS)</string>
-    <string name="text_ok">ตกลง</string>
-    <string name="text_cancel">ยกเลิก</string>
     <string name="device_not_support_gps">อุปกรณ์ไม่รองรับระบบ GPS</string>
 
     <string-array name="tab_store">

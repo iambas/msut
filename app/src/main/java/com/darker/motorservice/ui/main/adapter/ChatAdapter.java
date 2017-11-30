@@ -1,5 +1,6 @@
 package com.darker.motorservice.ui.main.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.darker.motorservice.R;
 import com.darker.motorservice.ui.chat.ChatActivity;
 import com.darker.motorservice.ui.main.model.ChatItem;
@@ -93,6 +95,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         } else {
             String url = "https://graph.facebook.com/" + chatItem.getPhoto() + "/picture?height=70&width=70";
             Picasso.with(context).load(url).into(holder.imageView);
+            Glide.with(context).load(url).into(holder.imageView);
         }
 
         holder.txtName.setText(chatItem.getChatWithName());
@@ -101,6 +104,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         String strDate = items.get(position).getDate();
         int hour = 0, minute = 0;
 
+        @SuppressLint("SimpleDateFormat")
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try {
             Date date = df.parse(strDate);

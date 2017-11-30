@@ -1,5 +1,6 @@
 package com.darker.motorservice.ui.chat;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -16,7 +17,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.darker.motorservice.R;
+import com.darker.motorservice.sharedpreferences.AccountType;
+import com.darker.motorservice.sharedpreferences.SharedPreferencesUtil;
 import com.darker.motorservice.ui.chat.model.ChatMessageItem;
 import com.darker.motorservice.ui.map.MapsActivity;
 import com.darker.motorservice.ui.show_picture.ShowPictureActivity;
@@ -29,7 +33,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -45,57 +48,57 @@ import static com.darker.motorservice.utility.Constant.DATA;
 import static com.darker.motorservice.utility.Constant.IMG;
 import static com.darker.motorservice.utility.Constant.KEY_CHAT;
 import static com.darker.motorservice.utility.Constant.KEY_IMAGE;
-import static com.darker.motorservice.utility.Constant.KEY_LOGIN_MOTOR_SERVICE;
 import static com.darker.motorservice.utility.Constant.LATLNG;
 import static com.darker.motorservice.utility.Constant.NAME;
 import static com.darker.motorservice.utility.Constant.STATUS;
-import static com.darker.motorservice.utility.Constant.USER;
 
 public class MessageAdapter extends ArrayAdapter {
     private List<ChatMessageItem> items;
     private Context context;
-    private int bYear, bMonth, bDay;
-    private SharedPreferences sh;
+    private int bYear;
+    private int bMonth;
+    private int bDay;
+    private SharedPreferences prefs;
     private int resource;
+
+    private LinearLayout layout;
+    private ImageView imageView;
+    private TextView tvTime;
+    private TextView tvMessageLeft;
+    private TextView tvMessageRight;
+    private TextView tvLeftTime;
+    private TextView tvRightTime;
+    private ImageView ivLeft;
+    private ImageView ivRight;
+    private ImageView ivMessage;
+    private TextView textView;
 
     public MessageAdapter(Context context, int resource, List<ChatMessageItem> items) {
         super(context, resource);
         this.context = context;
         this.resource = resource;
         this.items = items;
-        sh = context.getSharedPreferences(KEY_LOGIN_MOTOR_SERVICE, Context.MODE_PRIVATE);
+        prefs = SharedPreferencesUtil.getLoginPreferences(context);
     }
 
+    @SuppressLint("ViewHolder")
     @NonNull
     @Override
     public View getView(int position, View view, @NonNull ViewGroup parent) {
         LayoutInflater inflater = ((Activity) context).getLayoutInflater();
         view = inflater.inflate(resource, parent, false);
 
-        LinearLayout layout = (LinearLayout) view.findViewById(R.id.layout);
-        ImageView imageView = (ImageView) view.findViewById(img);
-        TextView timeView = (TextView) view.findViewById(R.id.time);
-        TextView msgLeft = (TextView) view.findViewById(R.id.message_left);
-        TextView msgRight = (TextView) view.findViewById(R.id.message_right);
-        TextView lTime = (TextView) view.findViewById(R.id.ltime);
-        TextView rTime = (TextView) view.findViewById(R.id.rtime);
-        ImageView imgLeft = (ImageView) view.findViewById(R.id.img_left);
-        ImageView imgRight = (ImageView) view.findViewById(R.id.img_right);
-        ImageView imgMsg;
-        TextView textView;
+        bindView(view);
+        setPaddingForLastView(position);
 
         final ChatMessageItem chat = items.get(position);
-        if (position == getCount() - 1) {
-            layout.setPadding(32, 4, 32, 12);
-        }
 
         String strDate = chat.getDate();
         int year, month, day, hour, minute;
         year = month = day = hour = minute = 0;
-        String Months[] = {"ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.",
-                "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.",
-                "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."};
+        String[] Months = context.getResources().getStringArray(R.array.short_month);
 
+        @SuppressLint("SimpleDateFormat")
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try {
             Date date = df.parse(strDate);
@@ -117,8 +120,8 @@ public class MessageAdapter extends ArrayAdapter {
         String time = day + " " + Months[month] + " " + (year + 543);
 
         if (position == 0) {
-            timeView.setText(time);
-            timeView.setVisibility(View.VISIBLE);
+            tvTime.setText(time);
+            tvTime.setVisibility(View.VISIBLE);
         } else {
             String sDate = items.get(position - 1).getDate();
             try {
@@ -133,8 +136,8 @@ public class MessageAdapter extends ArrayAdapter {
             }
 
             if (bYear != year || bMonth != month || bDay != day) {
-                timeView.setText(time);
-                timeView.setVisibility(View.VISIBLE);
+                tvTime.setText(time);
+                tvTime.setVisibility(View.VISIBLE);
             }
         }
 
@@ -144,43 +147,29 @@ public class MessageAdapter extends ArrayAdapter {
         String imgName = "";
         if (isImg) imgName = msg.replace(KEY_IMAGE, "");
 
-        if (chat.getStatus().equals(sh.getString(STATUS, ""))) {
+        if (chat.getStatus().equals(prefs.getString(STATUS, ""))) {
             if (!chat.getRead().equals(""))
                 dtime += "\nอ่านแล้ว";
 
-            imgMsg = imgRight;
-            textView = msgRight;
-            /*if (isImg){
-                imgRTime.setText(dtime);
-                imgRTime.setVisibility(View.VISIBLE);
-            }else {
-                rTime.setText(dtime);
-                rTime.setVisibility(View.VISIBLE);
-            }*/
-            rTime.setText(dtime);
-            rTime.setVisibility(View.VISIBLE);
+            ivMessage = ivRight;
+            textView = tvMessageRight;
+            tvRightTime.setText(dtime);
+            tvRightTime.setVisibility(View.VISIBLE);
         } else {
-            imgMsg = imgLeft;
-            textView = msgLeft;
-            /*if (isImg){
-                imgLTime.setText(dtime);
-                imgLTime.setVisibility(View.VISIBLE);
-            }else {
-                lTime.setText(dtime);
-                lTime.setVisibility(View.VISIBLE);
-            }*/
-            lTime.setText(dtime);
-            lTime.setVisibility(View.VISIBLE);
+            ivMessage = ivLeft;
+            textView = tvMessageLeft;
+            tvLeftTime.setText(dtime);
+            tvLeftTime.setVisibility(View.VISIBLE);
             imageView.setVisibility(View.VISIBLE);
 
             DatabaseReference db = FirebaseDatabase.getInstance().getReference().child(CHAT);
-            db = db.child(sh.getString(KEY_CHAT, "")).child(DATA);
+            db = db.child(prefs.getString(KEY_CHAT, "")).child(DATA);
             final DatabaseReference finalDb = db;
             db.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                        if (!ds.child(STATUS).getValue().equals(sh.getString(STATUS, ""))) {
+                        if (!ds.child(STATUS).getValue().equals(prefs.getString(STATUS, ""))) {
                             finalDb.child(ds.getKey()).child("read").setValue("อ่านแล้ว");
                         }
                     }
@@ -193,10 +182,10 @@ public class MessageAdapter extends ArrayAdapter {
             if (position > 0) {
                 String bs = items.get(position-1).getStatus();
                 if (!bs.equals(chat.getStatus())){
-                    setImg(imageView);
+                    setImageView(imageView);
                 }
             }else {
-                setImg(imageView);
+                setImageView(imageView);
             }
         }
 
@@ -216,15 +205,15 @@ public class MessageAdapter extends ArrayAdapter {
         if (isImg){
             textView.setVisibility(View.GONE);
             try{
-                imgMsg.setImageBitmap(chat.getBitmap());
+                ivMessage.setImageBitmap(chat.getBitmap());
             }catch (Exception e){
                 Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.bg_edit_white);
-                imgMsg.setImageBitmap(bitmap);
-                loadImg(imgMsg, imgName);
+                ivMessage.setImageBitmap(bitmap);
+                setImageViewFromStorage(ivMessage, imgName);
             }
-            imgMsg.setVisibility(View.VISIBLE);
+            ivMessage.setVisibility(View.VISIBLE);
             final String finalImgName = imgName;
-            imgMsg.setOnClickListener(new View.OnClickListener() {
+            ivMessage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(context, ShowPictureActivity.class);
@@ -233,34 +222,12 @@ public class MessageAdapter extends ArrayAdapter {
                 }
             });
         }else {
-            imgMsg.setVisibility(View.GONE);
             textView.setText(msg);
+            ivMessage.setVisibility(View.GONE);
             textView.setVisibility(View.VISIBLE);
         }
 
         return view;
-    }
-
-    private void setImg(ImageView imageView) {
-        // set image each store
-        if (sh.getString(STATUS, "").equals(USER)) {
-            Bitmap bitmap = ImageUtil.getImgProfile(context, sh.getString(CHAT_WITH_ID, ""));
-            imageView.setImageBitmap(bitmap);
-        } else {
-            String img = sh.getString(IMG, "");
-            String url = "https://graph.facebook.com/" + img + "/picture?height=50&width=50";
-            Picasso.with(context).load(url).into(imageView);
-        }
-    }
-
-    private void loadImg(final ImageView imageView, final String path) {
-        StorageReference islandRef = FirebaseStorage.getInstance().getReference().child(path);
-        islandRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-            @Override
-            public void onSuccess(Uri uri) {
-                Picasso.with(context).load(uri).into(imageView);
-            }
-        });
     }
 
     @Override
@@ -276,5 +243,48 @@ public class MessageAdapter extends ArrayAdapter {
     @Override
     public long getItemId(int position) {
         return position;
+    }
+
+    private void setPaddingForLastView(int position) {
+        if (position == getCount() - 1) {
+            layout.setPadding(32, 4, 32, 12);
+        }
+    }
+
+    private void bindView(View view) {
+        layout = (LinearLayout) view.findViewById(R.id.layout);
+        imageView = (ImageView) view.findViewById(img);
+        tvTime = (TextView) view.findViewById(R.id.time);
+        tvMessageLeft = (TextView) view.findViewById(R.id.message_left);
+        tvMessageRight = (TextView) view.findViewById(R.id.message_right);
+        tvLeftTime = (TextView) view.findViewById(R.id.ltime);
+        tvRightTime = (TextView) view.findViewById(R.id.rtime);
+        ivLeft = (ImageView) view.findViewById(R.id.img_left);
+        ivRight = (ImageView) view.findViewById(R.id.img_right);
+    }
+
+    private void setImageView(ImageView imageView) {
+        if (AccountType.isCustomer(context)) {
+            Bitmap bitmap = ImageUtil.getImgProfile(context, prefs.getString(CHAT_WITH_ID, ""));
+            imageView.setImageBitmap(bitmap);
+        } else {
+            String img = prefs.getString(IMG, "");
+            String url = ImageUtil.getUrlPictureFacebook(img);
+            Glide.with(context)
+                    .load(url)
+                    .into(imageView);
+        }
+    }
+
+    private void setImageViewFromStorage(final ImageView imageView, final String path) {
+        StorageReference islandRef = FirebaseStorage.getInstance().getReference().child(path);
+        islandRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Glide.with(context)
+                        .load(uri)
+                        .into(imageView);
+            }
+        });
     }
 }
