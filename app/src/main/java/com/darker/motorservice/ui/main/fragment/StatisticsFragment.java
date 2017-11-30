@@ -73,7 +73,7 @@ public class StatisticsFragment extends Fragment{
     public void initGlobal(View view) {
         this.context = view.getContext();
         this.mView = view;
-        statMonth = DateUtil.getDateFormat("yyyy-MM");
+        statMonth = DateUtil.getDateFormat(DateUtil.DatePattern.YEAR_MONTH);
     }
 
     public void checkAdmin(View view) {

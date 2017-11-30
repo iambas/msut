@@ -34,8 +34,8 @@ public class FirebaseUtil {
 
     public static void setValueStats(String traderId, final String type) {
         DatabaseReference dbStats = FirebaseUtil.getChildData(StatsConstant.STATS);
-        String yearAndMonth = DateUtil.getDateFormat("yyyy-MM");
-        String date = DateUtil.getDateFormat("dd-MM-yyyy");
+        String yearAndMonth = DateUtil.getDateFormat(DateUtil.DatePattern.YEAR_MONTH);
+        String date = DateUtil.getDateFormat(DateUtil.DatePattern.DATE);
 
         final DatabaseReference dbStatsDate = dbStats.child(traderId).child(yearAndMonth).child(date);
         dbStatsDate.addListenerForSingleValueEvent(new ValueEventListener() {

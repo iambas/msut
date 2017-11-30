@@ -11,6 +11,13 @@ import java.util.Date;
  */
 
 public class DateUtil {
+
+    public class DatePattern{
+        public static final String YEAR_MONTH = "yyyy-MM";
+        public static final String DATE = "dd-MM-yyyy";
+        public static final String TIME_DATE = "yyyy-MM-dd HH:mm:ss";
+    }
+
     public static int getCurrentMonth(){
         return Calendar.getInstance().get(Calendar.MONTH) + 1;
     }

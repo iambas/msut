@@ -375,11 +375,11 @@ public class ChatActivity extends AppCompatActivity implements
     }
 
     private void pushMessage(String message) {
-        String time = DateUtil.getDateFormat("yyyy-MM-dd HH:mm:ss");
+        String timeDate = DateUtil.getDateFormat(DateUtil.DatePattern.TIME_DATE);
         mDatabase.child(keyChat)
                 .child(DATA)
                 .push()
-                .setValue(new ChatMessageItem(time, myName, message, status, ""));
+                .setValue(new ChatMessageItem(timeDate, myName, message, status, ""));
         edInputMessage.setText("");
     }
 
