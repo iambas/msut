@@ -513,7 +513,7 @@ public class ChatActivity extends AppCompatActivity implements
             return chatMessageItem.getMessage().replace(KEY_IMAGE, "");
         } else {
             addChatMessageToList(chatMessageItem);
-            return "";
+            return null;
         }
     }
 
