@@ -82,6 +82,21 @@ public class MessageAdapter extends ArrayAdapter {
         return view;
     }
 
+    @Override
+    public Object getItem(int position) {
+        return items.get(position);
+    }
+
+    @Override
+    public int getCount() {
+        return items.size();
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
     private void manageStatusMessage(int position, ChatMessageItem chat, String timeChat) {
         if (SharedPreferencesUtil.isStatusMessageEqualAccountLogin(context, chat.getStatus())) {
             if (!chat.getRead().equals("")) {
@@ -116,14 +131,11 @@ public class MessageAdapter extends ArrayAdapter {
         if (GPSUtil.isGPSMessage(chatMessage)) {
             final String latLng = GPSUtil.getLatLngFromMessage(chatMessage);
             chatMessage = chat.getSender() + "\nได้ส่งตำแหน่ง GPS\nกดเพื่อดูตำแหน่ง";
-            textView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(context, MapsActivity.class);
-                    intent.putExtra(NAME, chat.getSender());
-                    intent.putExtra(LATLNG, latLng);
-                    context.startActivity(intent);
-                }
+            textView.setOnClickListener(view -> {
+                Intent intent = new Intent(context, MapsActivity.class);
+                intent.putExtra(NAME, chat.getSender());
+                intent.putExtra(LATLNG, latLng);
+                context.startActivity(intent);
             });
         }
         return chatMessage;
@@ -135,13 +147,10 @@ public class MessageAdapter extends ArrayAdapter {
             ImageUtil.setImageViewFromStorage(context, ivMessage, pathImage);
             hideMessageView();
             showImageView();
-            ivMessage.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(context, ShowPictureActivity.class);
-                    intent.putExtra(KEY_IMAGE, pathImage);
-                    context.startActivity(intent);
-                }
+            ivMessage.setOnClickListener(v -> {
+                Intent intent = new Intent(context, ShowPictureActivity.class);
+                intent.putExtra(KEY_IMAGE, pathImage);
+                context.startActivity(intent);
             });
         }else {
             textView.setText(chatMessage);
@@ -162,10 +171,10 @@ public class MessageAdapter extends ArrayAdapter {
         ivMessage.setVisibility(View.GONE);
     }
 
+
     private void showImageView() {
         ivMessage.setVisibility(View.VISIBLE);
     }
-
 
     private View getInflateView(@NonNull ViewGroup parent) {
         View view;LayoutInflater inflater = ((Activity) context).getLayoutInflater();
@@ -184,21 +193,6 @@ public class MessageAdapter extends ArrayAdapter {
                 tvTime.setVisibility(View.VISIBLE);
             }
         }
-    }
-
-    @Override
-    public Object getItem(int position) {
-        return items.get(position);
-    }
-
-    @Override
-    public int getCount() {
-        return items.size();
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
     }
 
     private void setPaddingForLastView(int position) {

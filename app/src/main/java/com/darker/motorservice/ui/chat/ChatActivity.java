@@ -56,7 +56,6 @@ import com.google.firebase.storage.StorageReference;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import static com.darker.motorservice.utility.Constant.CHAT;
@@ -100,7 +99,7 @@ public class ChatActivity extends AppCompatActivity
 
     private boolean found = false;
 
-    private DatabaseReference mDatabase;
+    private DatabaseReference dbChat;
     private StorageReference storageRef;
     private MessageAdapter messageAdapter;
     private List<ChatMessageItem> chatMessageItemList;
@@ -231,7 +230,7 @@ public class ChatActivity extends AppCompatActivity
     private void initInstance() {
         storageRef = FirebaseUtil.getStorageReference();
         uid = FirebaseUtil.getUid();
-        mDatabase = FirebaseUtil.getChildData(CHAT);
+        dbChat = FirebaseUtil.getChildData(CHAT);
         chatMessageItemList = new ArrayList<>();
         messageAdapter = new MessageAdapter(this, R.layout.message_item, chatMessageItemList);
     }
@@ -312,12 +311,7 @@ public class ChatActivity extends AppCompatActivity
         imageView.setImageBitmap(bitmap);
 
         builder.setTitle(R.string.send_image);
-        builder.setPositiveButton(R.string.send, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                checkBeforeUploadImage(bitmap);
-            }
-        });
+        builder.setPositiveButton(R.string.send, (dialog, which) -> checkBeforeUploadImage(bitmap));
         builder.setNegativeButton(R.string.cancel, null);
         builder.show();
     }
@@ -367,7 +361,7 @@ public class ChatActivity extends AppCompatActivity
 
     private void pushMessage(String message) {
         String timeDate = DateUtil.getDateFormat(DateUtil.DatePattern.TIME_DATE);
-        mDatabase.child(keyChat)
+        dbChat.child(keyChat)
                 .child(DATA)
                 .push()
                 .setValue(new ChatMessageItem(timeDate, myName, message, status, ""));
@@ -388,14 +382,14 @@ public class ChatActivity extends AppCompatActivity
 
     private void find() {
         found = false;
-        mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+        dbChat.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot data : dataSnapshot.getChildren()) {
                     if (!eachForloop(data)) break;
                 }
                 if (!found){
-                    mDatabase.push().setValue(new NewChatItem(service, user));
+                    dbChat.push().setValue(new NewChatItem(service, user));
                 }
                 findOrQuery();
             }
@@ -407,7 +401,7 @@ public class ChatActivity extends AppCompatActivity
 
     private boolean eachForloop(DataSnapshot data) {
         if (data.getKey().equals("data")) {
-            mDatabase.child(data.getKey()).removeValue();
+            dbChat.child(data.getKey()).removeValue();
             return true;
         }
         try {
@@ -435,15 +429,16 @@ public class ChatActivity extends AppCompatActivity
     }
 
     private void queryDataByKeyChat() {
-        final int currentMonth = DateUtil.getCurrentMonth();
-        mDatabase.child(keyChat).child(DATA)
+        dbChat.child(keyChat)
+                .child(FirebaseUtil.DatabaseChild.DATA)
                 .addValueEventListener(new ValueEventListener() {
+
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 chatMessageItemList.clear();
-                for (DataSnapshot data : dataSnapshot.getChildren()) {
-                    ChatMessageItem chatMessageItem = data.getValue(ChatMessageItem.class);
-                    removeChat(chatMessageItem, data, currentMonth);
+                for (DataSnapshot dsChatChildren : dataSnapshot.getChildren()) {
+                    ChatMessageItem chatMessageItem = dsChatChildren.getValue(ChatMessageItem.class);
+                    FirebaseUtil.removeChatOlderThanTwoMonth(chatMessageItem, keyChat, dsChatChildren.getKey());
                     chatMessageItemList.add(chatMessageItem);
                 }
                 sortChatList();
@@ -456,31 +451,8 @@ public class ChatActivity extends AppCompatActivity
         });
     }
 
-    private void removeChat(ChatMessageItem chatMessageItem, DataSnapshot data, int currentMonth) {
-        int monthChat = DateUtil.getMonthFromChat(chatMessageItem.getDate());
-        Log.d("ChatItem", currentMonth + " : " + monthChat);
-        if (monthChat > 10) {
-            if (monthChat - 10 == currentMonth) {
-                if (chatMessageItem.getMessage().contains(KEY_IMAGE)) {
-                    storageRef.child(chatMessageItem.getMessage().replace(KEY_IMAGE, "")).delete();
-                }
-                mDatabase.child(keyChat).child(DATA).child(data.getKey()).removeValue();
-            }
-        } else if (monthChat + 2 <= currentMonth) {
-            if (chatMessageItem.getMessage().contains(KEY_IMAGE)) {
-                storageRef.child(chatMessageItem.getMessage().replace(KEY_IMAGE, "")).delete();
-            }
-            mDatabase.child(keyChat).child(DATA).child(data.getKey()).removeValue();
-        }
-    }
-
     private void sortChatList() {
-        Collections.sort(chatMessageItemList, new Comparator<ChatMessageItem>() {
-            @Override
-            public int compare(ChatMessageItem o1, ChatMessageItem o2) {
-                return o1.toString().compareToIgnoreCase(o2.toString());
-            }
-        });
+        Collections.sort(chatMessageItemList, (o1, o2) -> o1.toString().compareToIgnoreCase(o2.toString()));
         messageAdapter.notifyDataSetChanged();
         progressBar.setVisibility(View.GONE);
     }

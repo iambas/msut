@@ -8,7 +8,6 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -18,8 +17,6 @@ import com.darker.motorservice.database.ServiceDatabase;
 import com.darker.motorservice.firebase.FirebaseUtil;
 import com.darker.motorservice.model.ServicesItem;
 import com.darker.motorservice.ui.main.callback.ImageUploadCallback;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -82,7 +79,7 @@ public class ImageUtil {
         return output;
     }
 
-    public static int[] getStoreIcon(){
+    public static int[] getStoreIcon() {
         return new int[]{
                 R.drawable.ic_chat_white,
                 R.drawable.ic_timeline_white,
@@ -92,7 +89,7 @@ public class ImageUtil {
         };
     }
 
-    public static int[] getUserIcon(){
+    public static int[] getUserIcon() {
         return new int[]{
                 R.drawable.ic_motorcycle_white,
                 R.drawable.ic_chat_white,
@@ -102,22 +99,16 @@ public class ImageUtil {
         };
     }
 
-    public static void uploadImage(final String imageName, final Bitmap imageBitmap, final ImageUploadCallback callback){
+    public static void uploadImage(final String imageName, final Bitmap imageBitmap, final ImageUploadCallback callback) {
         UploadTask uploadTask = getUploadTask(imageName, imageBitmap);
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                callback.onFailure(imageName);
-            }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                callback.onSuccess(imageName, imageBitmap);
-            }
-        });
+        uploadTask
+                .addOnFailureListener(exception ->
+                        callback.onFailure(imageName))
+                .addOnSuccessListener(taskSnapshot ->
+                        callback.onSuccess(imageName, imageBitmap));
     }
 
-    private static UploadTask getUploadTask(String imageName, Bitmap imageBitmap){
+    private static UploadTask getUploadTask(String imageName, Bitmap imageBitmap) {
         StorageReference storageReference = FirebaseStorage.getInstance().getReference();
         StorageReference mountainsRef = storageReference.child(imageName);
 
@@ -127,16 +118,16 @@ public class ImageUtil {
         return mountainsRef.putBytes(data);
     }
 
-    public static String getImageName(String uid){
+    public static String getImageName(String uid) {
         String date = DateUtil.getDateFormat("-yyyy_MM_dd_HH_mm_ss");
-        return  "image/" + uid.substring(0, 5) + date + ".png";
+        return "image/" + uid.substring(0, 5) + date + ".png";
     }
 
-    public static Bitmap getBitmap(Context context, byte[] bytes, int resource){
+    public static Bitmap getBitmap(Context context, byte[] bytes, int resource) {
         Bitmap bitmap;
-        try{
+        try {
             bitmap = convertByteToBitmap(bytes);
-        } catch (Exception e){
+        } catch (Exception e) {
             bitmap = BitmapFactory.decodeResource(context.getResources(), resource);
         }
         return bitmap;
@@ -146,26 +137,26 @@ public class ImageUtil {
         return MediaStore.Images.Media.getBitmap(context.getContentResolver(), imageUri);
     }
 
-    public static String getUrlPictureFacebook(String path){
+    public static String getUrlPictureFacebook(String path) {
         return URL_GRAPH_FACEBOOK + path + PICTURE_SIZE;
     }
 
-    public static boolean isImageMessage(String message){
-        return message.contains(KEY_IMAGE);
+    public static boolean isImageMessage(String message) {
+        return message.contains(ImageUtil.KEY_IMAGE);
+    }
+
+    public static String getImagePath(String message){
+        return message.replace(ImageUtil.KEY_IMAGE, "");
     }
 
     public static void setImageViewFromStorage(final Context context, final ImageView imageView, final String path) {
         StorageReference islandRef = FirebaseUtil.getChildStorage(path);
-        islandRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-            @Override
-            public void onSuccess(Uri uri) {
+        islandRef.getDownloadUrl().addOnSuccessListener(uri ->
                 Glide.with(context)
                         .load(uri)
                         .apply(new RequestOptions()
                                 .placeholder(R.drawable.bg_edit_white)
                                 .error(R.drawable.bg_edit_white))
-                        .into(imageView);
-            }
-        });
+                        .into(imageView));
     }
 }

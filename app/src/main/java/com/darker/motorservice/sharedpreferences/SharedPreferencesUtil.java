@@ -12,6 +12,7 @@ import com.darker.motorservice.utility.Constant;
 public class SharedPreferencesUtil {
     private static final String KEY_LOGIN_MOTOR_SERVICE = "login_motor_service";
     private static final String KEY_CHAT_ALERT = "chat";
+    public static final String KEY_CHAT = "key_chat";
     private static final String ALERT = "alert";
 
     public static SharedPreferences getLoginPreferences(Context context){
