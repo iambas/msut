@@ -1,7 +1,6 @@
 package com.darker.motorservice.ui.chat;
 
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -64,9 +63,7 @@ import static com.darker.motorservice.utility.Constant.IMG;
 import static com.darker.motorservice.utility.Constant.KEY_CHAT;
 import static com.darker.motorservice.utility.Constant.NAME;
 import static com.darker.motorservice.utility.Constant.PHOTO;
-import static com.darker.motorservice.utility.Constant.STATUS;
 import static com.darker.motorservice.utility.Constant.TEL_NUM;
-import static com.darker.motorservice.utility.Constant.USER;
 import static com.darker.motorservice.utility.ImageUtil.KEY_IMAGE;
 
 public class ChatActivity extends AppCompatActivity
@@ -76,7 +73,7 @@ public class ChatActivity extends AppCompatActivity
     private static final int PLACE_PICKER_REQUEST = 1;
     private static final int IMAGE_REQUEST = 2;
 
-    private TextView tvNetAlert;
+    private TextView tvNetworkAlert;
     private EditText edInputMessage;
     private ProgressBar progressBar;
     private ImageButton imgBtnImage;
@@ -88,8 +85,8 @@ public class ChatActivity extends AppCompatActivity
     private String phoneNumber;
     private String status;
     private String uid;
-    private String service;
-    private String user;
+    private String traderId;
+    private String customerId;
     private String myName;
     private String chatWithId;
     private String photo;
@@ -98,7 +95,7 @@ public class ChatActivity extends AppCompatActivity
     private MessageAdapter messageAdapter;
     private List<ChatMessageItem> chatMessageItemList;
 
-    private SharedPreferences.Editor prefsLogin;
+    private SharedPreferences.Editor prefsLoginEditor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,7 +143,7 @@ public class ChatActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (status.equals(USER)) {
+        if (AccountType.isCustomer(this)) {
             if (!NetworkUtil.isNetworkAvailable(this))
                 getMenuInflater().inflate(R.menu.menu_chat_no_net, menu);
             else
@@ -186,11 +183,11 @@ public class ChatActivity extends AppCompatActivity
 
     private void setServiceAndUser() {
         if (AccountType.isCustomer(this)) {
-            service = chatWithId;
-            user = uid;
+            traderId = chatWithId;
+            customerId = uid;
         } else {
-            service = uid;
-            user = chatWithId;
+            traderId = uid;
+            customerId = chatWithId;
         }
     }
 
@@ -201,8 +198,8 @@ public class ChatActivity extends AppCompatActivity
 
     private void checkKeyChat() {
         if (!keyChat.isEmpty()) {
-            prefsLogin.putString(KEY_CHAT, keyChat);
-            prefsLogin.apply();
+            prefsLoginEditor.putString(KEY_CHAT, keyChat);
+            prefsLoginEditor.apply();
         }
     }
 
@@ -212,13 +209,13 @@ public class ChatActivity extends AppCompatActivity
         imgBtnSend = (ImageButton) findViewById(R.id.btn_send);
         chatListView = (ListView) findViewById(R.id.list);
         edInputMessage = (EditText) findViewById(R.id.ed_input_message);
-        tvNetAlert = (TextView) findViewById(R.id.txt_net_alert);
+        tvNetworkAlert = (TextView) findViewById(R.id.txt_net_alert);
     }
 
     private void setupViewOnClick() {
         imgBtnImage.setOnClickListener(view -> showImageStoreSelect());
         imgBtnSend.setOnClickListener(view -> validateText());
-        tvNetAlert.setOnClickListener(view -> refreshUI());
+        tvNetworkAlert.setOnClickListener(view -> refreshUI());
     }
 
     private void initInstance() {
@@ -230,10 +227,10 @@ public class ChatActivity extends AppCompatActivity
 
     private void sharedPreferencesLogin() {
         SharedPreferences shLogin = SharedPreferencesUtil.getLoginPreferences(this);
-        prefsLogin = shLogin.edit();
-        prefsLogin.putString(IMG, photo);
-        prefsLogin.putString(CHAT_WITH_ID, chatWithId);
-        prefsLogin.apply();
+        prefsLoginEditor = shLogin.edit();
+        prefsLoginEditor.putString(IMG, photo);
+        prefsLoginEditor.putString(CHAT_WITH_ID, chatWithId);
+        prefsLoginEditor.apply();
         myName = shLogin.getString(NAME, "");
     }
 
@@ -252,7 +249,7 @@ public class ChatActivity extends AppCompatActivity
         chatWithId = intent.getStringExtra(CHAT_WITH_ID);
         chatWithName = intent.getStringExtra(CHAT_WITH_NAME);
         phoneNumber = intent.getStringExtra(TEL_NUM);
-        status = intent.getStringExtra(STATUS);
+        status = AccountType.getAccountLogin(this);
         photo = intent.getStringExtra(PHOTO);
     }
 
@@ -277,7 +274,7 @@ public class ChatActivity extends AppCompatActivity
         }
 
         if (keyChat.isEmpty()) {
-            find();
+            queryChatFromFirebase();
         }
 
         pushMessage(message);
@@ -364,48 +361,48 @@ public class ChatActivity extends AppCompatActivity
     private void refreshUI() {
         progressBar.setVisibility(View.VISIBLE);
         if (!NetworkUtil.isNetworkAvailable(this)) {
-            tvNetAlert.setVisibility(View.VISIBLE);
+            tvNetworkAlert.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.GONE);
         } else {
             edInputMessage.setFocusableInTouchMode(true);
-            tvNetAlert.setVisibility(View.GONE);
-            find();
+            tvNetworkAlert.setVisibility(View.GONE);
+            queryChatFromFirebase();
         }
     }
 
-    private void find() {
+    private void queryChatFromFirebase() {
         dbChat.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot data : dataSnapshot.getChildren()) {
-                    if (!eachForloop(data)) break;
+                for (DataSnapshot dsChildChat : dataSnapshot.getChildren()) {
+                    checkChildBug(dsChildChat);
+                    if (isFoundKeyChat(dsChildChat)) break;
                 }
                 if (!keyChat.isEmpty()) {
-                    dbChat.push().setValue(new NewChatItem(service, user));
+                    dbChat.push().setValue(new NewChatItem(traderId, customerId));
                 }
                 findOrQuery();
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
+            public void onCancelled(DatabaseError databaseError) {}
         });
     }
 
-    private boolean eachForloop(DataSnapshot data) {
+    private void checkChildBug(DataSnapshot data) {
         if (data.getKey().equals(FirebaseUtil.DatabaseChild.DATA)) {
             dbChat.child(data.getKey()).removeValue();
+        }
+    }
+
+    private boolean isFoundKeyChat(DataSnapshot dsChildChat) {
+        if (isFoundServiceAndUser(dsChildChat)) {
+            keyChat = dsChildChat.getKey();
+            prefsLoginEditor.putString(SharedPreferencesUtil.KEY_CHAT, keyChat);
+            prefsLoginEditor.commit();
             return true;
         }
-
-        if (isFoundServiceAndUser(data)) {
-            keyChat = data.getKey();
-            prefsLogin.putString(SharedPreferencesUtil.KEY_CHAT, keyChat);
-            prefsLogin.commit();
-            return false;
-        }
-
-        return true;
+        return false;
     }
 
     private boolean isFoundServiceAndUser(DataSnapshot data) {
@@ -416,13 +413,13 @@ public class ChatActivity extends AppCompatActivity
             return false;
         }
 
-        return serviceObj.toString().equals(service) &&
-                userObj.toString().equals(user);
+        return serviceObj.toString().equals(traderId) &&
+                userObj.toString().equals(customerId);
     }
 
     private void findOrQuery() {
         if (keyChat.isEmpty()) {
-            find();
+            queryChatFromFirebase();
             progressBar.setVisibility(View.GONE);
         } else {
             queryDataByKeyChat();
@@ -530,12 +527,8 @@ public class ChatActivity extends AppCompatActivity
     public void confirmGPSSettingsDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
         builder.setMessage(R.string.suggest_open_gps);
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                GPSUtil.gpsSettings(ChatActivity.this);
-            }
-        });
+        builder.setPositiveButton(R.string.ok, (dialogInterface, i) ->
+                GPSUtil.gpsSettings(ChatActivity.this));
         builder.setNegativeButton(R.string.cancel, null);
         builder.show();
     }
