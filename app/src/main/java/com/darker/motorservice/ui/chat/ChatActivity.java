@@ -22,7 +22,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.darker.motorservice.R;
-import com.darker.motorservice.database.PictureDatabase;
 import com.darker.motorservice.firebase.FirebaseUtil;
 import com.darker.motorservice.firebase.StatsConstant;
 import com.darker.motorservice.sharedpreferences.AccountType;
@@ -31,7 +30,6 @@ import com.darker.motorservice.ui.chat.model.ChatMessageItem;
 import com.darker.motorservice.ui.chat.model.NewChatItem;
 import com.darker.motorservice.ui.main.MainActivity;
 import com.darker.motorservice.ui.main.callback.ImageUploadCallback;
-import com.darker.motorservice.ui.main.model.PictureItem;
 import com.darker.motorservice.utility.CallPhoneUtil;
 import com.darker.motorservice.utility.DateUtil;
 import com.darker.motorservice.utility.GPSUtil;
@@ -94,7 +92,6 @@ public class ChatActivity extends AppCompatActivity
     private DatabaseReference dbChat;
     private MessageAdapter messageAdapter;
     private List<ChatMessageItem> chatMessageItemList;
-
     private SharedPreferences.Editor prefsLoginEditor;
 
     @Override
@@ -277,7 +274,7 @@ public class ChatActivity extends AppCompatActivity
             queryChatFromFirebase();
         }
 
-        pushMessage(message);
+        pushMessageToChatFirebase(message);
 
         if (AccountType.isCustomer(this)) {
             setStatsChat();
@@ -328,10 +325,9 @@ public class ChatActivity extends AppCompatActivity
             @Override
             public void onSuccess(String imageName, Bitmap bitmap) {
                 Log.d("upload", "OK");
-                pushMessage(KEY_IMAGE + imageName);
-                ToasAlert.alert(ChatActivity.this, R.string.send_image_complete);
+                pushMessageToChatFirebase(KEY_IMAGE + imageName);
                 setStatsChat();
-                pushImageToDatabase(bitmap, imageName);
+                ToasAlert.alert(ChatActivity.this, R.string.send_image_complete);
                 progressBar.setVisibility(View.GONE);
             }
 
@@ -343,13 +339,7 @@ public class ChatActivity extends AppCompatActivity
         };
     }
 
-    private void pushImageToDatabase(Bitmap bitmap, String imgName) {
-        PictureDatabase handle = new PictureDatabase(ChatActivity.this);
-        byte[] bytes = ImageUtil.convertBitmapToByte(bitmap);
-        handle.addPicture(new PictureItem(imgName, bytes));
-    }
-
-    private void pushMessage(String message) {
+    private void pushMessageToChatFirebase(String message) {
         String timeDate = DateUtil.getDateFormat(DateUtil.DatePattern.TIME_DATE);
         dbChat.child(keyChat)
                 .child(DATA)
@@ -378,9 +368,7 @@ public class ChatActivity extends AppCompatActivity
                     checkChildBug(dsChildChat);
                     if (isFoundKeyChat(dsChildChat)) break;
                 }
-                if (!keyChat.isEmpty()) {
-                    dbChat.push().setValue(new NewChatItem(traderId, customerId));
-                }
+                hasKeyChatPushData();
                 findOrQuery();
             }
 
@@ -389,9 +377,15 @@ public class ChatActivity extends AppCompatActivity
         });
     }
 
-    private void checkChildBug(DataSnapshot data) {
-        if (data.getKey().equals(FirebaseUtil.DatabaseChild.DATA)) {
-            dbChat.child(data.getKey()).removeValue();
+    private void hasKeyChatPushData() {
+        if (!keyChat.isEmpty()) {
+            dbChat.push().setValue(new NewChatItem(traderId, customerId));
+        }
+    }
+
+    private void checkChildBug(DataSnapshot dsChildChat) {
+        if (dsChildChat.getKey().equals(FirebaseUtil.DatabaseChild.DATA)) {
+            dbChat.child(dsChildChat.getKey()).removeValue();
         }
     }
 
@@ -500,7 +494,7 @@ public class ChatActivity extends AppCompatActivity
 
     private void pushMessageWithLatLng(Intent data) {
         Place place = PlacePicker.getPlace(this, data);
-        pushMessage(place.getLatLng().toString());
+        pushMessageToChatFirebase(place.getLatLng().toString());
         setStatsChat();
     }
 
