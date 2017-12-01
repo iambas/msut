@@ -36,7 +36,7 @@ import java.util.List;
 import static com.darker.motorservice.utility.Constant.ALERT;
 import static com.darker.motorservice.utility.Constant.CHAT;
 import static com.darker.motorservice.utility.Constant.DATA;
-import static com.darker.motorservice.utility.Constant.KEY_IMAGE;
+import static com.darker.motorservice.utility.ImageUtil.KEY_IMAGE;
 import static com.darker.motorservice.utility.Constant.KEY_LOGIN_MOTOR_SERVICE;
 import static com.darker.motorservice.utility.Constant.NAME;
 import static com.darker.motorservice.utility.Constant.PHOTO;

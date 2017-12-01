@@ -1,13 +1,10 @@
 package com.darker.motorservice.ui.chat;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,55 +16,42 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.darker.motorservice.R;
+import com.darker.motorservice.firebase.FirebaseUtil;
 import com.darker.motorservice.sharedpreferences.AccountType;
 import com.darker.motorservice.sharedpreferences.SharedPreferencesUtil;
 import com.darker.motorservice.ui.chat.model.ChatMessageItem;
 import com.darker.motorservice.ui.map.MapsActivity;
 import com.darker.motorservice.ui.show_picture.ShowPictureActivity;
 import com.darker.motorservice.utility.DateUtil;
+import com.darker.motorservice.utility.GPSUtil;
 import com.darker.motorservice.utility.ImageUtil;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
 import java.util.List;
 
 import static com.darker.motorservice.R.id.img;
-import static com.darker.motorservice.utility.Constant.CHAT;
 import static com.darker.motorservice.utility.Constant.CHAT_WITH_ID;
-import static com.darker.motorservice.utility.Constant.DATA;
 import static com.darker.motorservice.utility.Constant.IMG;
-import static com.darker.motorservice.utility.Constant.KEY_CHAT;
-import static com.darker.motorservice.utility.Constant.KEY_IMAGE;
 import static com.darker.motorservice.utility.Constant.LATLNG;
 import static com.darker.motorservice.utility.Constant.NAME;
-import static com.darker.motorservice.utility.Constant.STATUS;
+import static com.darker.motorservice.utility.ImageUtil.KEY_IMAGE;
 
 public class MessageAdapter extends ArrayAdapter {
-    private List<ChatMessageItem> items;
-    private Context context;
-    private int bYear;
-    private int bMonth;
-    private int bDay;
-    private SharedPreferences prefs;
-    private int resource;
-
-    private LinearLayout layout;
-    private ImageView imageView;
     private TextView tvTime;
     private TextView tvMessageLeft;
     private TextView tvMessageRight;
     private TextView tvLeftTime;
     private TextView tvRightTime;
+    private TextView textView;
     private ImageView ivLeft;
     private ImageView ivRight;
     private ImageView ivMessage;
-    private TextView textView;
+    private ImageView ivAccount;
+    private LinearLayout layout;
+
+    private List<ChatMessageItem> items;
+    private Context context;
+    private SharedPreferences prefs;
+    private int resource;
 
     public MessageAdapter(Context context, int resource, List<ChatMessageItem> items) {
         super(context, resource);
@@ -77,33 +61,32 @@ public class MessageAdapter extends ArrayAdapter {
         prefs = SharedPreferencesUtil.getLoginPreferences(context);
     }
 
-    @SuppressLint("ViewHolder")
     @NonNull
     @Override
     public View getView(int position, View view, @NonNull ViewGroup parent) {
-        LayoutInflater inflater = ((Activity) context).getLayoutInflater();
-        view = inflater.inflate(resource, parent, false);
-
+        view = getInflateView(parent);
         bindView(view);
         setPaddingForLastView(position);
 
-        final ChatMessageItem chat = items.get(position);
-
+        ChatMessageItem chat = items.get(position);
         String strDate = chat.getDate();
         String timeChat = DateUtil.getTimeChat(strDate);
         String dateTime = DateUtil.getDateTime(context, strDate);
+        String chatMessage = chat.getMessage();
 
         setTvTimeWithDateTime(position, strDate, dateTime);
+        manageStatusMessage(position, chat, timeChat);
+        chatMessage = ifGPSMessageSetData(chat, chatMessage);
+        setMessageOrImageView(chatMessage);
 
-        String msg = chat.getMessage();
-        final String[] arrMsg = msg.split(": ");
-        boolean isImg = msg.contains(KEY_IMAGE);
-        String imgName = "";
-        if (isImg) imgName = msg.replace(KEY_IMAGE, "");
+        return view;
+    }
 
-        if (chat.getStatus().equals(prefs.getString(STATUS, ""))) {
-            if (!chat.getRead().equals(""))
+    private void manageStatusMessage(int position, ChatMessageItem chat, String timeChat) {
+        if (SharedPreferencesUtil.isStatusMessageEqualAccountLogin(context, chat.getStatus())) {
+            if (!chat.getRead().equals("")) {
                 timeChat += "\nอ่านแล้ว";
+            }
 
             ivMessage = ivRight;
             textView = tvMessageRight;
@@ -114,77 +97,83 @@ public class MessageAdapter extends ArrayAdapter {
             textView = tvMessageLeft;
             tvLeftTime.setText(timeChat);
             tvLeftTime.setVisibility(View.VISIBLE);
-            imageView.setVisibility(View.VISIBLE);
+            ivAccount.setVisibility(View.VISIBLE);
 
-            DatabaseReference db = FirebaseDatabase.getInstance().getReference().child(CHAT);
-            db = db.child(prefs.getString(KEY_CHAT, "")).child(DATA);
-            final DatabaseReference finalDb = db;
-            db.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                        if (!ds.child(STATUS).getValue().equals(prefs.getString(STATUS, ""))) {
-                            finalDb.child(ds.getKey()).child("read").setValue("อ่านแล้ว");
-                        }
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {}
-            });
+            FirebaseUtil.updateMessageToReaded(context);
 
             if (position > 0) {
                 String bs = items.get(position-1).getStatus();
                 if (!bs.equals(chat.getStatus())){
-                    setImageView(imageView);
+                    setImageAccountView(ivAccount);
                 }
             }else {
-                setImageView(imageView);
+                setImageAccountView(ivAccount);
             }
         }
+    }
 
-        if (arrMsg[0].equals("lat/lng")) {
-            msg = chat.getSender() + "\nได้ส่งตำแหน่ง GPS\nกดเพื่อดูตำแหน่ง";
+    private String ifGPSMessageSetData(final ChatMessageItem chat, String chatMessage) {
+        if (GPSUtil.isGPSMessage(chatMessage)) {
+            final String latLng = GPSUtil.getLatLngFromMessage(chatMessage);
+            chatMessage = chat.getSender() + "\nได้ส่งตำแหน่ง GPS\nกดเพื่อดูตำแหน่ง";
             textView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(context, MapsActivity.class);
                     intent.putExtra(NAME, chat.getSender());
-                    intent.putExtra(LATLNG, arrMsg[1]);
+                    intent.putExtra(LATLNG, latLng);
                     context.startActivity(intent);
                 }
             });
         }
+        return chatMessage;
+    }
 
-        if (isImg){
-            textView.setVisibility(View.GONE);
-            try{
-                ivMessage.setImageBitmap(chat.getBitmap());
-            }catch (Exception e){
-                Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.bg_edit_white);
-                ivMessage.setImageBitmap(bitmap);
-                setImageViewFromStorage(ivMessage, imgName);
-            }
-            ivMessage.setVisibility(View.VISIBLE);
-            final String finalImgName = imgName;
+    private void setMessageOrImageView(String chatMessage) {
+        if (ImageUtil.isImageMessage(chatMessage)){
+            final String pathImage = chatMessage.replace(KEY_IMAGE, "");
+            ImageUtil.setImageViewFromStorage(context, ivMessage, pathImage);
+            hideMessageView();
+            showImageView();
             ivMessage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(context, ShowPictureActivity.class);
-                    intent.putExtra(KEY_IMAGE, finalImgName);
+                    intent.putExtra(KEY_IMAGE, pathImage);
                     context.startActivity(intent);
                 }
             });
         }else {
-            textView.setText(msg);
-            ivMessage.setVisibility(View.GONE);
-            textView.setVisibility(View.VISIBLE);
+            textView.setText(chatMessage);
+            hideImageView();
+            showMessageView();
         }
+    }
 
+    private void showMessageView() {
+        textView.setVisibility(View.VISIBLE);
+    }
+
+    private void hideMessageView() {
+        textView.setVisibility(View.GONE);
+    }
+
+    private void hideImageView() {
+        ivMessage.setVisibility(View.GONE);
+    }
+
+    private void showImageView() {
+        ivMessage.setVisibility(View.VISIBLE);
+    }
+
+
+    private View getInflateView(@NonNull ViewGroup parent) {
+        View view;LayoutInflater inflater = ((Activity) context).getLayoutInflater();
+        view = inflater.inflate(resource, parent, false);
         return view;
     }
 
-    public void setTvTimeWithDateTime(int position, String strDate, String dateTime) {
+    private void setTvTimeWithDateTime(int position, String strDate, String dateTime) {
         if (position == 0) {
             tvTime.setText(dateTime);
             tvTime.setVisibility(View.VISIBLE);
@@ -220,7 +209,7 @@ public class MessageAdapter extends ArrayAdapter {
 
     private void bindView(View view) {
         layout = (LinearLayout) view.findViewById(R.id.layout);
-        imageView = (ImageView) view.findViewById(img);
+        ivAccount = (ImageView) view.findViewById(img);
         tvTime = (TextView) view.findViewById(R.id.time);
         tvMessageLeft = (TextView) view.findViewById(R.id.message_left);
         tvMessageRight = (TextView) view.findViewById(R.id.message_right);
@@ -230,7 +219,7 @@ public class MessageAdapter extends ArrayAdapter {
         ivRight = (ImageView) view.findViewById(R.id.img_right);
     }
 
-    private void setImageView(ImageView imageView) {
+    private void setImageAccountView(ImageView imageView) {
         if (AccountType.isCustomer(context)) {
             Bitmap bitmap = ImageUtil.getImgProfile(context, prefs.getString(CHAT_WITH_ID, ""));
             imageView.setImageBitmap(bitmap);
@@ -241,17 +230,5 @@ public class MessageAdapter extends ArrayAdapter {
                     .load(url)
                     .into(imageView);
         }
-    }
-
-    private void setImageViewFromStorage(final ImageView imageView, final String path) {
-        StorageReference islandRef = FirebaseStorage.getInstance().getReference().child(path);
-        islandRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-            @Override
-            public void onSuccess(Uri uri) {
-                Glide.with(context)
-                        .load(uri)
-                        .into(imageView);
-            }
-        });
     }
 }

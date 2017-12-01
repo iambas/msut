@@ -9,9 +9,13 @@ import android.graphics.Paint;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.darker.motorservice.R;
 import com.darker.motorservice.database.ServiceDatabase;
+import com.darker.motorservice.firebase.FirebaseUtil;
 import com.darker.motorservice.model.ServicesItem;
 import com.darker.motorservice.ui.main.callback.ImageUploadCallback;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -27,6 +31,7 @@ public class ImageUtil {
 
     public static final String URL_GRAPH_FACEBOOK = "https://graph.facebook.com/";
     public static final String PICTURE_SIZE = "/picture?height=50&width=50";
+    public static final String KEY_IMAGE = "_i_m_a_g_e_";
 
     public static Bitmap getImgCover(Context context, String id) {
         ServicesItem servicesItem = new ServiceDatabase(context).getService(id);
@@ -143,5 +148,25 @@ public class ImageUtil {
 
     public static String getUrlPictureFacebook(String path){
         return URL_GRAPH_FACEBOOK + path + PICTURE_SIZE;
+    }
+
+    public static boolean isImageMessage(String message){
+        return message.contains(KEY_IMAGE);
+    }
+
+    public static void setImageViewFromStorage(final Context context, final ImageView imageView, final String path) {
+        StorageReference islandRef = FirebaseUtil.getChildStorage(path);
+        islandRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Glide.with(context)
+                        .load(uri)
+                        .apply(new RequestOptions()
+                                .placeholder(R.drawable.bg_edit_white)
+//                                .centerCrop()
+                                .error(R.drawable.bg_edit_white))
+                        .into(imageView);
+            }
+        });
     }
 }

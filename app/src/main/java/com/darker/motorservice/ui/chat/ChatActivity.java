@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -48,8 +47,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlacePicker;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -68,13 +65,13 @@ import static com.darker.motorservice.utility.Constant.CHAT_WITH_NAME;
 import static com.darker.motorservice.utility.Constant.DATA;
 import static com.darker.motorservice.utility.Constant.IMG;
 import static com.darker.motorservice.utility.Constant.KEY_CHAT;
-import static com.darker.motorservice.utility.Constant.KEY_IMAGE;
 import static com.darker.motorservice.utility.Constant.NAME;
 import static com.darker.motorservice.utility.Constant.PHOTO;
 import static com.darker.motorservice.utility.Constant.SERVICE;
 import static com.darker.motorservice.utility.Constant.STATUS;
 import static com.darker.motorservice.utility.Constant.TEL_NUM;
 import static com.darker.motorservice.utility.Constant.USER;
+import static com.darker.motorservice.utility.ImageUtil.KEY_IMAGE;
 
 public class ChatActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
@@ -455,7 +452,6 @@ public class ChatActivity extends AppCompatActivity implements
                     ChatMessageItem chatMessageItem = data.getValue(ChatMessageItem.class);
                     removeChat(chatMessageItem, data, currentMonth);
                     chatMessageItemList.add(chatMessageItem);
-//                    prepareLoadImage(chatMessageItem);
                 }
                 sortChatList();
             }
@@ -494,83 +490,6 @@ public class ChatActivity extends AppCompatActivity implements
         });
         messageAdapter.notifyDataSetChanged();
         progressBar.setVisibility(View.GONE);
-    }
-
-    private void prepareLoadImage(ChatMessageItem chatMessageItem) {
-        String path = checkMessage(chatMessageItem);
-        if (path == null) return;
-        if (!setBitmap(path, chatMessageItem)) return;
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.bg_edit_white);
-        chatMessageItem.setBitmap(bitmap);
-        addChatMessageToList(chatMessageItem);
-        loadImg(chatMessageItem, path);
-    }
-
-    private String checkMessage(ChatMessageItem chatMessageItem) {
-        if (chatMessageItem == null) return null;
-        if (chatMessageItem.getMessage() == null) return null;
-
-        if (chatMessageItem.getMessage().contains(KEY_IMAGE)) {
-            return chatMessageItem.getMessage().replace(KEY_IMAGE, "");
-        } else {
-            addChatMessageToList(chatMessageItem);
-            return null;
-        }
-    }
-
-    private void addChatMessageToList(ChatMessageItem chatMessageItem) {
-        chatMessageItemList.add(chatMessageItem);
-        messageAdapter.notifyDataSetChanged();
-    }
-
-    private boolean setBitmap(String path, ChatMessageItem chatMessageItem) {
-        final PictureDatabase handle = new PictureDatabase(this);
-        if (handle.hasPicture(path)) {
-            Log.d("hasPicture", "YES");
-            byte[] bytes = handle.getPicture(path).getPicture();
-            Bitmap bitmap = ImageUtil.convertByteToBitmap(bytes);
-            chatMessageItem.setBitmap(bitmap);
-            addChatMessageToList(chatMessageItem);
-            return true;
-        }
-        return false;
-    }
-
-    private void loadImg(final ChatMessageItem chatMessageItem, final String path) {
-        StorageReference islandRef = FirebaseUtil.getChildStorage(path);
-        final long ONE_MEGABYTE = 1024 * 1024;
-        islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-            @Override
-            public void onSuccess(byte[] bytes) {
-                Bitmap bitmap = ImageUtil.convertByteToBitmap(bytes);
-                addPictureToDatabaseWithBytes(bytes, path);
-                removeThenAddChatMessage(chatMessageItem, bitmap);
-                Log.d("load Picture", "OK");
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.d("load image", e.getMessage());
-            }
-        });
-    }
-
-    private void addPictureToDatabaseWithBytes(byte[] bytes, String path) {
-        PictureDatabase handle = new PictureDatabase(this);
-        handle.addPicture(new PictureItem(path, bytes));
-    }
-
-    private void removeThenAddChatMessage(ChatMessageItem chatMessageItem, Bitmap bitmap) {
-        try {
-            int index = chatMessageItemList.indexOf(chatMessageItem);
-            ChatMessageItem c = chatMessageItemList.get(index);
-            c.setBitmap(bitmap);
-            chatMessageItemList.remove(index);
-            chatMessageItemList.add(c);
-            messageAdapter.notifyDataSetChanged();
-        } catch (Exception e) {
-            Log.d("Excep chatact", e.getMessage());
-        }
     }
 
     public void validateGPSStatus() {

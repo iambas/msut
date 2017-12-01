@@ -3,6 +3,8 @@ package com.darker.motorservice.sharedpreferences;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.darker.motorservice.utility.Constant;
+
 /**
  * Created by Darker on 28/11/60.
  */
@@ -34,5 +36,11 @@ public class SharedPreferencesUtil {
 
     public static boolean isChatAlert(Context context){
         return getChatAlertPreferences(context).getBoolean(ALERT, false);
+    }
+
+    public static boolean isStatusMessageEqualAccountLogin(Context context, String status){
+        SharedPreferences prefs = getLoginPreferences(context);
+        String accountLogin = prefs.getString(Constant.STATUS, "");
+        return status.equals(accountLogin);
     }
 }
