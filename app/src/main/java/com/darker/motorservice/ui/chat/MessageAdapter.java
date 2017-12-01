@@ -24,6 +24,7 @@ import com.darker.motorservice.sharedpreferences.SharedPreferencesUtil;
 import com.darker.motorservice.ui.chat.model.ChatMessageItem;
 import com.darker.motorservice.ui.map.MapsActivity;
 import com.darker.motorservice.ui.show_picture.ShowPictureActivity;
+import com.darker.motorservice.utility.DateUtil;
 import com.darker.motorservice.utility.ImageUtil;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
@@ -34,11 +35,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import static com.darker.motorservice.R.id.img;
@@ -94,52 +90,10 @@ public class MessageAdapter extends ArrayAdapter {
         final ChatMessageItem chat = items.get(position);
 
         String strDate = chat.getDate();
-        int year, month, day, hour, minute;
-        year = month = day = hour = minute = 0;
-        String[] Months = context.getResources().getStringArray(R.array.short_month);
+        String timeChat = DateUtil.getTimeChat(strDate);
+        String dateTime = DateUtil.getDateTime(context, strDate);
 
-        @SuppressLint("SimpleDateFormat")
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        try {
-            Date date = df.parse(strDate);
-            Calendar c = Calendar.getInstance();
-            c.setTime(date);
-            year = c.get(Calendar.YEAR);
-            month = c.get(Calendar.MONTH);
-            day = c.get(Calendar.DATE);
-            hour = c.get(Calendar.HOUR_OF_DAY);
-            minute = c.get(Calendar.MINUTE);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        String h = String.valueOf(hour), m = String.valueOf(minute);
-        if (hour < 10) h = "0" + hour;
-        if (minute < 10) m = "0" + minute;
-        String dtime = h + ":" + m;
-        String time = day + " " + Months[month] + " " + (year + 543);
-
-        if (position == 0) {
-            tvTime.setText(time);
-            tvTime.setVisibility(View.VISIBLE);
-        } else {
-            String sDate = items.get(position - 1).getDate();
-            try {
-                Date date = df.parse(sDate);
-                Calendar c = Calendar.getInstance();
-                c.setTime(date);
-                bYear = c.get(Calendar.YEAR);
-                bMonth = c.get(Calendar.MONTH);
-                bDay = c.get(Calendar.DATE);
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-
-            if (bYear != year || bMonth != month || bDay != day) {
-                tvTime.setText(time);
-                tvTime.setVisibility(View.VISIBLE);
-            }
-        }
+        setTvTimeWithDateTime(position, strDate, dateTime);
 
         String msg = chat.getMessage();
         final String[] arrMsg = msg.split(": ");
@@ -149,16 +103,16 @@ public class MessageAdapter extends ArrayAdapter {
 
         if (chat.getStatus().equals(prefs.getString(STATUS, ""))) {
             if (!chat.getRead().equals(""))
-                dtime += "\nอ่านแล้ว";
+                timeChat += "\nอ่านแล้ว";
 
             ivMessage = ivRight;
             textView = tvMessageRight;
-            tvRightTime.setText(dtime);
+            tvRightTime.setText(timeChat);
             tvRightTime.setVisibility(View.VISIBLE);
         } else {
             ivMessage = ivLeft;
             textView = tvMessageLeft;
-            tvLeftTime.setText(dtime);
+            tvLeftTime.setText(timeChat);
             tvLeftTime.setVisibility(View.VISIBLE);
             imageView.setVisibility(View.VISIBLE);
 
@@ -228,6 +182,19 @@ public class MessageAdapter extends ArrayAdapter {
         }
 
         return view;
+    }
+
+    public void setTvTimeWithDateTime(int position, String strDate, String dateTime) {
+        if (position == 0) {
+            tvTime.setText(dateTime);
+            tvTime.setVisibility(View.VISIBLE);
+        } else {
+            String strDate2 = items.get(position - 1).getDate();
+            if (DateUtil.isDayDiffer(strDate, strDate2)){
+                tvTime.setText(dateTime);
+                tvTime.setVisibility(View.VISIBLE);
+            }
+        }
     }
 
     @Override
