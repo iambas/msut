@@ -51,14 +51,12 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.StorageReference;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.darker.motorservice.utility.Constant.CHAT;
 import static com.darker.motorservice.utility.Constant.CHAT_WITH_ID;
 import static com.darker.motorservice.utility.Constant.CHAT_WITH_NAME;
 import static com.darker.motorservice.utility.Constant.DATA;
@@ -66,7 +64,6 @@ import static com.darker.motorservice.utility.Constant.IMG;
 import static com.darker.motorservice.utility.Constant.KEY_CHAT;
 import static com.darker.motorservice.utility.Constant.NAME;
 import static com.darker.motorservice.utility.Constant.PHOTO;
-import static com.darker.motorservice.utility.Constant.SERVICE;
 import static com.darker.motorservice.utility.Constant.STATUS;
 import static com.darker.motorservice.utility.Constant.TEL_NUM;
 import static com.darker.motorservice.utility.Constant.USER;
@@ -97,14 +94,11 @@ public class ChatActivity extends AppCompatActivity
     private String chatWithId;
     private String photo;
 
-    private boolean found = false;
-
     private DatabaseReference dbChat;
-    private StorageReference storageRef;
     private MessageAdapter messageAdapter;
     private List<ChatMessageItem> chatMessageItemList;
 
-    private SharedPreferences.Editor spedLogin;
+    private SharedPreferences.Editor prefsLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,7 +158,7 @@ public class ChatActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_tel:
+            case R.id.menu_call_phone:
                 CallPhoneUtil.callPhoneDialog(this, chatWithId, chatWithName, phoneNumber);
                 return true;
             case R.id.menu_gps:
@@ -207,8 +201,8 @@ public class ChatActivity extends AppCompatActivity
 
     private void checkKeyChat() {
         if (!keyChat.isEmpty()) {
-            spedLogin.putString(KEY_CHAT, keyChat);
-            spedLogin.apply();
+            prefsLogin.putString(KEY_CHAT, keyChat);
+            prefsLogin.apply();
         }
     }
 
@@ -228,19 +222,18 @@ public class ChatActivity extends AppCompatActivity
     }
 
     private void initInstance() {
-        storageRef = FirebaseUtil.getStorageReference();
         uid = FirebaseUtil.getUid();
-        dbChat = FirebaseUtil.getChildData(CHAT);
+        dbChat = FirebaseUtil.getChildData(FirebaseUtil.DatabaseChild.CHAT);
         chatMessageItemList = new ArrayList<>();
         messageAdapter = new MessageAdapter(this, R.layout.message_item, chatMessageItemList);
     }
 
     private void sharedPreferencesLogin() {
         SharedPreferences shLogin = SharedPreferencesUtil.getLoginPreferences(this);
-        spedLogin = shLogin.edit();
-        spedLogin.putString(IMG, photo);
-        spedLogin.putString(CHAT_WITH_ID, chatWithId);
-        spedLogin.apply();
+        prefsLogin = shLogin.edit();
+        prefsLogin.putString(IMG, photo);
+        prefsLogin.putString(CHAT_WITH_ID, chatWithId);
+        prefsLogin.apply();
         myName = shLogin.getString(NAME, "");
     }
 
@@ -381,42 +374,50 @@ public class ChatActivity extends AppCompatActivity
     }
 
     private void find() {
-        found = false;
         dbChat.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot data : dataSnapshot.getChildren()) {
                     if (!eachForloop(data)) break;
                 }
-                if (!found){
+                if (!keyChat.isEmpty()) {
                     dbChat.push().setValue(new NewChatItem(service, user));
                 }
                 findOrQuery();
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {}
+            public void onCancelled(DatabaseError databaseError) {
+            }
         });
     }
 
     private boolean eachForloop(DataSnapshot data) {
-        if (data.getKey().equals("data")) {
+        if (data.getKey().equals(FirebaseUtil.DatabaseChild.DATA)) {
             dbChat.child(data.getKey()).removeValue();
             return true;
         }
-        try {
-            if (data.child(SERVICE).getValue().toString().equals(service) &&
-                    data.child(USER).getValue().toString().equals(user)) {
-                keyChat = data.getKey();
-                found = true;
-                spedLogin.putString(KEY_CHAT, keyChat);
-                spedLogin.commit();
-                return false;
-            }
-        } catch (Exception e) {
-            Log.d("ex", e.getMessage());
+
+        if (isFoundServiceAndUser(data)) {
+            keyChat = data.getKey();
+            prefsLogin.putString(SharedPreferencesUtil.KEY_CHAT, keyChat);
+            prefsLogin.commit();
+            return false;
         }
+
         return true;
+    }
+
+    private boolean isFoundServiceAndUser(DataSnapshot data) {
+        Object serviceObj = data.child(FirebaseUtil.DatabaseChild.SERVICE).getValue();
+        Object userObj = data.child(FirebaseUtil.DatabaseChild.USER).getValue();
+
+        if (serviceObj == null || userObj == null) {
+            return false;
+        }
+
+        return serviceObj.toString().equals(service) &&
+                userObj.toString().equals(user);
     }
 
     private void findOrQuery() {
@@ -433,22 +434,22 @@ public class ChatActivity extends AppCompatActivity
                 .child(FirebaseUtil.DatabaseChild.DATA)
                 .addValueEventListener(new ValueEventListener() {
 
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                chatMessageItemList.clear();
-                for (DataSnapshot dsChatChildren : dataSnapshot.getChildren()) {
-                    ChatMessageItem chatMessageItem = dsChatChildren.getValue(ChatMessageItem.class);
-                    FirebaseUtil.removeChatOlderThanTwoMonth(chatMessageItem, keyChat, dsChatChildren.getKey());
-                    chatMessageItemList.add(chatMessageItem);
-                }
-                sortChatList();
-            }
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        chatMessageItemList.clear();
+                        for (DataSnapshot dsChatChildren : dataSnapshot.getChildren()) {
+                            ChatMessageItem chatMessageItem = dsChatChildren.getValue(ChatMessageItem.class);
+                            FirebaseUtil.removeChatOlderThanTwoMonth(chatMessageItem, keyChat, dsChatChildren.getKey());
+                            chatMessageItemList.add(chatMessageItem);
+                        }
+                        sortChatList();
+                    }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                ToasAlert.alert(ChatActivity.this, R.string.cannot_load_data);
-            }
-        });
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        ToasAlert.alert(ChatActivity.this, R.string.cannot_load_data);
+                    }
+                });
     }
 
     private void sortChatList() {
@@ -459,7 +460,7 @@ public class ChatActivity extends AppCompatActivity
 
     public void validateGPSStatus() {
         if (!NetworkUtil.isNetworkAvailable(this)) return;
-        if (GPSUtil.isGPSEnable(this)){
+        if (GPSUtil.isGPSEnable(this)) {
             confirmGPSSettingsDialog();
             return;
         }
@@ -506,7 +507,7 @@ public class ChatActivity extends AppCompatActivity
         setStatsChat();
     }
 
-    private void setStatsChat(){
+    private void setStatsChat() {
         FirebaseUtil.setValueStats(chatWithId, StatsConstant.CHAT);
     }
 

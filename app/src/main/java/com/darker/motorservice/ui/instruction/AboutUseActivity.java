@@ -15,10 +15,10 @@ public class AboutUseActivity extends AppCompatActivity {
 
         if (getIntent().getStringExtra(TYPE).equals("about")){
             setContentView(R.layout.activity_about_us);
-            getSupportActionBar().setTitle(getResources().getString(R.string.about_us));
+            getSupportActionBar().setTitle(getResources().getString(R.string.about_us_with_underline));
         }else{
             setContentView(R.layout.activity_how_to_use);
-            getSupportActionBar().setTitle(getResources().getString(R.string.use));
+            getSupportActionBar().setTitle(getResources().getString(R.string.instruction_with_underline));
         }
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
