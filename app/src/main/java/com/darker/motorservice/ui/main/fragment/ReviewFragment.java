@@ -254,7 +254,7 @@ public class ReviewFragment extends Fragment implements View.OnClickListener{
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String msg = editRev.getText().toString();
-                if (!StringUtil.stringOk(msg)) {
+                if (!StringUtil.isStringOk(msg)) {
                     Toast.makeText(context, "คุณยังไม่ได้เขียนรีวิว!", Toast.LENGTH_LONG).show();
                     return;
                 }

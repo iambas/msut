@@ -73,9 +73,8 @@ import static com.darker.motorservice.utility.Constant.TEL_NUM;
 import static com.darker.motorservice.utility.Constant.USER;
 import static com.darker.motorservice.utility.ImageUtil.KEY_IMAGE;
 
-public class ChatActivity extends AppCompatActivity implements
-        GoogleApiClient.OnConnectionFailedListener,
-        View.OnClickListener {
+public class ChatActivity extends AppCompatActivity
+        implements GoogleApiClient.OnConnectionFailedListener {
 
     public static final String TAG = "ChatActivity";
     private static final int PLACE_PICKER_REQUEST = 1;
@@ -99,7 +98,6 @@ public class ChatActivity extends AppCompatActivity implements
     private String chatWithId;
     private String photo;
 
-    private boolean gpsStatus;
     private boolean found = false;
 
     private DatabaseReference mDatabase;
@@ -119,6 +117,7 @@ public class ChatActivity extends AppCompatActivity implements
         LogDataIntent();
         supportActionBar();
         bindView();
+        setupViewOnClick();
         sharedPreferencesLogin();
         initInstance();
         checkKeyChat();
@@ -150,17 +149,6 @@ public class ChatActivity extends AppCompatActivity implements
     protected void onPause() {
         super.onPause();
         SharedPreferencesUtil.enableChatAlert(this);
-    }
-
-    @Override
-    public void onClick(View view) {
-        if (view == imgBtnImage) {
-            showImageStoreSelect();
-        } else if (view == imgBtnSend) {
-            validateText();
-        } else if (view == tvNetAlert) {
-            refreshUI();
-        }
     }
 
     @Override
@@ -234,6 +222,12 @@ public class ChatActivity extends AppCompatActivity implements
         tvNetAlert = (TextView) findViewById(R.id.txt_net_alert);
     }
 
+    private void setupViewOnClick() {
+        imgBtnImage.setOnClickListener(view -> showImageStoreSelect());
+        imgBtnSend.setOnClickListener(view -> validateText());
+        tvNetAlert.setOnClickListener(view -> refreshUI());
+    }
+
     private void initInstance() {
         storageRef = FirebaseUtil.getStorageReference();
         uid = FirebaseUtil.getUid();
@@ -281,7 +275,7 @@ public class ChatActivity extends AppCompatActivity implements
 
     public void validateText() {
         String message = edInputMessage.getText().toString();
-        if (!StringUtil.stringOk(message)) {
+        if (!StringUtil.isStringOk(message)) {
             return;
         }
 
@@ -317,14 +311,14 @@ public class ChatActivity extends AppCompatActivity implements
         ImageView imageView = (ImageView) viewInflate.findViewById(R.id.img);
         imageView.setImageBitmap(bitmap);
 
-        builder.setTitle("ส่งรูปภาพ");
-        builder.setPositiveButton("ส่ง", new DialogInterface.OnClickListener() {
+        builder.setTitle(R.string.send_image);
+        builder.setPositiveButton(R.string.send, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 checkBeforeUploadImage(bitmap);
             }
         });
-        builder.setNegativeButton("ยกเลิก", null);
+        builder.setNegativeButton(R.string.cancel, null);
         builder.show();
     }
 
@@ -407,8 +401,7 @@ public class ChatActivity extends AppCompatActivity implements
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
+            public void onCancelled(DatabaseError databaseError) {}
         });
     }
 

@@ -163,7 +163,6 @@ public class ImageUtil {
                         .load(uri)
                         .apply(new RequestOptions()
                                 .placeholder(R.drawable.bg_edit_white)
-//                                .centerCrop()
                                 .error(R.drawable.bg_edit_white))
                         .into(imageView);
             }

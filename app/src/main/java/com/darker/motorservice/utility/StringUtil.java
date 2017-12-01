@@ -1,10 +1,5 @@
 package com.darker.motorservice.utility;
 
-import android.annotation.SuppressLint;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 /**
  * Created by Darker on 15/11/60.
  */
@@ -16,7 +11,7 @@ public class StringUtil {
     public StringUtil() {
     }
 
-    public static boolean stringOk(String string) {
+    public static boolean isStringOk(String string) {
         if (string == null) return false;
         if (string.isEmpty()) return false;
         return true;

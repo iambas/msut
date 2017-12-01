@@ -130,10 +130,10 @@ public class AddNewServiceFragment extends Fragment {
     }
 
     private boolean validateText() {
-        if (StringUtil.stringOk(name) ||
-                StringUtil.stringOk(position) ||
-                StringUtil.stringOk(phoneNumber) ||
-                StringUtil.stringOk(email)) {
+        if (StringUtil.isStringOk(name) ||
+                StringUtil.isStringOk(position) ||
+                StringUtil.isStringOk(phoneNumber) ||
+                StringUtil.isStringOk(email)) {
             return false;
         }
         return true;

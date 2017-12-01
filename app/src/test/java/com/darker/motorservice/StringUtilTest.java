@@ -12,17 +12,17 @@ import org.junit.Test;
 public class StringUtilTest {
     @Test
     public void stringNotNull_isCorrect(){
-        Assert.assertTrue(StringUtil.stringOk("1234"));
+        Assert.assertTrue(StringUtil.isStringOk("1234"));
     }
 
     @Test
     public void stringNull_isNotCorrect(){
-        Assert.assertFalse(StringUtil.stringOk(null));
+        Assert.assertFalse(StringUtil.isStringOk(null));
     }
 
     @Test
     public void stringEmpty_isNotCorrect(){
-        Assert.assertFalse(StringUtil.stringOk(""));
+        Assert.assertFalse(StringUtil.isStringOk(""));
     }
 
     @Test
