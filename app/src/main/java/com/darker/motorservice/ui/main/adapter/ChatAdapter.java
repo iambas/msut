@@ -36,14 +36,14 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import static com.darker.motorservice.utility.Constant.CHAT_WITH_ID;
-import static com.darker.motorservice.utility.Constant.CHAT_WITH_NAME;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.CHAT_WITH_ID;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.CHAT_WITH_NAME;
 import static com.darker.motorservice.utility.Constant.KEY_CHAT;
 import static com.darker.motorservice.utility.Constant.KEY_LOGIN_MOTOR_SERVICE;
-import static com.darker.motorservice.utility.Constant.PHOTO;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.PHOTO;
 import static com.darker.motorservice.utility.Constant.SERVICE;
 import static com.darker.motorservice.utility.Constant.STATUS;
-import static com.darker.motorservice.utility.Constant.TEL_NUM;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.TEL_NUM;
 import static com.darker.motorservice.utility.Constant.USER;
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {

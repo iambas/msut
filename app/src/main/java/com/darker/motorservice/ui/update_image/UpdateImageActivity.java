@@ -28,8 +28,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import static com.darker.motorservice.utility.Constant.COVER;
-import static com.darker.motorservice.utility.Constant.ID;
-import static com.darker.motorservice.utility.Constant.IMG;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.ID;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.IMG;
 
 public class UpdateImageActivity extends AppCompatActivity {
     private String id, image;

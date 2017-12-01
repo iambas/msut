@@ -10,6 +10,13 @@ import com.darker.motorservice.utility.Constant;
  */
 
 public class SharedPreferencesUtil {
+    public static final String ID = "id";
+    public static final String NAME = "name";
+    public static final String TEL_NUM = "tel_num";
+    public static final String PHOTO = "photo";
+    public static final String CHAT_WITH_ID = "chat_with_id";
+    public static final String CHAT_WITH_NAME = "chat_with_name";
+    public static final String IMG = "img";
     private static final String KEY_LOGIN_MOTOR_SERVICE = "login_motor_service";
     private static final String KEY_CHAT_ALERT = "chat";
     public static final String KEY_CHAT = "key_chat";

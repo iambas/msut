@@ -48,11 +48,11 @@ import com.google.firebase.database.ValueEventListener;
 
 import static android.widget.Toast.LENGTH_LONG;
 import static com.darker.motorservice.utility.Constant.EMAIL;
-import static com.darker.motorservice.utility.Constant.ID;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.ID;
 import static com.darker.motorservice.utility.Constant.KEY_LOGIN_MOTOR_SERVICE;
-import static com.darker.motorservice.utility.Constant.NAME;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.NAME;
 import static com.darker.motorservice.utility.Constant.PASSWORD;
-import static com.darker.motorservice.utility.Constant.PHOTO;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.PHOTO;
 import static com.darker.motorservice.utility.Constant.SERVICE;
 import static com.darker.motorservice.utility.Constant.STATUS;
 import static com.darker.motorservice.utility.Constant.TYPE;

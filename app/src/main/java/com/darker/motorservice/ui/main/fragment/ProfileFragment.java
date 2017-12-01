@@ -41,13 +41,13 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import static com.darker.motorservice.utility.Constant.COVER;
-import static com.darker.motorservice.utility.Constant.ID;
-import static com.darker.motorservice.utility.Constant.IMG;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.ID;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.IMG;
 import static com.darker.motorservice.utility.Constant.KEY_LOGIN_MOTOR_SERVICE;
 import static com.darker.motorservice.utility.Constant.LATLNG;
-import static com.darker.motorservice.utility.Constant.NAME;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.NAME;
 import static com.darker.motorservice.utility.Constant.ONLINE;
-import static com.darker.motorservice.utility.Constant.PHOTO;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.PHOTO;
 import static com.darker.motorservice.utility.Constant.SERVICE;
 import static com.darker.motorservice.utility.Constant.STATUS;
 import static com.darker.motorservice.utility.Constant.USER;

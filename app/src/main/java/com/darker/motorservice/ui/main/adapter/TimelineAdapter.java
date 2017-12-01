@@ -27,8 +27,8 @@ import com.google.firebase.storage.StorageReference;
 import java.util.List;
 
 import static com.darker.motorservice.utility.Constant.DATE;
-import static com.darker.motorservice.utility.Constant.ID;
-import static com.darker.motorservice.utility.Constant.IMG;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.ID;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.IMG;
 import static com.darker.motorservice.utility.Constant.KEY;
 import static com.darker.motorservice.utility.Constant.KEY_LOGIN_MOTOR_SERVICE;
 import static com.darker.motorservice.utility.Constant.MESSAGE;

@@ -29,10 +29,10 @@ import com.darker.motorservice.utility.ImageUtil;
 import java.util.List;
 
 import static com.darker.motorservice.R.id.img;
-import static com.darker.motorservice.utility.Constant.CHAT_WITH_ID;
-import static com.darker.motorservice.utility.Constant.IMG;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.CHAT_WITH_ID;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.IMG;
 import static com.darker.motorservice.utility.Constant.LATLNG;
-import static com.darker.motorservice.utility.Constant.NAME;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.NAME;
 import static com.darker.motorservice.utility.ImageUtil.KEY_IMAGE;
 
 public class MessageAdapter extends ArrayAdapter {

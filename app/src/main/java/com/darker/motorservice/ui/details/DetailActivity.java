@@ -24,15 +24,15 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import static com.darker.motorservice.utility.Constant.CHAT_WITH_ID;
-import static com.darker.motorservice.utility.Constant.CHAT_WITH_NAME;
-import static com.darker.motorservice.utility.Constant.ID;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.CHAT_WITH_ID;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.CHAT_WITH_NAME;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.ID;
 import static com.darker.motorservice.utility.Constant.KEY_CHAT;
 import static com.darker.motorservice.utility.Constant.LATLNG;
-import static com.darker.motorservice.utility.Constant.NAME;
-import static com.darker.motorservice.utility.Constant.PHOTO;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.NAME;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.PHOTO;
 import static com.darker.motorservice.utility.Constant.STATUS;
-import static com.darker.motorservice.utility.Constant.TEL_NUM;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.TEL_NUM;
 import static com.darker.motorservice.utility.Constant.USER;
 
 public class DetailActivity extends AppCompatActivity {

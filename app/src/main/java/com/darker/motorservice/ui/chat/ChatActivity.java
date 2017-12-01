@@ -54,14 +54,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.darker.motorservice.utility.Constant.CHAT_WITH_ID;
-import static com.darker.motorservice.utility.Constant.CHAT_WITH_NAME;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.CHAT_WITH_ID;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.CHAT_WITH_NAME;
 import static com.darker.motorservice.utility.Constant.DATA;
-import static com.darker.motorservice.utility.Constant.IMG;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.IMG;
 import static com.darker.motorservice.utility.Constant.KEY_CHAT;
-import static com.darker.motorservice.utility.Constant.NAME;
-import static com.darker.motorservice.utility.Constant.PHOTO;
-import static com.darker.motorservice.utility.Constant.TEL_NUM;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.NAME;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.PHOTO;
+import static com.darker.motorservice.sharedpreferences.SharedPreferencesUtil.TEL_NUM;
 import static com.darker.motorservice.utility.ImageUtil.KEY_IMAGE;
 
 public class ChatActivity extends AppCompatActivity
@@ -169,6 +169,12 @@ public class ChatActivity extends AppCompatActivity
         Log.d("onConnectionFailed", connectionResult.getErrorMessage());
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        resultPlacePicker(requestCode, resultCode, data);
+        resultImageRequest(requestCode, resultCode, data);
+    }
+
     private void supportActionBar() {
         getSupportActionBar().setTitle(chatWithName);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -223,12 +229,12 @@ public class ChatActivity extends AppCompatActivity
     }
 
     private void sharedPreferencesLogin() {
-        SharedPreferences shLogin = SharedPreferencesUtil.getLoginPreferences(this);
-        prefsLoginEditor = shLogin.edit();
+        SharedPreferences prefsLogin = SharedPreferencesUtil.getLoginPreferences(this);
+        prefsLoginEditor = prefsLogin.edit();
         prefsLoginEditor.putString(IMG, photo);
         prefsLoginEditor.putString(CHAT_WITH_ID, chatWithId);
         prefsLoginEditor.apply();
-        myName = shLogin.getString(NAME, "");
+        myName = prefsLogin.getString(NAME, "");
     }
 
     private void LogDataIntent() {
@@ -453,12 +459,6 @@ public class ChatActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        resultPlacePicker(requestCode, resultCode, data);
-        resultImageRequest(requestCode, resultCode, data);
-    }
-
     private void resultImageRequest(int requestCode, int resultCode, Intent data) {
         if (requestCode == IMAGE_REQUEST && resultCode == RESULT_OK) {
             setBitmapForDialog(data);
@@ -501,7 +501,7 @@ public class ChatActivity extends AppCompatActivity
         }
     }
 
-    public void confirmGPSSettingsDialog() {
+    private void confirmGPSSettingsDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
         builder.setMessage(R.string.suggest_open_gps);
         builder.setPositiveButton(R.string.ok, (dialogInterface, i) ->
