@@ -423,24 +423,7 @@ public class ChatActivity extends AppCompatActivity
     private void queryDataByKeyChat() {
         dbChat.child(keyChat)
                 .child(FirebaseUtil.DatabaseChild.DATA)
-                .addValueEventListener(new ValueEventListener() {
-
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        chatMessageItemList.clear();
-                        for (DataSnapshot dsChatChildren : dataSnapshot.getChildren()) {
-                            ChatMessageItem chatMessageItem = dsChatChildren.getValue(ChatMessageItem.class);
-                            FirebaseUtil.removeChatOlderThanTwoMonth(chatMessageItem, keyChat, dsChatChildren.getKey());
-                            chatMessageItemList.add(chatMessageItem);
-                        }
-                        sortChatList();
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        ToasAlert.alert(ChatActivity.this, R.string.cannot_load_data);
-                    }
-                });
+                .addValueEventListener(chatMessageListener());
     }
 
     private void sortChatList() {
@@ -532,5 +515,26 @@ public class ChatActivity extends AppCompatActivity
             startActivity(new Intent(this, MainActivity.class));
         }
         finish();
+    }
+
+    @NonNull
+    private ValueEventListener chatMessageListener() {
+        return new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                chatMessageItemList.clear();
+                for (DataSnapshot dsChatChildren : dataSnapshot.getChildren()) {
+                    ChatMessageItem chatMessageItem = dsChatChildren.getValue(ChatMessageItem.class);
+                    FirebaseUtil.removeChatOlderThanTwoMonth(chatMessageItem, keyChat, dsChatChildren.getKey());
+                    chatMessageItemList.add(chatMessageItem);
+                }
+                sortChatList();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                ToasAlert.alert(ChatActivity.this, R.string.cannot_load_data);
+            }
+        };
     }
 }
