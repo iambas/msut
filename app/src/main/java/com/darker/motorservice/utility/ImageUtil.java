@@ -71,7 +71,6 @@ public class ImageUtil {
         m.setScale((float) wantedWidth / bitmap.getWidth(), (float) wantedHeight / bitmap.getHeight());
         canvas.drawBitmap(bitmap, m, new Paint());
 
-        //Log.d("size", "" + convertBitmapToByte(output).length / 1024);
         if (convertBitmapToByte(output).length / 1024 > 800 && wantedWidth > 50) {
             return scaleBitmap(bitmap, wantedWidth - 100);
         }
@@ -158,5 +157,22 @@ public class ImageUtil {
                                 .placeholder(R.drawable.bg_edit_white)
                                 .error(R.drawable.bg_edit_white))
                         .into(imageView));
+    }
+
+    public static Bitmap getBitmapNotOver720px(Context context, Uri imageUri){
+        Bitmap bitmap = null;
+        try {
+            bitmap = ImageUtil.getImageMediaStore(context, imageUri);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return bitmap;
+        }
+
+        if (bitmap.getWidth() > 720)
+            bitmap = ImageUtil.scaleBitmap(bitmap, 720);
+        else
+            bitmap = ImageUtil.scaleBitmap(bitmap, bitmap.getWidth());
+
+        return bitmap;
     }
 }
