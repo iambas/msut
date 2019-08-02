@@ -6,7 +6,7 @@
     android:name="com.google.android.gms.maps.SupportMapFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.darker.motorservice.activity.MapsActivity"
+    tools:context="com.darker.motorservice.ui.map.MapsActivity"
     map:cameraTilt="30"
     map:cameraZoom="17"
     map:uiCompass="true"

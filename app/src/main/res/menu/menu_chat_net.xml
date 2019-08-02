@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/menu_tel"
+        android:id="@+id/menu_call_phone"
         android:title="Tel"
         android:icon="@drawable/ic_call"
         app:showAsAction="always"/>

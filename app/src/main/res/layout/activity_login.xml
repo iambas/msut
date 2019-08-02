@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
-    tools:context="com.darker.motorservice.activity.LoginActivity">
+    tools:context="com.darker.motorservice.ui.login.LoginActivity">
 
     <ImageView
         android:layout_width="150dp"
@@ -85,7 +85,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="aboutMe"
-            android:text="@string/about_us"
+            android:text="@string/about_us_with_underline"
             android:textSize="16sp" />
 
         <TextView
@@ -94,7 +94,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
             android:onClick="howToUse"
-            android:text="@string/use"
+            android:text="@string/instruction_with_underline"
             android:textSize="16sp" />
     </LinearLayout>
 

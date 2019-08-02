@@ -1,0 +1,31 @@
+package com.darker.motorservice.ui.instruction;
+
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+
+import com.darker.motorservice.R;
+
+import static com.darker.motorservice.utility.Constant.TYPE;
+
+public class AboutUseActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if (getIntent().getStringExtra(TYPE).equals("about")){
+            setContentView(R.layout.activity_about_us);
+            getSupportActionBar().setTitle(getResources().getString(R.string.about_us_with_underline));
+        }else{
+            setContentView(R.layout.activity_how_to_use);
+            getSupportActionBar().setTitle(getResources().getString(R.string.instruction_with_underline));
+        }
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp(){
+        finish();
+        return true;
+    }
+}

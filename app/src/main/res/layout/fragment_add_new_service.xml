@@ -21,7 +21,7 @@
             <TextView
                 android:layout_width="70dp"
                 android:layout_height="wrap_content"
-                android:text="@string/service_name"
+                android:text="@string/store_name"
                 android:textColor="@color/black"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -47,7 +47,7 @@
             <TextView
                 android:layout_width="70dp"
                 android:layout_height="wrap_content"
-                android:text="@string/service_pos"
+                android:text="@string/store_position"
                 android:textColor="@color/black"
                 android:textSize="18sp"
                 android:textStyle="bold" />

@@ -20,7 +20,7 @@
         android:paddingEnd="16dp"
         android:paddingStart="16dp"
         android:paddingTop="4dp"
-        tools:context="com.darker.motorservice.activity.ReviewActivity">
+        tools:context=".ui.update_data_service.ReviewActivity">
 
         <View
             android:id="@+id/top_view"
@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/top_view"
             android:lineSpacingExtra="6dp"
-            android:text="@string/t1"
+            android:text="@string/default_services"
             android:textColor="@color/black"
             android:textSize="16sp" />
 
